@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Phase 5 — Microservices & Cloud</title>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;500;600;700;800;900&family=Roboto+Mono:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:          #edf0f4;
+  --surface:     #ffffff;
+  --surface2:    #f3f5f8;
+  --surface3:    #e8ecf1;
+  --border:      #d0d7e2;
+  --border2:     #b8c2d4;
+  --ink:         #111827;
+  --ink2:        #2d3748;
+  --muted:       #64748b;
+  --muted2:      #94a3b8;
+
+  --sky:         #0369a1;
+  --sky-mid:     #38bdf8;
+  --sky-light:   #e0f2fe;
+  --sky-border:  #7dd3fc;
+
+  --steel:       #334155;
+  --steel-light: #f1f5f9;
+  --steel-border:#94a3b8;
+
+  --teal:        #0f766e;
+  --teal-light:  #f0fdfa;
+  --teal-border: #5eead4;
+
+  --amber:       #b45309;
+  --amber-light: #fffbeb;
+  --amber-border:#fcd34d;
+
+  --rose:        #be123c;
+  --rose-light:  #fff1f2;
+  --rose-border: #fda4af;
+
+  --violet:      #6d28d9;
+  --violet-light:#f5f3ff;
+  --violet-border:#c4b5fd;
+
+  --emerald:     #065f46;
+  --emerald-light:#ecfdf5;
+  --emerald-border:#6ee7b7;
+
+  --code-bg:     #0f172a;
+  --code-surf:   #1e293b;
+  --kw:#7dd3fc; --tp:#86efac; --fn:#67e8f9; --st:#fca5a5;
+  --cm:#475569;  --nb:#fdba74; --an:#c4b5fd; --cl:#86efac; --op:#5eead4;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Epilogue', sans-serif;
+  min-height: 100vh;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-attachment: fixed;
+}
+
+/* ── HEADER ─────────────────────────────────────── */
+.hdr {
+  background: var(--steel);
+  color: #fff;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+.hdr-inner {
+  padding: 48px 56px 44px;
+  position: relative;
+  z-index: 2;
+}
+.hdr-grid-lines {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+.hdr-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--sky-mid), var(--teal-border), var(--sky-mid));
+}
+.hdr-accent-num {
+  position: absolute;
+  right: 56px; bottom: -10px;
+  font-family: 'Epilogue', sans-serif;
+  font-size: 200px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.04);
+  line-height: 1;
+  letter-spacing: -12px;
+  pointer-events: none; user-select: none;
+}
+.phase-eyebrow {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--sky-mid);
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.phase-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 28px; height: 2px;
+  background: var(--sky-mid);
+}
+h1 {
+  font-family: 'Epilogue', sans-serif;
+  font-size: clamp(30px, 4.5vw, 54px);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -1.5px;
+  color: #fff;
+}
+h1 em { font-style: normal; color: var(--sky-mid); }
+.hdr-sub {
+  margin-top: 10px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+}
+.hdr-chips {
+  display: flex; gap: 24px; margin-top: 22px; flex-wrap: wrap;
+}
+.hchip {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  display: flex; align-items: center; gap: 5px;
+}
+.hchip b { color: var(--sky-mid); }
+
+/* ── PROGRESS ──────────────────────────────────── */
+.prog {
+  background: var(--steel);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 12px 56px;
+  display: flex; align-items: center; gap: 5px;
+}
+.plbl {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(255,255,255,0.3); margin-right: 8px; white-space: nowrap;
+}
+.pseg {
+  flex: 1; height: 3px; border-radius: 2px;
+  background: rgba(255,255,255,0.12); cursor: pointer;
+  transition: background .25s;
+}
+.pseg.done  { background: rgba(56,189,248,0.4); }
+.pseg.active{ background: var(--sky-mid); }
+
+/* ── NAV ────────────────────────────────────────── */
+.nav {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  padding: 0 56px;
+  display: flex; overflow-x: auto; scrollbar-width: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.nav::-webkit-scrollbar { display: none; }
+.nbtn {
+  flex-shrink: 0;
+  padding: 14px 20px;
+  border: none; border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Epilogue', sans-serif;
+  font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 8px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.nbtn:hover { color: var(--ink2); background: var(--surface2); }
+.nbtn.on { color: var(--sky); border-bottom-color: var(--sky); }
+.nnum {
+  background: var(--surface3);
+  color: var(--muted);
+  font-family: 'Roboto Mono', monospace;
+  font-size: 9px; padding: 2px 6px;
+  border-radius: 3px; font-weight: 600;
+}
+.nbtn.on .nnum { background: var(--sky-light); color: var(--sky); }
+
+.kbhint {
+  text-align: center; padding: 7px;
+  font-family: 'Roboto Mono', monospace; font-size: 10px;
+  color: var(--muted2);
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+kbd { background: var(--border); padding: 1px 5px; border-radius: 3px; font-size: 10px; }
+
+/* ── MAIN ───────────────────────────────────────── */
+.main { max-width: 1100px; margin: 0 auto; padding: 32px 56px 64px; }
+
+.card { display: none; animation: fadeUp .3s ease; }
+.card.on { display: block; }
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(10px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── CARD BAND ──────────────────────────────────── */
+.band {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 14px 14px 0 0;
+  padding: 28px 36px;
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 20px;
+  position: relative; overflow: hidden;
+}
+.band-stripe {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 5px;
+}
+.band-l { display: flex; align-items: flex-start; gap: 18px; padding-left: 10px; }
+.tnum {
+  font-family: 'Epilogue', sans-serif;
+  font-size: 48px; font-weight: 900; line-height: 1;
+  color: var(--border2); flex-shrink: 0;
+  width: 58px; text-align: right; margin-top: 2px;
+}
+.ttag {
+  display: inline-flex; align-items: center;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 3px 10px; border-radius: 3px; margin-bottom: 8px;
+}
+.btitle {
+  font-family: 'Epilogue', sans-serif;
+  font-size: 22px; font-weight: 800; color: var(--ink); line-height: 1.2;
+}
+.bsub { margin-top: 5px; font-size: 13px; color: var(--muted); line-height: 1.55; }
+.pbadge {
+  flex-shrink: 0;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 1px; padding: 5px 12px;
+  border-radius: 20px; margin-top: 4px; text-transform: uppercase;
+}
+
+/* ── CONTENT ────────────────────────────────────── */
+.content {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 14px 14px;
+  padding: 0 36px 36px;
+  margin-bottom: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* tabs */
+.stabs {
+  display: flex; border-bottom: 1px solid var(--border);
+  margin: 0 -36px 28px; padding: 0 36px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.stabs::-webkit-scrollbar { display: none; }
+.stab {
+  flex-shrink: 0; padding: 12px 16px;
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  cursor: pointer; border-bottom: 2px solid transparent;
+  transition: all .2s; font-family: 'Roboto Mono', monospace;
+  letter-spacing: .5px; text-transform: uppercase;
+  display: flex; align-items: center; gap: 5px;
+}
+.stab:hover { color: var(--ink2); }
+.stab.on { color: var(--sky); border-bottom-color: var(--sky); }
+.panel { display: none; }
+.panel.on { display: block; }
+
+/* section title */
+.stitle {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 14px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.stitle b { color: var(--sky); }
+
+/* key points */
+.kps { display: flex; flex-direction: column; gap: 10px; }
+.kp {
+  display: flex; gap: 14px; padding: 13px 16px;
+  border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface2); font-size: 13.5px;
+  line-height: 1.65; transition: border-color .2s, box-shadow .2s;
+}
+.kp:hover { border-color: var(--border2); box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+.ki { font-size: 17px; flex-shrink: 0; margin-top: 1px; }
+.kt { flex: 1; }
+.kt strong { color: var(--ink); }
+.kt code {
+  background: var(--sky-light); border: 1px solid var(--sky-border);
+  color: var(--sky); padding: 1px 6px; border-radius: 3px;
+  font-family: 'Roboto Mono', monospace; font-size: 11.5px;
+}
+.g { color: var(--emerald); font-weight: 700; }
+.a { color: var(--amber); font-weight: 700; }
+.r { color: var(--rose); font-weight: 700; }
+.b { color: var(--sky); font-weight: 700; }
+.p { color: var(--violet); font-weight: 700; }
+.t { color: var(--teal); font-weight: 700; }
+.s { color: var(--steel); font-weight: 700; }
+
+/* code */
+.cblock {
+  background: var(--code-bg);
+  border-radius: 10px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.chdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; background: var(--code-surf);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.cdots { display: flex; gap: 6px; align-items: center; }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dr{background:#ff5f57;} .dy{background:#febc2e;} .dg{background:#28c840;}
+.clang {
+  font-family: 'Roboto Mono', monospace; font-size: 10px;
+  letter-spacing: 1.5px; color: rgba(255,255,255,0.25); text-transform: uppercase;
+}
+pre {
+  padding: 22px; overflow-x: auto;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12.5px; line-height: 1.78; color: #94a3b8;
+}
+.kw{color:var(--kw);} .tp{color:var(--tp);} .fn{color:var(--fn);} .st{color:var(--st);}
+.cm{color:var(--cm);font-style:italic;} .nb{color:var(--nb);} .an{color:var(--an);}
+.cl{color:var(--cl);} .op{color:var(--op);}
+
+/* interview Q */
+.iqs { display: flex; flex-direction: column; gap: 10px; }
+.iq {
+  border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden;
+  transition: border-color .2s, box-shadow .2s;
+}
+.iq:hover { border-color: var(--border2); box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+.iqh {
+  padding: 13px 16px; cursor: pointer;
+  display: flex; align-items: flex-start; gap: 11px;
+  background: var(--surface2); user-select: none;
+}
+.iqtag {
+  font-family: 'Roboto Mono', monospace; font-size: 9px; font-weight: 600;
+  letter-spacing: 1px; padding: 3px 7px; border-radius: 3px;
+  white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+  text-transform: uppercase;
+}
+.tm { background: var(--rose-light); color: var(--rose); border: 1px solid var(--rose-border); }
+.tt { background: var(--amber-light); color: var(--amber); border: 1px solid var(--amber-border); }
+.tc { background: var(--sky-light); color: var(--sky); border: 1px solid var(--sky-border); }
+.tp2 { background: var(--violet-light); color: var(--violet); border: 1px solid var(--violet-border); }
+.tco { background: var(--emerald-light); color: var(--emerald); border: 1px solid var(--emerald-border); }
+.iqqt { font-size: 13px; font-weight: 700; color: var(--ink); flex: 1; line-height: 1.5; }
+.iqtgl { color: var(--muted); font-size: 16px; flex-shrink: 0; margin-top: 2px; transition: transform .25s; }
+.iq.open .iqtgl { transform: rotate(180deg); }
+.iqb {
+  display: none; padding: 16px; font-size: 13px;
+  line-height: 1.78; color: var(--ink2);
+  border-top: 1px solid var(--border); background: #fff;
+}
+.iq.open .iqb { display: block; }
+.iqb code {
+  background: var(--sky-light); border: 1px solid var(--sky-border);
+  color: var(--sky); padding: 1px 6px; border-radius: 3px;
+  font-family: 'Roboto Mono', monospace; font-size: 11.5px;
+}
+.iqb strong { color: var(--ink); }
+.trick {
+  margin-top: 10px; padding: 10px 14px;
+  background: var(--amber-light);
+  border-left: 3px solid var(--amber);
+  border-radius: 0 6px 6px 0; font-size: 12px; color: var(--amber);
+}
+.trick strong { color: var(--amber); }
+.warn {
+  margin-top: 10px; padding: 10px 14px;
+  background: var(--rose-light);
+  border-left: 3px solid var(--rose);
+  border-radius: 0 6px 6px 0; font-size: 12px; color: var(--rose);
+}
+
+/* table */
+.tbl {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+  border-radius: 8px; overflow: hidden; border: 1px solid var(--border);
+}
+.tbl th {
+  background: var(--steel); color: rgba(255,255,255,0.85);
+  padding: 10px 14px; text-align: left;
+  font-family: 'Roboto Mono', monospace; font-size: 10px;
+  letter-spacing: 1px; text-transform: uppercase; font-weight: 500;
+}
+.tbl td {
+  padding: 10px 14px; border-bottom: 1px solid rgba(208,215,226,.5);
+  color: var(--ink2); vertical-align: top; line-height: 1.55;
+}
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: var(--surface2); }
+.tbl td code {
+  background: var(--sky-light); color: var(--sky);
+  padding: 1px 6px; border-radius: 3px;
+  font-family: 'Roboto Mono', monospace; font-size: 11px;
+  border: 1px solid var(--sky-border);
+}
+
+/* memory tip */
+.mtip {
+  background: linear-gradient(135deg, var(--sky-light), #fff);
+  border: 1px solid var(--sky-border);
+  border-radius: 10px; padding: 18px 20px;
+  font-size: 13.5px; line-height: 1.72;
+  display: flex; gap: 14px;
+}
+.mico { font-size: 22px; flex-shrink: 0; }
+.mtip strong { color: var(--sky); }
+
+/* architecture diagram */
+.arch {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 20px 24px; margin-bottom: 16px;
+  overflow-x: auto;
+}
+.arch-row {
+  display: flex; align-items: center; gap: 0;
+  flex-wrap: nowrap; margin-bottom: 8px;
+}
+.abox {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; flex-shrink: 0;
+}
+.anode {
+  background: var(--surface); border: 1.5px solid var(--border2);
+  border-radius: 7px; padding: 8px 14px;
+  font-family: 'Roboto Mono', monospace; font-size: 11px;
+  font-weight: 600; color: var(--ink2); white-space: nowrap;
+  transition: all .2s;
+}
+.anode:hover { border-color: var(--sky); color: var(--sky); }
+.anode.hi { background: var(--sky-light); border-color: var(--sky-border); color: var(--sky); }
+.anode.teal { background: var(--teal-light); border-color: var(--teal-border); color: var(--teal); }
+.anode.rose { background: var(--rose-light); border-color: var(--rose-border); color: var(--rose); }
+.anode.violet { background: var(--violet-light); border-color: var(--violet-border); color: var(--violet); }
+.anode.amber { background: var(--amber-light); border-color: var(--amber-border); color: var(--amber); }
+.anode.emerald { background: var(--emerald-light); border-color: var(--emerald-border); color: var(--emerald); }
+.asub { font-family: 'Roboto Mono', monospace; font-size: 9px; color: var(--muted); margin-top: 4px; }
+.arr {
+  color: var(--border2); font-size: 16px;
+  padding: 0 6px; flex-shrink: 0;
+  align-self: center; margin-bottom: 18px;
+}
+.arr-down { text-align: center; color: var(--border2); font-size: 16px; margin: 4px 0; }
+
+/* tags */
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag {
+  font-family: 'Roboto Mono', monospace; font-size: 11px;
+  padding: 4px 12px; border-radius: 20px; font-weight: 500;
+  background: var(--sky-light); color: var(--sky);
+  border: 1px solid var(--sky-border);
+}
+
+/* callout */
+.callout {
+  display: flex; gap: 12px; padding: 14px 16px;
+  border-radius: 8px; font-size: 13px; line-height: 1.65;
+  margin-bottom: 14px;
+}
+.callout-sky   { background: var(--sky-light); border: 1px solid var(--sky-border); color: var(--sky); }
+.callout-teal  { background: var(--teal-light); border: 1px solid var(--teal-border); color: var(--teal); }
+.callout-amber { background: var(--amber-light); border: 1px solid var(--amber-border); color: var(--amber); }
+.callout-rose  { background: var(--rose-light); border: 1px solid var(--rose-border); color: var(--rose); }
+.callout-icon  { font-size: 18px; flex-shrink: 0; }
+.callout-body  { flex: 1; }
+.callout-body strong { color: inherit; }
+
+.gap { margin-bottom: 24px; }
+.gap-sm { margin-bottom: 14px; }
+
+@media (max-width: 640px) {
+  .main, .nav, .prog, .hdr-inner { padding-left: 20px; padding-right: 20px; }
+  .band { padding: 20px; }
+  .content { padding: 0 20px 24px; }
+  .stabs { margin: 0 -20px 22px; padding: 0 20px; }
+}
+
+.footer {
+  text-align: center; padding: 28px 56px;
+  color: rgba(255,255,255,0.3);
+  font-family: 'Roboto Mono', monospace; font-size: 10px; letter-spacing: 1px;
+  background: var(--steel);
+  margin-top: 48px;
+}
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<div class="hdr">
+  <div class="hdr-bar"></div>
+  <div class="hdr-grid-lines"></div>
+  <div class="hdr-inner">
+    <div class="hdr-accent-num">5</div>
+    <div class="phase-eyebrow">Phase 5 · Microservices &amp; Cloud</div>
+    <h1>Microservices <em>&amp; Cloud</em><br>Study Cards</h1>
+    <div class="hdr-sub">// Topics 26–30 · Senior Engineer Level · Spring Cloud · Interview-Ready</div>
+    <div class="hdr-chips">
+      <div class="hchip">Topics <b>5</b></div>
+      <div class="hchip">Priority <b>🔴 HIGH</b></div>
+      <div class="hchip">Stack <b>Spring Cloud · Eureka · Gateway · Resilience4j</b></div>
+    </div>
+  </div>
+</div>
+
+<div class="prog">
+  <span class="plbl">Progress</span>
+  <div class="pseg active" onclick="show(0)"></div>
+  <div class="pseg" onclick="show(1)"></div>
+  <div class="pseg" onclick="show(2)"></div>
+  <div class="pseg" onclick="show(3)"></div>
+  <div class="pseg" onclick="show(4)"></div>
+</div>
+
+<div class="nav">
+  <button class="nbtn on" onclick="show(0)"><span class="nnum">26</span>Microservices</button>
+  <button class="nbtn" onclick="show(1)"><span class="nnum">27</span>Service Discovery</button>
+  <button class="nbtn" onclick="show(2)"><span class="nnum">28</span>API Gateway</button>
+  <button class="nbtn" onclick="show(3)"><span class="nnum">29</span>Circuit Breakers</button>
+  <button class="nbtn" onclick="show(4)"><span class="nnum">30</span>Config Server</button>
+</div>
+<div class="kbhint">Navigate: <kbd>←</kbd> <kbd>→</kbd> arrow keys · Click tabs for sections</div>
+
+<div class="main">
+
+<!-- ╔══════════════════════════════════════════════════╗
+     ║  TOPIC 26 — Microservices Architecture           ║
+     ╚══════════════════════════════════════════════════╝ -->
+<div class="card on" id="c0">
+  <div class="band">
+    <div class="band-stripe" style="background:var(--sky)"></div>
+    <div class="band-l">
+      <div class="tnum">26</div>
+      <div>
+        <div class="ttag" style="background:var(--sky-light);color:var(--sky);border:1px solid var(--sky-border)">Architecture</div>
+        <div class="btitle">Microservices Architecture</div>
+        <div class="bsub">Decomposing the monolith — patterns, tradeoffs, and what interviewers really want to hear</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--rose-light);color:var(--rose);border:1px solid var(--rose-border)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb0">
+      <div class="stab on" onclick="tab(0,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(0,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(0,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(0,'m')">🧠 Memory</div>
+    </div>
+
+    <div class="panel on" id="c0-c">
+      <div class="stitle"><b>◆</b> Core Concepts</div>
+
+      <div class="arch">
+        <div class="arch-row">
+          <div class="abox"><div class="anode hi">Client / Browser</div><div class="asub">HTTP / gRPC</div></div>
+          <div class="arr">→</div>
+          <div class="abox"><div class="anode amber">API Gateway</div><div class="asub">Routing · Auth · Rate Limit</div></div>
+          <div class="arr">→</div>
+          <div class="abox"><div class="anode teal">Service Registry</div><div class="asub">Eureka / Consul</div></div>
+        </div>
+        <div style="text-align:center;color:var(--border2);font-size:13px;margin:8px 0;">↓ Discovery</div>
+        <div class="arch-row" style="justify-content:center;gap:8px;flex-wrap:wrap;">
+          <div class="abox"><div class="anode">User Service</div><div class="asub">:8081</div></div>
+          <div class="abox"><div class="anode">Order Service</div><div class="asub">:8082</div></div>
+          <div class="abox"><div class="anode">Payment Service</div><div class="asub">:8083</div></div>
+          <div class="abox"><div class="anode">Notification</div><div class="asub">:8084</div></div>
+        </div>
+        <div style="text-align:center;color:var(--border2);font-size:13px;margin:8px 0;">↓ Each with its own DB</div>
+        <div class="arch-row" style="justify-content:center;gap:8px;flex-wrap:wrap;">
+          <div class="abox"><div class="anode rose">PostgreSQL</div></div>
+          <div class="abox"><div class="anode rose">MongoDB</div></div>
+          <div class="abox"><div class="anode rose">MySQL</div></div>
+          <div class="abox"><div class="anode rose">Redis</div></div>
+        </div>
+      </div>
+
+      <div class="kps">
+        <div class="kp"><div class="ki">🔪</div><div class="kt"><strong class="b">Decomposition Strategies</strong> — <strong>By Business Capability</strong> (DDD bounded contexts — User, Order, Payment, Inventory — recommended). <strong>By Subdomain</strong> (core, supporting, generic subdomains). <strong>Strangler Fig Pattern</strong> — gradually replace monolith by routing traffic incrementally to new microservices while keeping the monolith alive.</div></div>
+        <div class="kp"><div class="ki">🗃️</div><div class="kt"><strong class="t">Database Per Service</strong> — Each service owns its data store exclusively. No shared DB. Enables: independent scaling, polyglot persistence (each service picks the best DB for its needs). Challenge: <strong>distributed transactions</strong> — use SAGA pattern (choreography or orchestration) instead of 2PC.</div></div>
+        <div class="kp"><div class="ki">📡</div><div class="kt"><strong class="g">Inter-Service Communication</strong> — <strong>Synchronous</strong>: REST (HTTP) or gRPC (binary, faster, schema-driven). <strong>Asynchronous</strong>: Message brokers (Kafka, RabbitMQ) — loose coupling, better resilience. Use async when: result not immediately needed, fan-out to multiple consumers, eventual consistency is acceptable.</div></div>
+        <div class="kp"><div class="ki">⚠️</div><div class="kt"><strong class="r">Microservices Challenges</strong> — Distributed system problems: network latency, partial failures, data consistency, service discovery, distributed tracing, increased operational complexity. Not suitable for small teams or early-stage projects. Don't microservice-ize prematurely — start with a modular monolith.</div></div>
+        <div class="kp"><div class="ki">📋</div><div class="kt"><strong class="p">SAGA Pattern</strong> — Manages distributed transactions without 2PC. <strong>Choreography</strong>: services emit events, each service reacts and emits next event (event-driven, loose coupling, harder to debug). <strong>Orchestration</strong>: a central SAGA orchestrator tells each service what to do (centralized logic, easier to track, more coupling). Each step has a compensating transaction for rollback.</div></div>
+        <div class="kp"><div class="ki">🏗️</div><div class="kt"><strong class="s">12-Factor App Principles</strong> — The blueprint for cloud-native services: codebase in version control, dependencies declared explicitly, config in environment, backing services as attached resources, build/release/run stages separate, stateless processes, port binding, concurrency, disposability, dev/prod parity, logs as streams, admin processes.</div></div>
+      </div>
+      <div class="gap-sm"></div>
+      <div class="stitle"><b>◆</b> Monolith vs Microservices</div>
+      <table class="tbl">
+        <tr><th>Aspect</th><th>Monolith</th><th>Microservices</th></tr>
+        <tr><td>Deployment</td><td>Single deployable unit</td><td>Independent per service</td></tr>
+        <tr><td>Scaling</td><td>Scale entire app</td><td>Scale individual services</td></tr>
+        <tr><td>Tech stack</td><td>Single stack</td><td>Polyglot (per service)</td></tr>
+        <tr><td>Data</td><td>Single shared DB</td><td>DB per service</td></tr>
+        <tr><td>Failure</td><td>Whole app down</td><td>Isolated; need resilience patterns</td></tr>
+        <tr><td>Complexity</td><td>Simple to start</td><td>High operational overhead</td></tr>
+        <tr><td>Team size</td><td>Small to medium</td><td>Large (Conway's Law applies)</td></tr>
+      </table>
+    </div>
+
+    <div class="panel" id="c0-x">
+      <div class="stitle"><b>◆</b> Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Spring Boot Microservice — Setup + Inter-Service REST + Feign</div></div>
+<pre><span class="cm">// ── Spring Boot microservice entry point ──────────</span>
+<span class="an">@SpringBootApplication</span>
+<span class="an">@EnableDiscoveryClient</span>        <span class="cm">// register with Eureka</span>
+<span class="an">@EnableFeignClients</span>            <span class="cm">// enable Feign HTTP clients</span>
+<span class="kw">public class</span> <span class="cl">OrderServiceApp</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="tp">SpringApplication</span>.<span class="fn">run</span>(<span class="cl">OrderServiceApp</span>.<span class="kw">class</span>, args);
+    }
+}
+
+<span class="cm">// ── Feign Client: calls UserService via service name ─</span>
+<span class="an">@FeignClient</span>(name = <span class="st">"user-service"</span>)   <span class="cm">// resolves via Eureka</span>
+<span class="kw">public interface</span> <span class="cl">UserServiceClient</span> {
+
+    <span class="an">@GetMapping</span>(<span class="st">"/users/{id}"</span>)
+    <span class="tp">UserDto</span> <span class="fn">getUserById</span>(<span class="an">@PathVariable</span> <span class="tp">Long</span> id);
+
+    <span class="an">@PostMapping</span>(<span class="st">"/users/validate"</span>)
+    <span class="kw">boolean</span> <span class="fn">validateUser</span>(<span class="an">@RequestBody</span> <span class="tp">UserRequest</span> req);
+}
+
+<span class="cm">// ── Service using Feign ───────────────────────────</span>
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">OrderService</span> {
+    <span class="kw">private final</span> <span class="tp">UserServiceClient</span> userClient;
+    <span class="kw">private final</span> <span class="tp">OrderRepository</span> orderRepo;
+
+    <span class="kw">public</span> <span class="fn">OrderService</span>(<span class="tp">UserServiceClient</span> uc, <span class="tp">OrderRepository</span> or) {
+        <span class="kw">this</span>.userClient = uc;
+        <span class="kw">this</span>.orderRepo  = or;
+    }
+
+    <span class="kw">public</span> <span class="tp">Order</span> <span class="fn">placeOrder</span>(<span class="tp">Long</span> userId, <span class="tp">OrderRequest</span> req) {
+        <span class="tp">UserDto</span> user = userClient.<span class="fn">getUserById</span>(userId); <span class="cm">// HTTP call via Feign</span>
+        <span class="kw">if</span> (user == <span class="kw">null</span>) <span class="kw">throw new</span> <span class="tp">UserNotFoundException</span>(userId);
+
+        <span class="tp">Order</span> order = <span class="tp">Order</span>.<span class="fn">builder</span>()
+            .<span class="fn">userId</span>(userId)
+            .<span class="fn">items</span>(req.<span class="fn">getItems</span>())
+            .<span class="fn">status</span>(<span class="tp">OrderStatus</span>.<span class="cl">PENDING</span>)
+            .<span class="fn">build</span>();
+        <span class="kw">return</span> orderRepo.<span class="fn">save</span>(order);
+    }
+}
+
+<span class="cm">// ── application.yml for OrderService ─────────────</span>
+<span class="cm">// spring:</span>
+<span class="cm">//   application:</span>
+<span class="cm">//     name: order-service          # service name in Eureka</span>
+<span class="cm">// eureka:</span>
+<span class="cm">//   client:</span>
+<span class="cm">//     service-url:</span>
+<span class="cm">//       defaultZone: http://eureka:8761/eureka/</span>
+<span class="cm">// server:</span>
+<span class="cm">//   port: 0                        # random port — Eureka handles discovery</span></pre>
+      </div>
+    </div>
+
+    <div class="panel" id="c0-q">
+      <div class="stitle"><b>◆</b> Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is the difference between microservices and a monolith? When would you choose each?</div><div class="iqtgl">▾</div></div><div class="iqb">A <strong>monolith</strong> is a single deployable unit with all components tightly integrated — simple to develop, test, and deploy early on, but hard to scale parts independently. <strong>Microservices</strong> decompose the application into small, independently deployable services — each with its own data store, technology, and deployment pipeline. Choose monolith when: small team, early product, unclear domain boundaries. Choose microservices when: multiple teams working independently, need to scale specific components, need polyglot tech stacks. <strong>Modular monolith</strong> is often the right middle ground — clean internal boundaries without distribution complexity.<div class="trick"><strong>⚡ "Start with a monolith, extract microservices when you feel the pain" — Martin Fowler's recommendation.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">How do you handle distributed transactions across microservices without 2PC?</div><div class="iqtgl">▾</div></div><div class="iqb">Two-Phase Commit (2PC) is avoided in microservices because it creates tight coupling and availability issues. The alternative is the <strong>SAGA pattern</strong>:<br><strong>Choreography SAGA</strong>: Each service publishes events after completing its local transaction; other services react. No central coordinator. Loose coupling but hard to track overall state.<br><strong>Orchestration SAGA</strong>: A SAGA orchestrator service sends commands to each service and handles responses/compensations. Easier to manage flow but introduces coupling to the orchestrator.<br>Each step has a <strong>compensating transaction</strong> — if Payment fails, OrderService cancels the order, InventoryService restocks. Use event sourcing for audit trail.<div class="trick"><strong>⚡ In interviews: always mention compensating transactions for rollback — this shows you understand eventual consistency.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is Conway's Law and how does it relate to microservices?</div><div class="iqtgl">▾</div></div><div class="iqb">Conway's Law states: <em>"Organizations design systems that mirror their own communication structure."</em> Applied to microservices: your service boundaries should map to your team boundaries. A team that owns User and Orders will naturally create a monolith for both — because they communicate constantly. For microservices to succeed, you need teams that can work independently with minimal inter-team coordination. This is why the <strong>Inverse Conway Maneuver</strong> is used — restructure teams first (around business capabilities), then the architecture follows naturally.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tc">Concept</span><div class="iqqt">Explain the Database Per Service pattern. What challenges does it create?</div><div class="iqtgl">▾</div></div><div class="iqb">Each microservice has its own private data store — no other service can access it directly (no shared DB). Benefits: services are truly independent (schema changes don't break others), can choose the best DB per service (polyglot persistence). Challenges: <strong>1. No JOIN across services</strong> — must compose data in application code. <strong>2. Distributed transactions</strong> — use SAGA. <strong>3. Eventual consistency</strong> — data may be temporarily out of sync across services. <strong>4. Reporting queries</strong> across services — use a separate read-model/CQRS pattern or a dedicated analytics DB fed by events.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is the Strangler Fig pattern and when is it used?</div><div class="iqtgl">▾</div></div><div class="iqb">The Strangler Fig pattern is a migration strategy for gradually replacing a monolith with microservices. Like a strangler fig vine that grows around a tree and eventually replaces it: <strong>1)</strong> Deploy the new microservice alongside the monolith. <strong>2)</strong> Route specific traffic to the new service (via API Gateway or routing layer). <strong>3)</strong> Gradually migrate more functionality to microservices. <strong>4)</strong> Retire the monolith when fully migrated. Benefits: no big-bang rewrite, validate each piece independently, rollback easily. Key tool: API Gateway as the routing layer controls traffic splitting.</div></div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="c0-m">
+      <div class="stitle"><b>◆</b> Memory Tip</div>
+      <div class="mtip"><div class="mico">💡</div><div>
+        <strong>Microservices = team topology made tangible.</strong> Each service = one team = one business capability = one DB = one deployment pipeline. If two services always need to be deployed together, they should probably be one service.<br><br>
+        <strong>Key patterns cheat sheet:</strong><br>
+        • Distributed transactions → <strong>SAGA</strong> (Choreography or Orchestration)<br>
+        • Monolith migration → <strong>Strangler Fig</strong><br>
+        • Data consistency → <strong>Eventual Consistency + Event Sourcing</strong><br>
+        • Cross-service queries → <strong>CQRS + Read Models</strong><br>
+        • Service contract → <strong>API versioning + consumer-driven contracts</strong>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════╗
+     ║  TOPIC 27 — Service Discovery (Eureka)           ║
+     ╚══════════════════════════════════════════════════╝ -->
+<div class="card" id="c1">
+  <div class="band">
+    <div class="band-stripe" style="background:var(--teal)"></div>
+    <div class="band-l">
+      <div class="tnum">27</div>
+      <div>
+        <div class="ttag" style="background:var(--teal-light);color:var(--teal);border:1px solid var(--teal-border)">Spring Cloud</div>
+        <div class="btitle">Service Discovery — Eureka</div>
+        <div class="bsub">How microservices find each other at runtime without hardcoded URLs</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--amber-light);color:var(--amber);border:1px solid var(--amber-border)">🟡 Medium</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb1">
+      <div class="stab on" onclick="tab(1,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(1,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(1,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(1,'m')">🧠 Memory</div>
+    </div>
+
+    <div class="panel on" id="c1-c">
+      <div class="stitle"><b>◆</b> How Eureka Works</div>
+      <div class="arch">
+        <div class="arch-row" style="justify-content:center">
+          <div class="abox"><div class="anode teal" style="padding:10px 20px">Eureka Server<br><small style="font-weight:300">:8761</small></div><div class="asub">Service Registry</div></div>
+        </div>
+        <div style="display:flex;justify-content:center;gap:40px;margin:6px 0;color:var(--border2);font-size:12px;font-family:'Roboto Mono',monospace;">
+          <span>① Register + Heartbeat</span>
+          <span>② Fetch registry</span>
+        </div>
+        <div class="arch-row" style="justify-content:center;gap:24px">
+          <div class="abox"><div class="anode hi">Order Service<br><small>instance 1 · :8082</small></div><div class="asub">Provider</div></div>
+          <div class="abox"><div class="anode hi">Order Service<br><small>instance 2 · :8083</small></div><div class="asub">Provider</div></div>
+          <div class="abox"><div class="anode amber">User Service<br><small>:8081</small></div><div class="asub">Consumer</div></div>
+        </div>
+        <div style="text-align:center;margin-top:8px;font-family:'Roboto Mono',monospace;font-size:11px;color:var(--muted)">③ User Service calls Order Service by name → Eureka returns instance list → Client-side load balance</div>
+      </div>
+
+      <div class="kps">
+        <div class="kp"><div class="ki">📖</div><div class="kt"><strong class="t">Self-Registration</strong> — Services register themselves with the Eureka server on startup (sending service name, IP, port, health URL). They send heartbeats every 30s. If no heartbeat for 90s → Eureka marks the instance <strong>DOWN</strong> and removes it from the registry.</div></div>
+        <div class="kp"><div class="ki">💾</div><div class="kt"><strong class="b">Client-Side Discovery &amp; Load Balancing</strong> — Clients (other services) pull the registry from Eureka and cache it locally. Spring Cloud LoadBalancer (replaces Ribbon) selects an instance from the cached list — <strong>Round Robin</strong> by default. Client-side = more flexible; server-side = simpler (e.g., AWS ALB).</div></div>
+        <div class="kp"><div class="ki">🛡️</div><div class="kt"><strong class="g">Self-Preservation Mode</strong> — If Eureka loses more than 15% of heartbeats in a short window, it enters self-preservation: stops evicting instances. This prevents Eureka from de-registering services due to network issues. Can cause stale entries — disable in dev with <code>eureka.server.enable-self-preservation=false</code>.</div></div>
+        <div class="kp"><div class="ki">🔄</div><div class="kt"><strong class="a">Eureka HA Setup</strong> — Run multiple Eureka server instances that replicate to each other (peer-to-peer). Each Eureka instance registers with others. Configure <code>eureka.client.service-url.defaultZone</code> to point to all peers. Clients can failover to another Eureka node if one goes down.</div></div>
+        <div class="kp"><div class="ki">🔀</div><div class="kt"><strong class="p">Alternatives</strong> — <strong>Consul</strong> (HashiCorp — health checks via TCP/HTTP/script, DNS-based discovery, KV store, multi-datacenter), <strong>Zookeeper</strong> (CP system — strong consistency, ZooKeeper-based coordination), <strong>Kubernetes Service Discovery</strong> (built-in DNS + Services — preferred in K8s deployments, no separate registry needed).</div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="c1-x">
+      <div class="stitle"><b>◆</b> Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Eureka Server + Client Setup</div></div>
+<pre><span class="cm">// ── Eureka Server ────────────────────────────────</span>
+<span class="an">@SpringBootApplication</span>
+<span class="an">@EnableEurekaServer</span>
+<span class="kw">public class</span> <span class="cl">EurekaServerApp</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="tp">SpringApplication</span>.<span class="fn">run</span>(<span class="cl">EurekaServerApp</span>.<span class="kw">class</span>, args);
+    }
+}
+
+<span class="cm">// application.yml — Eureka Server</span>
+<span class="cm">// server:</span>
+<span class="cm">//   port: 8761</span>
+<span class="cm">// eureka:</span>
+<span class="cm">//   client:</span>
+<span class="cm">//     register-with-eureka: false   # server doesn't register itself</span>
+<span class="cm">//     fetch-registry: false         # server doesn't fetch registry</span>
+<span class="cm">//   server:</span>
+<span class="cm">//     enable-self-preservation: false  # disable in dev</span>
+
+<span class="cm">// ── Eureka Client (microservice) ─────────────────</span>
+<span class="cm">// pom.xml dependency:</span>
+<span class="cm">// spring-cloud-starter-netflix-eureka-client</span>
+
+<span class="cm">// application.yml — client service</span>
+<span class="cm">// spring:</span>
+<span class="cm">//   application:</span>
+<span class="cm">//     name: order-service       # ← this is the service name in registry</span>
+<span class="cm">// eureka:</span>
+<span class="cm">//   client:</span>
+<span class="cm">//     service-url:</span>
+<span class="cm">//       defaultZone: http://localhost:8761/eureka/</span>
+<span class="cm">//   instance:</span>
+<span class="cm">//     prefer-ip-address: true   # use IP instead of hostname</span>
+<span class="cm">//     lease-renewal-interval-in-seconds: 30</span>
+<span class="cm">//     lease-expiration-duration-in-seconds: 90</span>
+
+<span class="cm">// ── Load-Balanced RestTemplate ─────────────────</span>
+<span class="an">@Configuration</span>
+<span class="kw">public class</span> <span class="cl">AppConfig</span> {
+    <span class="an">@Bean</span>
+    <span class="an">@LoadBalanced</span>                  <span class="cm">// enables client-side load balancing</span>
+    <span class="kw">public</span> <span class="tp">RestTemplate</span> <span class="fn">restTemplate</span>() {
+        <span class="kw">return new</span> <span class="tp">RestTemplate</span>();
+    }
+}
+
+<span class="cm">// Usage — service name resolves via Eureka + LB</span>
+<span class="tp">UserDto</span> user = restTemplate.<span class="fn">getForObject</span>(
+    <span class="st">"http://user-service/users/{id}"</span>, <span class="cm">// "user-service" resolved by Eureka</span>
+    <span class="tp">UserDto</span>.<span class="kw">class</span>, userId
+);
+
+<span class="cm">// ── Feign (cleaner than RestTemplate) ────────────</span>
+<span class="an">@FeignClient</span>(name = <span class="st">"user-service"</span>,
+    fallback = <span class="cl">UserServiceFallback</span>.<span class="kw">class</span>)    <span class="cm">// Resilience4j fallback</span>
+<span class="kw">public interface</span> <span class="cl">UserServiceClient</span> {
+    <span class="an">@GetMapping</span>(<span class="st">"/users/{id}"</span>)
+    <span class="tp">UserDto</span> <span class="fn">getUser</span>(<span class="an">@PathVariable</span> <span class="st">"id"</span> <span class="tp">Long</span> id);
+}
+
+<span class="an">@Component</span>
+<span class="kw">class</span> <span class="cl">UserServiceFallback</span> <span class="kw">implements</span> <span class="cl">UserServiceClient</span> {
+    <span class="kw">public</span> <span class="tp">UserDto</span> <span class="fn">getUser</span>(<span class="tp">Long</span> id) {
+        <span class="kw">return</span> <span class="tp">UserDto</span>.<span class="fn">defaultUser</span>(); <span class="cm">// graceful degradation</span>
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="panel" id="c1-q">
+      <div class="stitle"><b>◆</b> Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is service discovery and why is it needed in microservices?</div><div class="iqtgl">▾</div></div><div class="iqb">In microservices, instances are dynamic — they start/stop, scale up/down, and their IP:port changes constantly. Hardcoding service URLs is impossible. Service discovery solves this: services register their current address in a <strong>registry</strong>, and callers look up the address at runtime. Two patterns: <strong>Client-side discovery</strong> (client queries registry, chooses instance, calls directly — e.g., Eureka + Feign) and <strong>Server-side discovery</strong> (client calls a load balancer which queries registry — e.g., AWS ALB + ECS). Client-side gives more control; server-side is simpler for the client.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is Eureka's self-preservation mode and when can it cause problems?</div><div class="iqtgl">▾</div></div><div class="iqb">Self-preservation activates when Eureka receives fewer heartbeats than expected (default threshold: 85% of expected). Instead of de-registering instances, Eureka holds onto the stale registry — assuming it's a network partition, not actual failures. <strong>Problem</strong>: in a network partition scenario, clients may receive stale entries for services that are actually DOWN, causing failed calls. In development, this causes confusion — stopped services still appear as UP. Best practice: disable self-preservation in dev/test (<code>enable-self-preservation: false</code>), keep it on in production, and combine with client-side circuit breakers (Resilience4j) to handle stale entries gracefully.<div class="trick"><strong>⚡ Self-preservation = Eureka choosing AP over CP (CAP theorem). It prefers availability of registry data over consistency.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">How does Kubernetes service discovery differ from Eureka?</div><div class="iqtgl">▾</div></div><div class="iqb">Kubernetes has built-in service discovery via DNS and <strong>Services</strong> (kube-proxy). A K8s Service gets a stable DNS name and virtual IP — pods can call <code>order-service:8080</code> without any registry client library. K8s handles load balancing across pod endpoints automatically. Differences: K8s discovery is infrastructure-level (no code changes needed), Eureka is application-level (requires SDK). For K8s deployments, you typically don't need Eureka — replace it with K8s Services and optionally <code>spring-cloud-kubernetes</code> for Spring Cloud integration.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tc">Concept</span><div class="iqqt">What is the difference between Ribbon (deprecated) and Spring Cloud LoadBalancer?</div><div class="iqtgl">▾</div></div><div class="iqb">Netflix Ribbon was the original client-side load balancer in Spring Cloud — it integrated with Eureka and provided Round Robin balancing. <strong>It's now deprecated and in maintenance mode.</strong> Spring Cloud LoadBalancer (part of Spring Cloud Commons) is the replacement — lighter, reactive-friendly, supports Reactor-based WebClient, pluggable load balancing strategies (RoundRobin, Random, custom). Spring Cloud LoadBalancer is the default when you include <code>spring-cloud-starter-loadbalancer</code>. If you're still using Ribbon, migrate to Spring Cloud LoadBalancer.</div></div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="c1-m">
+      <div class="stitle"><b>◆</b> Memory Tip</div>
+      <div class="mtip"><div class="mico">💡</div><div>
+        <strong>Eureka workflow in 4 steps:</strong><br>
+        <strong>1. Register</strong> — Service starts, posts its IP:port to Eureka<br>
+        <strong>2. Heartbeat</strong> — Service pings Eureka every 30s to say "I'm alive"<br>
+        <strong>3. Fetch</strong> — Clients pull registry and cache it locally (refreshed every 30s)<br>
+        <strong>4. Resolve</strong> — <code>http://service-name/path</code> → Eureka resolves → Load Balancer picks instance<br><br>
+        <strong>Self-preservation mnemonic: "Eureka is optimistic — it assumes YOU are wrong, not the services."</strong>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════╗
+     ║  TOPIC 28 — API Gateway                          ║
+     ╚══════════════════════════════════════════════════╝ -->
+<div class="card" id="c2">
+  <div class="band">
+    <div class="band-stripe" style="background:var(--violet)"></div>
+    <div class="band-l">
+      <div class="tnum">28</div>
+      <div>
+        <div class="ttag" style="background:var(--violet-light);color:var(--violet);border:1px solid var(--violet-border)">Spring Cloud</div>
+        <div class="btitle">API Gateway — Spring Cloud Gateway</div>
+        <div class="bsub">The front door of your microservices — routing, auth, rate limiting, and more in one place</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--amber-light);color:var(--amber);border:1px solid var(--amber-border)">🟡 Medium</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb2">
+      <div class="stab on" onclick="tab(2,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(2,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(2,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(2,'m')">🧠 Memory</div>
+    </div>
+
+    <div class="panel on" id="c2-c">
+      <div class="stitle"><b>◆</b> Gateway Architecture</div>
+      <div class="arch">
+        <div class="arch-row" style="justify-content:center">
+          <div class="abox"><div class="anode hi">Client Request<br><small>GET /api/users/1</small></div></div>
+          <div class="arr">→</div>
+          <div class="abox"><div class="anode violet" style="padding:12px 24px">API Gateway<br><small>:8080</small></div><div class="asub">Spring Cloud Gateway</div></div>
+        </div>
+        <div style="text-align:center;font-family:'Roboto Mono',monospace;font-size:11px;color:var(--muted);margin:8px 0">
+          PreFilter Chain: Auth → Rate Limit → Logging → <strong>Route Match</strong> → PostFilter: Response Transform
+        </div>
+        <div class="arch-row" style="justify-content:center;gap:12px;flex-wrap:wrap">
+          <div class="abox"><div class="anode">/api/users/**<br>→ user-service</div></div>
+          <div class="abox"><div class="anode">/api/orders/**<br>→ order-service</div></div>
+          <div class="abox"><div class="anode">/api/products/**<br>→ product-service</div></div>
+          <div class="abox"><div class="anode amber">/api/admin/**<br>→ 403 (role check)</div></div>
+        </div>
+      </div>
+
+      <div class="kps">
+        <div class="kp"><div class="ki">🏗️</div><div class="kt"><strong class="p">Route = Predicate + Filters + URI</strong> — A route matches a request using <strong>Predicates</strong> (conditions: path, method, header, cookie, query param, host) and forwards it to a URI after applying <strong>Filters</strong> (pre and post processing). Spring Cloud Gateway is reactive (built on Project Reactor + Netty) — non-blocking, high throughput.</div></div>
+        <div class="kp"><div class="ki">⚙️</div><div class="kt"><strong class="b">Built-in Filters</strong> — <code>AddRequestHeader</code>, <code>AddResponseHeader</code>, <code>RemoveRequestHeader</code>, <code>RewritePath</code> (URL rewriting), <code>StripPrefix</code> (remove path prefix), <code>CircuitBreaker</code> (Resilience4j integration), <code>RequestRateLimiter</code> (Redis-based rate limiting), <code>Retry</code>, <code>RequestSize</code>.</div></div>
+        <div class="kp"><div class="ki">🔑</div><div class="kt"><strong class="g">JWT Authentication at Gateway</strong> — Gateway validates JWT tokens before forwarding to downstream services. Downstream services trust the gateway and don't need to re-validate (or receive validated user info in headers). Extract user claims, add as <code>X-User-Id</code>, <code>X-User-Role</code> headers to downstream request.</div></div>
+        <div class="kp"><div class="ki">🚦</div><div class="kt"><strong class="t">Rate Limiting</strong> — Built-in <code>RequestRateLimiter</code> filter uses <strong>Redis + Token Bucket algorithm</strong>. Configure: requests per second, burst capacity. Keys: by IP (<code>#{@remoteAddrKeyResolver}</code>) or by user ID (custom). Prevents API abuse and DDoS.</div></div>
+        <div class="kp"><div class="ki">⚡</div><div class="kt"><strong class="a">Gateway vs Zuul</strong> — Zuul 1.x (Netflix, blocking, Servlet-based) is deprecated. Zuul 2 was never officially integrated into Spring Cloud. <strong>Spring Cloud Gateway</strong> is the current standard: reactive, non-blocking, Netty-based, better performance, actively maintained. Use Spring Cloud Gateway for all new projects.</div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="c2-x">
+      <div class="stitle"><b>◆</b> Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Spring Cloud Gateway — Routes + JWT Filter + Rate Limiting</div></div>
+<pre><span class="cm">// ── Gateway Setup ─────────────────────────────────</span>
+<span class="an">@SpringBootApplication</span>
+<span class="an">@EnableDiscoveryClient</span>
+<span class="kw">public class</span> <span class="cl">GatewayApp</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="tp">SpringApplication</span>.<span class="fn">run</span>(<span class="cl">GatewayApp</span>.<span class="kw">class</span>, args);
+    }
+}
+
+<span class="cm">// ── application.yml — Route Configuration ─────────</span>
+<span class="cm">// spring:</span>
+<span class="cm">//   cloud:</span>
+<span class="cm">//     gateway:</span>
+<span class="cm">//       routes:</span>
+<span class="cm">//         - id: user-service</span>
+<span class="cm">//           uri: lb://user-service       # lb:// = load-balanced via Eureka</span>
+<span class="cm">//           predicates:</span>
+<span class="cm">//             - Path=/api/users/**</span>
+<span class="cm">//           filters:</span>
+<span class="cm">//             - StripPrefix=1            # strip /api prefix before forwarding</span>
+<span class="cm">//             - name: CircuitBreaker</span>
+<span class="cm">//               args:</span>
+<span class="cm">//                 name: userCB</span>
+<span class="cm">//                 fallbackUri: forward:/fallback/user</span>
+<span class="cm">//             - name: RequestRateLimiter</span>
+<span class="cm">//               args:</span>
+<span class="cm">//                 redis-rate-limiter.replenishRate: 10</span>
+<span class="cm">//                 redis-rate-limiter.burstCapacity: 20</span>
+<span class="cm">//</span>
+<span class="cm">//         - id: order-service</span>
+<span class="cm">//           uri: lb://order-service</span>
+<span class="cm">//           predicates:</span>
+<span class="cm">//             - Path=/api/orders/**</span>
+<span class="cm">//             - Header=X-Request-Id, \d+  # header must match regex</span>
+<span class="cm">//           filters:</span>
+<span class="cm">//             - AddRequestHeader=X-Gateway, spring-cloud-gateway</span>
+<span class="cm">//             - RewritePath=/api/orders/(?&lt;rest&gt;.*), /orders/${rest}</span>
+
+<span class="cm">// ── Custom JWT Global Filter ──────────────────────</span>
+<span class="an">@Component</span>
+<span class="kw">public class</span> <span class="cl">JwtAuthFilter</span> <span class="kw">implements</span> <span class="tp">GlobalFilter</span>, <span class="tp">Ordered</span> {
+
+    <span class="kw">private final</span> <span class="tp">JwtUtil</span> jwtUtil;
+
+    <span class="an">@Override</span>
+    <span class="kw">public</span> <span class="tp">Mono</span>&lt;<span class="tp">Void</span>&gt; <span class="fn">filter</span>(<span class="tp">ServerWebExchange</span> exchange, <span class="tp">GatewayFilterChain</span> chain) {
+        <span class="tp">ServerHttpRequest</span> request = exchange.<span class="fn">getRequest</span>();
+
+        <span class="cm">// Skip auth for public endpoints</span>
+        <span class="kw">if</span> (<span class="fn">isPublicEndpoint</span>(request.<span class="fn">getPath</span>())) <span class="kw">return</span> chain.<span class="fn">filter</span>(exchange);
+
+        <span class="tp">String</span> token = <span class="fn">extractToken</span>(request);
+        <span class="kw">if</span> (token == <span class="kw">null</span> || !jwtUtil.<span class="fn">isValid</span>(token)) {
+            exchange.<span class="fn">getResponse</span>().<span class="fn">setStatusCode</span>(<span class="tp">HttpStatus</span>.<span class="cl">UNAUTHORIZED</span>);
+            <span class="kw">return</span> exchange.<span class="fn">getResponse</span>().<span class="fn">setComplete</span>();
+        }
+
+        <span class="cm">// Add user info to downstream headers</span>
+        <span class="tp">String</span> userId = jwtUtil.<span class="fn">getUserId</span>(token);
+        <span class="tp">ServerHttpRequest</span> mutatedReq = request.<span class="fn">mutate</span>()
+            .<span class="fn">header</span>(<span class="st">"X-User-Id"</span>, userId)
+            .<span class="fn">header</span>(<span class="st">"X-User-Role"</span>, jwtUtil.<span class="fn">getRole</span>(token))
+            .<span class="fn">build</span>();
+
+        <span class="kw">return</span> chain.<span class="fn">filter</span>(exchange.<span class="fn">mutate</span>().<span class="fn">request</span>(mutatedReq).<span class="fn">build</span>());
+    }
+
+    <span class="an">@Override</span>
+    <span class="kw">public int</span> <span class="fn">getOrder</span>() { <span class="kw">return</span> -<span class="nb">1</span>; } <span class="cm">// run before other filters</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="panel" id="c2-q">
+      <div class="stitle"><b>◆</b> Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is an API Gateway and what cross-cutting concerns does it handle?</div><div class="iqtgl">▾</div></div><div class="iqb">An API Gateway is a single entry point for all client requests in a microservices architecture. It handles: <strong>Routing</strong> (forward to correct service based on path/method/header), <strong>Authentication/Authorization</strong> (validate JWT, check roles before forwarding), <strong>Rate Limiting</strong> (throttle requests per IP/user), <strong>Load Balancing</strong> (across service instances), <strong>SSL Termination</strong> (HTTPS at gateway, HTTP internally), <strong>Request/Response Transformation</strong> (add/remove headers, rewrite paths), <strong>Circuit Breaking</strong> (fail fast when downstream is unhealthy), <strong>Observability</strong> (centralized logging, tracing, metrics).<div class="trick"><strong>⚡ Without a gateway, every microservice needs to implement auth, rate limiting, etc. — massive duplication.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is the Backend for Frontend (BFF) pattern and how does it relate to the API Gateway?</div><div class="iqtgl">▾</div></div><div class="iqb">The <strong>BFF pattern</strong> creates <em>separate</em> API Gateway instances tailored to specific client types (mobile app, web app, third-party). A mobile BFF might aggregate multiple service calls into one response (reducing chattiness), return compressed/minimal data, and handle mobile-specific auth flows. A web BFF might return richer data. This differs from a generic gateway: BFF is client-specific, may aggregate/transform data, and can evolve independently per client. Use BFF when different clients have very different data needs or access patterns.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">How does Spring Cloud Gateway differ from Zuul? Why was the switch made?</div><div class="iqtgl">▾</div></div><div class="iqb">Zuul 1.x (Netflix): <strong>Blocking I/O</strong>, Servlet-based, one thread per request. Simple but poor performance under high concurrency. Zuul 2 (non-blocking) was never officially integrated into Spring Cloud. Spring Cloud Gateway uses <strong>Project Reactor + Netty</strong> — fully non-blocking, reactive, single event loop handles thousands of concurrent connections. SCG supports WebSocket out of the box, integrates with Spring Security 's reactive stack, and has better performance benchmarks. The switch reflects the industry shift toward reactive microservices.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tc">Concept</span><div class="iqqt">What is the difference between a Global Filter and a GatewayFilter in Spring Cloud Gateway?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>GlobalFilter</strong>: applies to ALL routes automatically. Implement <code>GlobalFilter</code> and register as a bean. Use for: authentication, request ID injection, logging. Order controlled via <code>Ordered</code> interface.<br><strong>GatewayFilter</strong>: applies to <em>specific routes</em> only, configured in the route definition. Use for: route-specific path rewriting, adding service-specific headers, per-route rate limiting. Both can be pre-filters (modify request before forwarding) or post-filters (modify response after upstream returns).</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">How does API Gateway handle JWT validation without hitting the auth service every time?</div><div class="iqtgl">▾</div></div><div class="iqb">The gateway validates the JWT <strong>locally</strong> using the public key (asymmetric RSA/ECDSA) or shared secret (HMAC). No call to the auth service for every request — JWT is self-contained with claims and signature. Steps: <strong>1)</strong> Auth service issues JWT signed with private key. <strong>2)</strong> Gateway has the public key (from Config Server or JWKs endpoint). <strong>3)</strong> Gateway verifies signature + expiry locally in microseconds. <strong>4)</strong> Extracts claims (userId, roles), adds as headers to downstream. Downstream services trust these headers (they trust the gateway). Only needs auth service contact on: token refresh, logout/blacklist checks, or key rotation.<div class="trick"><strong>⚡ This is why JWT is preferred over opaque tokens in microservices — stateless validation at every node.</strong></div></div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="c2-m">
+      <div class="stitle"><b>◆</b> Memory Tip</div>
+      <div class="mtip"><div class="mico">💡</div><div>
+        <strong>Gateway = Airport Security Check.</strong> Every passenger (request) goes through security (auth filter) before boarding their specific gate (route). Some gates have extra checks (rate limiting, role-based). The terminal (gateway) handles all the common rules — airlines (services) just handle their flight (business logic).<br><br>
+        <strong>Route anatomy: ID + Predicate + Filter + URI</strong><br>
+        <code>Predicate</code> = does this request match? (path, method, header)<br>
+        <code>Filter</code> = what to do before/after forwarding?<br>
+        <code>URI</code> = where to forward? (<code>lb://service-name</code> for load-balanced)
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════╗
+     ║  TOPIC 29 — Circuit Breakers                     ║
+     ╚══════════════════════════════════════════════════╝ -->
+<div class="card" id="c3">
+  <div class="band">
+    <div class="band-stripe" style="background:var(--rose)"></div>
+    <div class="band-l">
+      <div class="tnum">29</div>
+      <div>
+        <div class="ttag" style="background:var(--rose-light);color:var(--rose);border:1px solid var(--rose-border)">Resilience</div>
+        <div class="btitle">Circuit Breakers — Resilience4j &amp; Hystrix</div>
+        <div class="bsub">Stop cascading failures — fail fast and recover gracefully in distributed systems</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--rose-light);color:var(--rose);border:1px solid var(--rose-border)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb3">
+      <div class="stab on" onclick="tab(3,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(3,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(3,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(3,'m')">🧠 Memory</div>
+    </div>
+
+    <div class="panel on" id="c3-c">
+      <div class="stitle"><b>◆</b> Circuit Breaker State Machine</div>
+      <div class="arch">
+        <div class="arch-row" style="justify-content:center;gap:0">
+          <div class="abox">
+            <div class="anode emerald" style="padding:12px 20px">CLOSED<br><small>Normal operation</small></div>
+            <div class="asub">Calls pass through</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:16px">
+            <div style="font-family:'Roboto Mono',monospace;font-size:10px;color:var(--rose);margin:0 8px;text-align:center">failure rate ≥ threshold<br>→ OPEN</div>
+          </div>
+          <div class="arr">→</div>
+          <div class="abox">
+            <div class="anode rose" style="padding:12px 20px">OPEN<br><small>Failing fast</small></div>
+            <div class="asub">Calls rejected immediately</div>
+          </div>
+          <div class="arr">→<br><small style="font-size:9px;font-family:'Roboto Mono',monospace;color:var(--muted)">wait timeout</small></div>
+          <div class="abox">
+            <div class="anode amber" style="padding:12px 20px">HALF-OPEN<br><small>Testing recovery</small></div>
+            <div class="asub">Limited calls allowed</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:4px;font-family:'Roboto Mono',monospace;font-size:10px;color:var(--muted)">
+          HALF-OPEN success → CLOSED &nbsp;|&nbsp; HALF-OPEN failure → OPEN (reset wait)
+        </div>
+      </div>
+
+      <div class="kps">
+        <div class="kp"><div class="ki">⚡</div><div class="kt"><strong class="r">Why Circuit Breaker?</strong> — In distributed systems, a slow/failed downstream service causes callers to pile up waiting (threads blocked on timeouts). This <strong>cascades</strong> — all threads exhausted, caller goes down, cascades upward. Circuit breaker <strong>fails fast</strong> when failure rate exceeds threshold — no waiting for timeout. Callers get an immediate error/fallback instead of hanging.</div></div>
+        <div class="kp"><div class="ki">📊</div><div class="kt"><strong class="b">Resilience4j Configuration</strong> — Key settings: <code>slidingWindowType</code> (COUNT_BASED or TIME_BASED), <code>slidingWindowSize</code> (number of calls or seconds), <code>failureRateThreshold</code> (% of failures to trip — default 50%), <code>waitDurationInOpenState</code> (time before HALF-OPEN), <code>permittedNumberOfCallsInHalfOpenState</code>, <code>slowCallDurationThreshold</code> + <code>slowCallRateThreshold</code> (also counts slow calls as failures).</div></div>
+        <div class="kp"><div class="ki">🛡️</div><div class="kt"><strong class="g">Fallback Strategy</strong> — When circuit is OPEN, return: cached data, default value, partial response, error message. <strong>Avoid</strong>: fallback that calls another slow service (nested calls defeat the purpose). A good fallback is pre-computed, in-memory, or from cache. Combine with <code>@Retry</code> for transient errors before circuit trips.</div></div>
+        <div class="kp"><div class="ki">📦</div><div class="kt"><strong class="p">Resilience4j Modules</strong> — <code>CircuitBreaker</code> (fail-fast on repeated failures), <code>Retry</code> (retry with backoff for transient errors), <code>RateLimiter</code> (limit calls per period), <code>Bulkhead</code> (limit concurrent calls — ThreadPool or Semaphore), <code>TimeLimiter</code> (timeout on async calls). Use as annotations: <code>@CircuitBreaker</code>, <code>@Retry</code>, <code>@RateLimiter</code>, <code>@Bulkhead</code>.</div></div>
+        <div class="kp"><div class="ki">🗑️</div><div class="kt"><strong class="a">Hystrix (Deprecated)</strong> — Netflix Hystrix entered maintenance mode in 2018. No longer actively developed. The Spring Cloud team recommends <strong>Resilience4j</strong> as the replacement. Key difference: Hystrix is thread-pool based (each command runs in a separate pool), Resilience4j is functional and decorator-based (works with existing threads), lighter weight, fully reactive-compatible.</div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="c3-x">
+      <div class="stitle"><b>◆</b> Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Resilience4j — CircuitBreaker + Retry + Bulkhead</div></div>
+<pre><span class="cm">// ── application.yml config ────────────────────────</span>
+<span class="cm">// resilience4j:</span>
+<span class="cm">//   circuitbreaker:</span>
+<span class="cm">//     instances:</span>
+<span class="cm">//       userService:</span>
+<span class="cm">//         slidingWindowSize: 10         # evaluate last 10 calls</span>
+<span class="cm">//         failureRateThreshold: 50      # >50% failures → OPEN</span>
+<span class="cm">//         waitDurationInOpenState: 10s  # wait 10s before HALF-OPEN</span>
+<span class="cm">//         permittedNumberOfCallsInHalfOpenState: 3</span>
+<span class="cm">//         slowCallDurationThreshold: 2s # calls >2s = slow</span>
+<span class="cm">//         slowCallRateThreshold: 80     # >80% slow calls → OPEN</span>
+<span class="cm">//   retry:</span>
+<span class="cm">//     instances:</span>
+<span class="cm">//       userService:</span>
+<span class="cm">//         maxAttempts: 3</span>
+<span class="cm">//         waitDuration: 500ms</span>
+<span class="cm">//         retryExceptions:</span>
+<span class="cm">//           - java.net.ConnectException</span>
+<span class="cm">//   bulkhead:</span>
+<span class="cm">//     instances:</span>
+<span class="cm">//       userService:</span>
+<span class="cm">//         maxConcurrentCalls: 10        # max 10 concurrent calls</span>
+
+<span class="cm">// ── Annotation-based usage ────────────────────────</span>
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">UserApiService</span> {
+
+    <span class="an">@CircuitBreaker</span>(name = <span class="st">"userService"</span>, fallbackMethod = <span class="st">"fallbackUser"</span>)
+    <span class="an">@Retry</span>(name = <span class="st">"userService"</span>)            <span class="cm">// retry first, then CB</span>
+    <span class="an">@Bulkhead</span>(name = <span class="st">"userService"</span>)
+    <span class="kw">public</span> <span class="tp">UserDto</span> <span class="fn">getUser</span>(<span class="tp">Long</span> id) {
+        <span class="kw">return</span> restTemplate.<span class="fn">getForObject</span>(
+            <span class="st">"http://user-service/users/{id}"</span>, <span class="tp">UserDto</span>.<span class="kw">class</span>, id
+        );
+    }
+
+    <span class="cm">// Fallback: same signature + Throwable</span>
+    <span class="kw">private</span> <span class="tp">UserDto</span> <span class="fn">fallbackUser</span>(<span class="tp">Long</span> id, <span class="tp">Throwable</span> ex) {
+        log.<span class="fn">warn</span>(<span class="st">"Circuit open for user {}: {}"</span>, id, ex.<span class="fn">getMessage</span>());
+        <span class="kw">return</span> <span class="tp">UserDto</span>.<span class="fn">anonymous</span>();      <span class="cm">// return safe default</span>
+    }
+}
+
+<span class="cm">// ── Programmatic usage (more control) ────────────</span>
+<span class="tp">CircuitBreakerRegistry</span> registry = <span class="tp">CircuitBreakerRegistry</span>.<span class="fn">ofDefaults</span>();
+<span class="tp">CircuitBreaker</span> cb = registry.<span class="fn">circuitBreaker</span>(<span class="st">"userService"</span>);
+
+<span class="tp">Supplier</span>&lt;<span class="tp">UserDto</span>&gt; supplier = <span class="tp">CircuitBreaker</span>.<span class="fn">decorateSupplier</span>(cb,
+    () -> userApiClient.<span class="fn">getUser</span>(id)
+);
+
+<span class="tp">UserDto</span> user = <span class="tp">Try</span>.<span class="fn">ofSupplier</span>(supplier)
+    .<span class="fn">recover</span>(ex -> <span class="tp">UserDto</span>.<span class="fn">anonymous</span>())
+    .<span class="fn">get</span>();
+
+<span class="cm">// ── Listen to CB state transitions ───────────────</span>
+cb.<span class="fn">getEventPublisher</span>()
+    .<span class="fn">onStateTransition</span>(e ->
+        log.<span class="fn">warn</span>(<span class="st">"CB {} state: {} → {}"</span>,
+            e.<span class="fn">getCircuitBreakerName</span>(),
+            e.<span class="fn">getStateTransition</span>().<span class="fn">getFromState</span>(),
+            e.<span class="fn">getStateTransition</span>().<span class="fn">getToState</span>()
+        )
+    );</pre>
+      </div>
+    </div>
+
+    <div class="panel" id="c3-q">
+      <div class="stitle"><b>◆</b> Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">Explain the three states of a Circuit Breaker and what happens in each.</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>CLOSED</strong> (normal): All calls pass through. CB tracks failure rate in a sliding window. When failure rate ≥ threshold, transitions to OPEN.<br><strong>OPEN</strong> (failing fast): All calls are immediately rejected with <code>CallNotPermittedException</code> — no actual call made. Returns fallback or error. After <code>waitDurationInOpenState</code>, transitions to HALF-OPEN.<br><strong>HALF-OPEN</strong> (testing recovery): Allows a limited number of test calls (configured). If those succeed → CLOSED. If they fail → OPEN again (with reset wait timer). This prevents immediately flooding a recovering service.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is the difference between Circuit Breaker, Retry, and Bulkhead? When do you use each?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>Retry</strong>: Handle transient failures — temporary network blips, occasional timeouts. Retry a few times with backoff before failing. Don't retry non-idempotent operations blindly (charging twice!).<br><strong>Circuit Breaker</strong>: Handle sustained failures — when a downstream is consistently failing. Fails fast instead of waiting for timeouts; gives downstream time to recover.<br><strong>Bulkhead</strong>: Limit resource consumption — prevents one service's slowness from consuming all threads/connections. Isolates failure impact. Semaphore bulkhead: limits concurrent calls. Thread pool bulkhead: separate thread pool per dependency.<br><div class="trick"><strong>⚡ Compose them: Retry → CircuitBreaker → Bulkhead → TimeLimiter. Retry first (transient), CB second (sustained), Bulkhead third (resource isolation), TimeLimiter fourth (async timeout).</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">Why is Hystrix deprecated and what does Resilience4j do differently?</div><div class="iqtgl">▾</div></div><div class="iqb">Hystrix used a <strong>thread pool per dependency</strong> — each command ran in an isolated thread pool. Heavy, hard to configure correctly, and not reactive-friendly. Netflix stopped developing it in 2018. Resilience4j is <strong>lightweight</strong> (uses decorators/functional wrappers, no separate thread pools by default), fully <strong>reactive-compatible</strong> (works with Mono/Flux), modular (use only what you need), configurable per-instance, and has better observability via Micrometer/Actuator. Spring Cloud officially recommends Resilience4j as the Hystrix replacement.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tc">Concept</span><div class="iqqt">What is a good fallback strategy? What are the anti-patterns?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>Good fallback strategies:</strong> Return cached data (stale but better than nothing), return a safe default (anonymous user, empty list), return a degraded response (partial data), queue the request for async retry, fail gracefully with a user-friendly error message.<br><strong>Fallback anti-patterns:</strong> <strong>1. Calling another slow service in the fallback</strong> — you're just delaying the failure. <strong>2. Returning null</strong> — causes NPE downstream. <strong>3. Hiding errors silently</strong> — always log fallback invocations with the cause. <strong>4. Complex fallback logic</strong> — fallbacks should be fast and simple. <strong>5. Not alerting on high fallback rates</strong> — a healthy system should rarely use fallbacks.</div></div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="c3-m">
+      <div class="stitle"><b>◆</b> Memory Tip</div>
+      <div class="mtip"><div class="mico">💡</div><div>
+        <strong>Circuit Breaker = Electrical circuit breaker analogy.</strong><br>
+        When too many failures (overload), the breaker <strong>OPENS</strong> (trips) — no more current flows. After cooling down, it tests with HALF-OPEN (try manually). If safe → CLOSED (normal). If still dangerous → OPEN again.<br><br>
+        <strong>Resilience4j annotation stacking order (outer to inner):</strong><br>
+        <code>@Bulkhead → @TimeLimiter → @CircuitBreaker → @Retry → @RateLimiter</code><br><br>
+        <strong>CB vs Retry trigger:</strong> Retry = "maybe it'll work this time". CB = "stop trying, it's definitely broken".
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════╗
+     ║  TOPIC 30 — Config Server                        ║
+     ╚══════════════════════════════════════════════════╝ -->
+<div class="card" id="c4">
+  <div class="band">
+    <div class="band-stripe" style="background:var(--emerald)"></div>
+    <div class="band-l">
+      <div class="tnum">30</div>
+      <div>
+        <div class="ttag" style="background:var(--emerald-light);color:var(--emerald);border:1px solid var(--emerald-border)">Spring Cloud</div>
+        <div class="btitle">Config Server &amp; Distributed Configuration</div>
+        <div class="bsub">Centralize, externalize, and refresh config across all your microservices without redeployment</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--amber-light);color:var(--amber);border:1px solid var(--amber-border)">🟡 Medium</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb4">
+      <div class="stab on" onclick="tab(4,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(4,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(4,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(4,'m')">🧠 Memory</div>
+    </div>
+
+    <div class="panel on" id="c4-c">
+      <div class="stitle"><b>◆</b> Config Server Architecture</div>
+      <div class="arch">
+        <div class="arch-row" style="justify-content:center;gap:16px;flex-wrap:wrap">
+          <div class="abox"><div class="anode teal">Git Repository<br><small>application.yml<br>order-service-prod.yml</small></div><div class="asub">Config Source</div></div>
+          <div class="arr">→</div>
+          <div class="abox"><div class="anode emerald" style="padding:12px 20px">Config Server<br><small>:8888</small></div><div class="asub">Central Config</div></div>
+          <div class="arr">→</div>
+          <div class="abox">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div class="anode hi">Order Service</div>
+              <div class="anode hi">User Service</div>
+              <div class="anode hi">Payment Service</div>
+            </div>
+            <div class="asub">Config Clients</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;text-align:center;font-family:'Roboto Mono',monospace;font-size:11px;color:var(--muted)">
+          Git push → Config Server pulls → POST /actuator/refresh → Services reload config (no restart!)
+        </div>
+      </div>
+
+      <div class="kps">
+        <div class="kp"><div class="ki">📁</div><div class="kt"><strong class="g">Config File Naming Convention</strong> — Config Server resolves files by: <code>{application-name}.yml</code>, <code>{application-name}-{profile}.yml</code>. Plus a shared <code>application.yml</code> for all services. Hierarchy: specific > generic. Example: <code>order-service-prod.yml</code> overrides <code>order-service.yml</code> overrides <code>application.yml</code>. Profile activation: <code>spring.profiles.active=prod</code>.</div></div>
+        <div class="kp"><div class="ki">🔐</div><div class="kt"><strong class="b">Secret Encryption</strong> — Config Server supports encrypting sensitive values. Use <code>{cipher}...</code> prefix for encrypted values in config files. Server decrypts before serving to clients. Key sources: symmetric (text key), asymmetric (Java keystore). Alternatively use <strong>HashiCorp Vault</strong> as backend — Spring Cloud Vault provides native integration for secrets management.</div></div>
+        <div class="kp"><div class="ki">🔄</div><div class="kt"><strong class="t">Dynamic Refresh with @RefreshScope</strong> — Annotate beans with <code>@RefreshScope</code> — when a <code>POST /actuator/refresh</code> is triggered, the bean is recreated with fresh config. Beans without <code>@RefreshScope</code> keep old values. For broadcast refresh across all services: use <strong>Spring Cloud Bus</strong> (RabbitMQ or Kafka) to publish RefreshRemoteApplicationEvent to all instances at once.</div></div>
+        <div class="kp"><div class="ki">📂</div><div class="kt"><strong class="p">Backend Options</strong> — <strong>Git</strong> (default, version-controlled, branch/tag support — best for config changes with audit trail), <strong>SVN</strong>, <strong>File System</strong> (local files — dev only), <strong>Vault</strong> (HashiCorp Vault — best for secrets), <strong>JDBC</strong> (config in database), <strong>Redis</strong> (fast, in-memory). Multiple backends can be used simultaneously with composite environment.</div></div>
+        <div class="kp"><div class="ki">⚡</div><div class="kt"><strong class="a">Bootstrap vs Application Config</strong> — In Spring Boot 2.4+, <code>bootstrap.yml</code> is no longer needed by default. Use <code>spring.config.import=configserver:</code> in <code>application.yml</code> to pull config from Config Server. Pre-2.4: <code>bootstrap.yml</code> was loaded first (before application context) to fetch config server location — critical for Config Server address to be known before loading the rest of config.</div></div>
+      </div>
+      <div class="gap-sm"></div>
+      <div class="stitle"><b>◆</b> Config File Priority (highest to lowest)</div>
+      <table class="tbl">
+        <tr><th>Source</th><th>Example</th><th>Scope</th></tr>
+        <tr><td>Environment Variables</td><td><code>SPRING_DATASOURCE_URL</code></td><td>Instance-specific (K8s secrets, env vars)</td></tr>
+        <tr><td>Command Line Args</td><td><code>--server.port=9090</code></td><td>Runtime override</td></tr>
+        <tr><td>Config Server — App+Profile</td><td><code>order-service-prod.yml</code></td><td>Service + environment specific</td></tr>
+        <tr><td>Config Server — App</td><td><code>order-service.yml</code></td><td>Service-wide defaults</td></tr>
+        <tr><td>Config Server — Shared</td><td><code>application.yml</code></td><td>All services defaults</td></tr>
+        <tr><td>Local application.yml</td><td><code>src/main/resources/application.yml</code></td><td>Packaged defaults (lowest)</td></tr>
+      </table>
+    </div>
+
+    <div class="panel" id="c4-x">
+      <div class="stitle"><b>◆</b> Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Config Server + Client + RefreshScope + Bus</div></div>
+<pre><span class="cm">// ── Config Server Application ─────────────────────</span>
+<span class="an">@SpringBootApplication</span>
+<span class="an">@EnableConfigServer</span>
+<span class="kw">public class</span> <span class="cl">ConfigServerApp</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="tp">SpringApplication</span>.<span class="fn">run</span>(<span class="cl">ConfigServerApp</span>.<span class="kw">class</span>, args);
+    }
+}
+
+<span class="cm">// ── Config Server application.yml ─────────────────</span>
+<span class="cm">// server:</span>
+<span class="cm">//   port: 8888</span>
+<span class="cm">// spring:</span>
+<span class="cm">//   cloud:</span>
+<span class="cm">//     config:</span>
+<span class="cm">//       server:</span>
+<span class="cm">//         git:</span>
+<span class="cm">//           uri: https://github.com/myorg/config-repo</span>
+<span class="cm">//           default-label: main          # branch</span>
+<span class="cm">//           search-paths: '{application}' # subfolder per service</span>
+<span class="cm">//           clone-on-start: true          # clone at startup</span>
+<span class="cm">//         encrypt:</span>
+<span class="cm">//           key: my-secret-key            # for {cipher} values</span>
+
+<span class="cm">// ── Client Service application.yml ────────────────</span>
+<span class="cm">// spring:</span>
+<span class="cm">//   application:</span>
+<span class="cm">//     name: order-service         # looks for order-service*.yml</span>
+<span class="cm">//   profiles:</span>
+<span class="cm">//     active: prod                # looks for order-service-prod.yml</span>
+<span class="cm">//   config:</span>
+<span class="cm">//     import: configserver:http://config-server:8888/</span>
+
+<span class="cm">// ── @RefreshScope: bean refreshed on /actuator/refresh</span>
+<span class="an">@RestController</span>
+<span class="an">@RefreshScope</span>                              <span class="cm">// recreated on refresh event</span>
+<span class="kw">public class</span> <span class="cl">FeatureController</span> {
+
+    <span class="an">@Value</span>(<span class="st">"${feature.new-ui.enabled:false}"</span>)
+    <span class="kw">private boolean</span> newUiEnabled;
+
+    <span class="an">@GetMapping</span>(<span class="st">"/feature"</span>)
+    <span class="kw">public</span> <span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">Boolean</span>&gt; <span class="fn">featureFlags</span>() {
+        <span class="kw">return</span> <span class="tp">Map</span>.<span class="fn">of</span>(<span class="st">"newUi"</span>, newUiEnabled);
+    }
+}
+
+<span class="cm">// ── Trigger refresh on single instance ───────────</span>
+<span class="cm">// POST http://order-service:8082/actuator/refresh</span>
+<span class="cm">// → Returns: ["feature.new-ui.enabled"] (changed keys)</span>
+
+<span class="cm">// ── Spring Cloud Bus: broadcast refresh to ALL ────</span>
+<span class="cm">// Add: spring-cloud-starter-bus-kafka (or bus-amqp)</span>
+<span class="cm">// POST http://config-server:8888/actuator/busrefresh</span>
+<span class="cm">// → Publishes RefreshRemoteApplicationEvent to Kafka/RabbitMQ</span>
+<span class="cm">// → All subscribed instances refresh automatically</span>
+
+<span class="cm">// ── Encrypted config value ────────────────────────</span>
+<span class="cm">// In Git config file:</span>
+<span class="cm">// spring:</span>
+<span class="cm">//   datasource:</span>
+<span class="cm">//     password: '{cipher}AQBsXeK7A...encrypted...base64=='</span>
+<span class="cm">// Config Server decrypts before serving to client</span>
+
+<span class="cm">// ── Vault backend (secrets management) ───────────</span>
+<span class="cm">// spring:</span>
+<span class="cm">//   cloud:</span>
+<span class="cm">//     config:</span>
+<span class="cm">//       server:</span>
+<span class="cm">//         vault:</span>
+<span class="cm">//           host: vault.mycompany.com</span>
+<span class="cm">//           port: 8200</span>
+<span class="cm">//           authentication: TOKEN</span>
+<span class="cm">//           token: my-vault-token</span></pre>
+      </div>
+    </div>
+
+    <div class="panel" id="c4-q">
+      <div class="stitle"><b>◆</b> Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">Why is externalized configuration important in microservices?</div><div class="iqtgl">▾</div></div><div class="iqb">The <strong>12-Factor App principle #3</strong>: config should be in the environment, not the code. In microservices: you have dozens of services, each with multiple instances across environments (dev/staging/prod). Embedding config in code means repackaging/redeploying for every config change. Externalized config enables: <strong>1.</strong> Same artifact deployed across environments (different configs applied at runtime). <strong>2.</strong> Config changes without redeployment. <strong>3.</strong> Centralized audit trail (Git history of config changes). <strong>4.</strong> Secrets managed separately from code (no API keys in source control). <strong>5.</strong> Feature flags toggled at runtime.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">How does @RefreshScope work? What happens when refresh is triggered?</div><div class="iqtgl">▾</div></div><div class="iqb"><code>@RefreshScope</code> creates a <strong>scoped proxy</strong> around the bean. When a refresh is triggered (via <code>POST /actuator/refresh</code> or Spring Cloud Bus event): <strong>1)</strong> The bean's current instance is destroyed (scope cache cleared). <strong>2)</strong> On next access, the proxy creates a new instance, pulling fresh config values. <strong>3)</strong> New instance has updated <code>@Value</code> fields. Beans without <code>@RefreshScope</code> retain old values until restart. Important: <code>@ConfigurationProperties</code> beans are automatically refreshed without <code>@RefreshScope</code> when using <code>@RefreshScope</code> on a config class or by default in Boot 2.4+.<div class="trick"><strong>⚡ Don't put @RefreshScope on @Configuration classes — it can cause unexpected bean recreation cycles.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is Spring Cloud Bus and when do you need it?</div><div class="iqtgl">▾</div></div><div class="iqb">Spring Cloud Bus links all service instances via a message broker (RabbitMQ or Kafka). When a config change is pushed: instead of hitting <code>/actuator/refresh</code> on every instance individually, you hit <code>/actuator/busrefresh</code> on <em>any</em> instance (or the config server). The Bus broadcasts a <code>RefreshRemoteApplicationEvent</code> to all connected instances — they all refresh simultaneously. Needed when: you have multiple instances of services (horizontal scaling) and need all to pick up config changes atomically. Without Bus, you'd need to call refresh on each instance separately — error-prone and slow at scale.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tc">Concept</span><div class="iqqt">How would you handle secrets (DB passwords, API keys) in a Config Server setup?</div><div class="iqtgl">▾</div></div><div class="iqb">Multiple options, in order of security: <strong>1. Config Server encryption</strong>: Store <code>{cipher}encrypted-value</code> in Git. Config Server decrypts using a key. Key must be secured (env var, not in code). <strong>2. HashiCorp Vault</strong>: Config Server uses Vault as a backend for secrets only. Vault provides fine-grained access control, secret rotation, audit logs. Best for production. <strong>3. Kubernetes Secrets</strong>: Mount secrets as environment variables or files. Managed by K8s RBAC. <strong>4. Environment Variables</strong>: For sensitive values in containerized environments — injected at runtime, never in code or Git.<div class="trick"><strong>⚡ Never store plain-text passwords in Git config files — even private repos can be compromised.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is the Config Server config file resolution order?</div><div class="iqtgl">▾</div></div><div class="iqb">For a service named <code>order-service</code> with profile <code>prod</code>, Config Server fetches in order (most specific wins): <strong>1.</strong> <code>order-service-prod.yml</code> (application + profile — highest priority). <strong>2.</strong> <code>order-service.yml</code> (application only). <strong>3.</strong> <code>application-prod.yml</code> (shared + profile). <strong>4.</strong> <code>application.yml</code> (shared defaults — lowest priority). All matched files are loaded and merged — properties from higher-priority files override lower. Local <code>application.yml</code> in the service itself is lowest priority and overridden by Config Server values.</div></div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="c4-m">
+      <div class="stitle"><b>◆</b> Memory Tip</div>
+      <div class="mtip"><div class="mico">💡</div><div>
+        <strong>Config Server = centralized source of truth for all configuration.</strong><br>
+        Think of it like a <em>library</em> — all services check out their config at startup. When books (configs) are updated, use <code>/actuator/refresh</code> to return the old book and get a new one.<br><br>
+        <strong>Refresh flow cheat sheet:</strong><br>
+        • <strong>Single instance</strong>: <code>POST /actuator/refresh</code> on that instance<br>
+        • <strong>All instances</strong>: <code>POST /actuator/busrefresh</code> → Spring Cloud Bus broadcasts<br>
+        • <strong>Without restart</strong>: bean must be <code>@RefreshScope</code><br>
+        • <strong>Git webhook</strong>: GitHub/GitLab webhook → Config Server → Bus refresh → All services update<br><br>
+        <strong>Config resolution: SPECIFIC beats GENERIC. Profile-specific &gt; App &gt; Shared.</strong>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<div class="footer">PHASE 5 · MICROSERVICES &amp; CLOUD · TOPICS 26–30 · SPRING CLOUD · SENIOR ENGINEER INTERVIEW PREP</div>
+
+<script>
+let cur = 0;
+function show(i) {
+  document.querySelectorAll('.card').forEach((c,j)=>c.classList.toggle('on',j===i));
+  document.querySelectorAll('.nbtn').forEach((b,j)=>b.classList.toggle('on',j===i));
+  document.querySelectorAll('.pseg').forEach((s,j)=>{
+    s.classList.remove('active','done');
+    if(j<i) s.classList.add('done');
+    if(j===i) s.classList.add('active');
+  });
+  cur=i; window.scrollTo({top:0,behavior:'smooth'});
+}
+function tab(ti,panel){
+  const tabEls=document.querySelectorAll(`#tb${ti} .stab`);
+  const panels=['c','x','q','m'];
+  tabEls.forEach((t,i)=>t.classList.toggle('on',panels[i]===panel));
+  const card=document.getElementById(`c${ti}`);
+  card.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  const t=document.getElementById(`c${ti}-${panel}`);
+  if(t) t.classList.add('on');
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'&&cur<4) show(cur+1);
+  if(e.key==='ArrowLeft'&&cur>0) show(cur-1);
+});
+</script>
+</body>
+</html>

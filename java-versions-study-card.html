@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Java Versions — Interview Study Cards</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --surface: #111620;
+    --surface2: #161d2e;
+    --border: #1e2a3a;
+    --accent: #00d4aa;
+    --accent2: #ff6b35;
+    --accent3: #4fa3ff;
+    --accent4: #c678dd;
+    --accent5: #e5c07b;
+    --text: #cdd6f4;
+    --muted: #6b7fa3;
+    --code-bg: #0d1117;
+    --green: #a6e3a1;
+    --red: #f38ba8;
+    --yellow: #f9e2af;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  .header {
+    padding: 48px 40px 32px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(0,212,170,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .phase-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,212,170,0.1);
+    border: 1px solid rgba(0,212,170,0.3);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+  .phase-badge::before { content: '◆'; font-size: 8px; }
+  h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -1px;
+  }
+  h1 span { color: var(--accent); }
+  .subtitle {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 14px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .meta-row {
+    display: flex;
+    gap: 24px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .meta-chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .meta-chip span { color: var(--accent); font-weight: 600; }
+
+  /* Nav */
+  .nav {
+    display: flex;
+    gap: 4px;
+    padding: 20px 40px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav-btn {
+    flex-shrink: 0;
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .nav-btn:hover { color: var(--text); background: var(--surface2); }
+  .nav-btn.active {
+    background: rgba(0,212,170,0.12);
+    border-color: rgba(0,212,170,0.3);
+    color: var(--accent);
+  }
+
+  /* Main */
+  .main { padding: 32px 40px; max-width: 1100px; margin: 0 auto; }
+
+  /* Topic Card */
+  .topic-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 32px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+    display: none;
+  }
+  .topic-card.active { display: block; }
+  .topic-card:hover { border-color: rgba(0,212,170,0.2); }
+
+  .card-header {
+    padding: 24px 28px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    gap: 16px;
+  }
+  .card-header-left { display: flex; align-items: flex-start; gap: 16px; }
+  .version-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    margin-top: 3px;
+    flex-shrink: 0;
+  }
+  .card-title { font-size: 20px; font-weight: 800; }
+  .card-oneliner { margin-top: 6px; color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; line-height: 1.5; }
+  .toggle-icon { color: var(--muted); font-size: 20px; flex-shrink: 0; transition: transform 0.3s; margin-top: 4px; }
+  .topic-card.open .toggle-icon { transform: rotate(180deg); }
+
+  .card-body { display: none; padding: 0 28px 28px; }
+  .topic-card.open .card-body { display: block; }
+
+  /* Sections */
+  .section { margin-bottom: 24px; }
+  .section-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* Key points */
+  .key-points { display: flex; flex-direction: column; gap: 8px; }
+  .point {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border-radius: 8px;
+    border-left: 3px solid transparent;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .point-icon { flex-shrink: 0; font-size: 15px; margin-top: 1px; }
+  .point-text { flex: 1; }
+  .point-text code {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--accent3);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+  .highlight { color: var(--yellow); font-weight: 600; }
+  .green { color: var(--green); }
+  .red { color: var(--red); }
+
+  /* Code block */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #febc2e; }
+  .dot-g { background: #28c840; }
+  pre {
+    padding: 20px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    tab-size: 2;
+  }
+
+  /* Syntax highlighting */
+  .kw { color: #c678dd; }       /* keyword */
+  .tp { color: #e5c07b; }       /* type */
+  .fn { color: #61afef; }       /* function/method */
+  .st { color: #98c379; }       /* string */
+  .cm { color: #5c6370; font-style: italic; } /* comment */
+  .nb { color: #d19a66; }       /* number/literal */
+  .an { color: #e06c75; }       /* annotation */
+  .op { color: #56b6c2; }       /* operator */
+  .var { color: #abb2bf; }      /* variable */
+  .cl { color: var(--accent); } /* class name */
+
+  /* Interview Q */
+  .interview-qs { display: flex; flex-direction: column; gap: 10px; }
+  .iq {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .iq:hover { border-color: rgba(79,163,255,0.3); }
+  .iq-q {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent3);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .iq-q::before { content: 'Q'; background: rgba(79,163,255,0.15); color: var(--accent3); padding: 1px 7px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px; flex-shrink: 0; margin-top: 1px; }
+  .iq-a {
+    display: none;
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .iq-a code {
+    background: var(--code-bg);
+    color: var(--accent3);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+  .iq.open .iq-a { display: block; }
+
+  /* Tags */
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+  /* Comparison table */
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .compare-table th {
+    background: var(--surface2);
+    padding: 10px 14px;
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(30,42,58,0.5);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .compare-table td code {
+    background: var(--code-bg);
+    color: var(--accent3);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+  .compare-table tr:hover td { background: rgba(255,255,255,0.015); }
+
+  /* Memory tip */
+  .memory-tip {
+    background: rgba(0,212,170,0.06);
+    border: 1px solid rgba(0,212,170,0.2);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .memory-tip-icon { font-size: 18px; flex-shrink: 0; }
+
+  /* Progress bar */
+  .progress-bar {
+    display: flex;
+    gap: 4px;
+    padding: 16px 40px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+  .pb-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); margin-right: 8px; }
+  .pb-seg {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .pb-seg.done { background: var(--accent); }
+  .pb-seg.active { background: var(--accent3); }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  @media (max-width: 640px) {
+    .header, .nav, .main, .progress-bar { padding-left: 20px; padding-right: 20px; }
+    .card-header { padding: 18px 18px; }
+    .card-body { padding: 0 18px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="phase-badge">PHASE 8 · TOPICS 41–45</div>
+  <h1>Java <span>Versions</span><br>Study Cards</h1>
+  <div class="subtitle">// Senior Engineer Interview Prep · Memorizable · Reference-Grade</div>
+  <div class="meta-row">
+    <div class="meta-chip">Topics <span>5</span></div>
+    <div class="meta-chip">Priority <span>HIGH</span></div>
+    <div class="meta-chip">Estimated Study <span>2 days</span></div>
+    <div class="meta-chip">Java 8 → 25</div>
+  </div>
+</div>
+
+<div class="progress-bar">
+  <span class="pb-label">TOPICS</span>
+  <div class="pb-seg active" onclick="showTopic(0)" title="Java 8"></div>
+  <div class="pb-seg" onclick="showTopic(1)" title="Java 11"></div>
+  <div class="pb-seg" onclick="showTopic(2)" title="Java 17"></div>
+  <div class="pb-seg" onclick="showTopic(3)" title="Java 21"></div>
+  <div class="pb-seg" onclick="showTopic(4)" title="Java 25"></div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="showTopic(0)">41 · Java 8</button>
+  <button class="nav-btn" onclick="showTopic(1)">42 · Java 11</button>
+  <button class="nav-btn" onclick="showTopic(2)">43 · Java 17</button>
+  <button class="nav-btn" onclick="showTopic(3)">44 · Java 21</button>
+  <button class="nav-btn" onclick="showTopic(4)">45 · Java 25</button>
+</div>
+
+<div class="main">
+
+  <!-- ═══════════════════════════ TOPIC 41: JAVA 8 ═══════════════════════════ -->
+  <div class="topic-card active open" id="topic-0">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <div class="version-badge" style="background:rgba(0,212,170,0.12);color:var(--accent);border:1px solid rgba(0,212,170,0.3)">Java 8</div>
+        <div>
+          <div class="card-title">Topic 41 — Lambdas, Streams & Optional</div>
+          <div class="card-oneliner">// The release that transformed Java into a functional-capable language</div>
+        </div>
+      </div>
+      <div class="toggle-icon">▾</div>
+    </div>
+    <div class="card-body">
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent)">🔑 KEY CONCEPTS</div>
+        <div class="key-points">
+          <div class="point" style="border-left-color:var(--accent)">
+            <div class="point-icon">λ</div>
+            <div class="point-text"><span class="highlight">Lambda</span> — Anonymous function. Syntax: <code>(params) -> expression</code>. Implements a <strong>@FunctionalInterface</strong> (interface with exactly 1 abstract method). Enables passing behavior as data.</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent)">
+            <div class="point-icon">🌊</div>
+            <div class="point-text"><span class="highlight">Streams</span> — A pipeline to process collections declaratively. Two types of operations: <strong>Intermediate</strong> (lazy, return Stream: <code>filter, map, flatMap, sorted, distinct, limit</code>) and <strong>Terminal</strong> (eager, produce result: <code>collect, forEach, reduce, count, findFirst</code>). Streams are <strong>not reusable</strong> after terminal op.</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent)">
+            <div class="point-icon">📦</div>
+            <div class="point-text"><span class="highlight">Optional&lt;T&gt;</span> — A container that may or may not hold a value. Eliminates <code>NullPointerException</code>. Key methods: <code>of(), ofNullable(), empty(), isPresent(), ifPresent(), orElse(), orElseGet(), orElseThrow(), map(), flatMap(), filter()</code>.</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent)">
+            <div class="point-icon">🔗</div>
+            <div class="point-text"><span class="highlight">Method References</span> — Shorthand for lambdas that call a single method. 4 types: <code>ClassName::staticMethod</code>, <code>instance::method</code>, <code>ClassName::instanceMethod</code>, <code>ClassName::new</code> (constructor).</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent)">
+            <div class="point-icon">⚙️</div>
+            <div class="point-text"><span class="highlight">Functional Interfaces</span> — Built-in: <code>Predicate&lt;T&gt;</code> (test→boolean), <code>Function&lt;T,R&gt;</code> (apply→R), <code>Consumer&lt;T&gt;</code> (accept→void), <code>Supplier&lt;T&gt;</code> (get→T), <code>BiFunction&lt;T,U,R&gt;</code>. All in <code>java.util.function</code>.</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent)">
+            <div class="point-icon">🗺️</div>
+            <div class="point-text"><span class="highlight">Default & Static Interface Methods</span> — Interfaces can now have implemented methods. <code>default</code> keyword allows backward-compatible interface evolution without breaking existing implementations.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent)">💻 MEMORIZABLE CODE</div>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+            <div class="code-lang">JAVA 8 · LAMBDAS + STREAMS + OPTIONAL</div>
+          </div>
+          <pre><span class="cm">// ── Lambda ──────────────────────────────────────</span>
+<span class="tp">Runnable</span> r = () -> <span class="fn">System.out.println</span>(<span class="st">"Hello Lambda"</span>);
+<span class="tp">Comparator</span>&lt;<span class="tp">String</span>&gt; comp = (<span class="var">a</span>, <span class="var">b</span>) -> <span class="var">a</span>.<span class="fn">compareTo</span>(<span class="var">b</span>);
+
+<span class="cm">// ── Functional Interfaces ────────────────────────</span>
+<span class="tp">Predicate</span>&lt;<span class="tp">String</span>&gt; isEmpty = <span class="tp">String</span>::<span class="fn">isEmpty</span>;       <span class="cm">// method ref</span>
+<span class="tp">Function</span>&lt;<span class="tp">String</span>, <span class="tp">Integer</span>&gt; len = <span class="tp">String</span>::<span class="fn">length</span>;
+<span class="tp">Consumer</span>&lt;<span class="tp">String</span>&gt; print = <span class="tp">System</span>.out::<span class="fn">println</span>;
+<span class="tp">Supplier</span>&lt;<span class="tp">List</span>&gt;  newList = <span class="tp">ArrayList</span>::<span class="kw">new</span>;
+
+<span class="cm">// ── Stream Pipeline ──────────────────────────────</span>
+<span class="tp">List</span>&lt;<span class="tp">String</span>&gt; names = <span class="tp">List</span>.<span class="fn">of</span>(<span class="st">"Alice"</span>, <span class="st">"Bob"</span>, <span class="st">"Anna"</span>, <span class="st">"Charlie"</span>);
+
+<span class="tp">List</span>&lt;<span class="tp">String</span>&gt; result = names.<span class="fn">stream</span>()
+    .<span class="fn">filter</span>(<span class="var">n</span> -> <span class="var">n</span>.<span class="fn">startsWith</span>(<span class="st">"A"</span>))         <span class="cm">// intermediate</span>
+    .<span class="fn">map</span>(<span class="tp">String</span>::<span class="fn">toUpperCase</span>)               <span class="cm">// intermediate</span>
+    .<span class="fn">sorted</span>()                                <span class="cm">// intermediate</span>
+    .<span class="fn">collect</span>(<span class="tp">Collectors</span>.<span class="fn">toList</span>());           <span class="cm">// terminal</span>
+<span class="cm">// → ["ALICE", "ANNA"]</span>
+
+<span class="cm">// flatMap: List of Lists → flat List</span>
+<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; flat = <span class="tp">List</span>.<span class="fn">of</span>(<span class="tp">List</span>.<span class="fn">of</span>(<span class="nb">1</span>,<span class="nb">2</span>), <span class="tp">List</span>.<span class="fn">of</span>(<span class="nb">3</span>,<span class="nb">4</span>))
+    .<span class="fn">stream</span>().<span class="fn">flatMap</span>(<span class="tp">Collection</span>::<span class="fn">stream</span>)
+    .<span class="fn">collect</span>(<span class="tp">Collectors</span>.<span class="fn">toList</span>());  <span class="cm">// [1,2,3,4]</span>
+
+<span class="cm">// reduce: sum</span>
+<span class="kw">int</span> sum = <span class="tp">Stream</span>.<span class="fn">of</span>(<span class="nb">1</span>,<span class="nb">2</span>,<span class="nb">3</span>,<span class="nb">4</span>).<span class="fn">reduce</span>(<span class="nb">0</span>, <span class="tp">Integer</span>::<span class="fn">sum</span>); <span class="cm">// 10</span>
+
+<span class="cm">// ── Optional ─────────────────────────────────────</span>
+<span class="tp">Optional</span>&lt;<span class="tp">String</span>&gt; opt = <span class="tp">Optional</span>.<span class="fn">ofNullable</span>(<span class="fn">getUserName</span>());
+
+<span class="tp">String</span> name = opt
+    .<span class="fn">filter</span>(<span class="var">s</span> -> <span class="var">s</span>.<span class="fn">length</span>() > <span class="nb">3</span>)
+    .<span class="fn">map</span>(<span class="tp">String</span>::<span class="fn">toUpperCase</span>)
+    .<span class="fn">orElse</span>(<span class="st">"GUEST"</span>);                       <span class="cm">// default value</span>
+
+opt.<span class="fn">orElseThrow</span>(() -> <span class="kw">new</span> <span class="tp">RuntimeException</span>(<span class="st">"Not found"</span>));
+
+<span class="cm">// ── Default Interface Method ──────────────────────</span>
+<span class="kw">interface</span> <span class="cl">Greeter</span> {
+    <span class="kw">void</span> <span class="fn">greet</span>(<span class="tp">String</span> <span class="var">name</span>);
+    <span class="kw">default</span> <span class="kw">void</span> <span class="fn">greetLoud</span>(<span class="tp">String</span> <span class="var">name</span>) {
+        <span class="fn">greet</span>(<span class="var">name</span>.<span class="fn">toUpperCase</span>());  <span class="cm">// reuses abstract method</span>
+    }
+}</pre>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent)">🗂️ STREAM OPERATIONS CHEATSHEET</div>
+        <table class="compare-table">
+          <tr><th>Operation</th><th>Type</th><th>Returns</th><th>Example</th></tr>
+          <tr><td><code>filter</code></td><td>Intermediate</td><td>Stream&lt;T&gt;</td><td><code>.filter(s -> s.length() > 3)</code></td></tr>
+          <tr><td><code>map</code></td><td>Intermediate</td><td>Stream&lt;R&gt;</td><td><code>.map(String::toUpperCase)</code></td></tr>
+          <tr><td><code>flatMap</code></td><td>Intermediate</td><td>Stream&lt;R&gt;</td><td><code>.flatMap(List::stream)</code></td></tr>
+          <tr><td><code>sorted</code></td><td>Intermediate</td><td>Stream&lt;T&gt;</td><td><code>.sorted(Comparator.reverseOrder())</code></td></tr>
+          <tr><td><code>distinct</code></td><td>Intermediate</td><td>Stream&lt;T&gt;</td><td><code>.distinct()</code></td></tr>
+          <tr><td><code>limit / skip</code></td><td>Intermediate</td><td>Stream&lt;T&gt;</td><td><code>.limit(5).skip(2)</code></td></tr>
+          <tr><td><code>collect</code></td><td>Terminal</td><td>Collection/R</td><td><code>.collect(Collectors.toList())</code></td></tr>
+          <tr><td><code>forEach</code></td><td>Terminal</td><td>void</td><td><code>.forEach(System.out::println)</code></td></tr>
+          <tr><td><code>reduce</code></td><td>Terminal</td><td>Optional&lt;T&gt;</td><td><code>.reduce(0, Integer::sum)</code></td></tr>
+          <tr><td><code>count</code></td><td>Terminal</td><td>long</td><td><code>.count()</code></td></tr>
+          <tr><td><code>findFirst/Any</code></td><td>Terminal</td><td>Optional&lt;T&gt;</td><td><code>.findFirst()</code></td></tr>
+          <tr><td><code>anyMatch/allMatch</code></td><td>Terminal</td><td>boolean</td><td><code>.anyMatch(s -> s.isEmpty())</code></td></tr>
+        </table>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent)">🧠 MEMORY TIP</div>
+        <div class="memory-tip">
+          <div class="memory-tip-icon">💡</div>
+          <div><strong>Stream = Builder pattern for data.</strong> Think of it like a production line: raw material (source) → conveyor belts (intermediate ops, lazy) → packaging machine (terminal op, triggers execution). A stream is lazy — nothing runs until a terminal op fires. <strong>map transforms shape, flatMap flattens + transforms.</strong></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent)">❓ INTERVIEW QUESTIONS</div>
+        <div class="interview-qs">
+          <div class="iq" onclick="this.classList.toggle('open')">
+            <div class="iq-q">What is the difference between <code>map()</code> and <code>flatMap()</code> in Streams?</div>
+            <div class="iq-a"><strong>map()</strong> transforms each element into one other element (1-to-1 mapping). <strong>flatMap()</strong> transforms each element into zero or more elements, then flattens the result into a single stream (1-to-many). Example: a <code>List&lt;List&lt;String&gt;&gt;</code> — using <code>map</code> gives you a <code>Stream&lt;List&lt;String&gt;&gt;</code>, while <code>flatMap(Collection::stream)</code> gives you a flat <code>Stream&lt;String&gt;</code>.</div>
+          </div>
+          <div class="iq" onclick="this.classList.toggle('open')">
+            <div class="iq-q">What is a Functional Interface? Can we have multiple abstract methods?</div>
+            <div class="iq-a">A Functional Interface has <strong>exactly one abstract method</strong>, which is the target for lambda expressions. You can have multiple default/static methods. The <code>@FunctionalInterface</code> annotation is optional but causes a compile error if the contract is violated. Key built-ins: <code>Predicate, Function, Consumer, Supplier, BiFunction</code>.</div>
+          </div>
+          <div class="iq" onclick="this.classList.toggle('open')">
+            <div class="iq-q">Why should you avoid <code>Optional.get()</code> without checking first? What's the better way?</div>
+            <div class="iq-a"><code>Optional.get()</code> throws <code>NoSuchElementException</code> if empty — it's no safer than a null check. Prefer: <code>orElse("default")</code> for a constant fallback, <code>orElseGet(() -> compute())</code> for lazy evaluation, <code>orElseThrow()</code> for explicit failure, or <code>ifPresent(val -> use(val))</code> for side effects. Never use Optional as a field type or method parameter — it's designed for return values.</div>
+          </div>
+          <div class="iq" onclick="this.classList.toggle('open')">
+            <div class="iq-q">What is the difference between intermediate and terminal stream operations?</div>
+            <div class="iq-a">Intermediate operations (like <code>filter, map, sorted</code>) are <strong>lazy</strong> — they return a new Stream and don't execute until a terminal operation is called. Terminal operations (like <code>collect, forEach, reduce, count</code>) are <strong>eager</strong> — they trigger the entire pipeline and produce a result or side-effect. After a terminal op, the stream is consumed and cannot be reused.</div>
+          </div>
+          <div class="iq" onclick="this.classList.toggle('open')">
+            <div class="iq-q">What are the 4 types of Method References in Java 8?</div>
+            <div class="iq-a">1. <code>ClassName::staticMethod</code> — e.g. <code>Integer::parseInt</code><br>2. <code>instance::instanceMethod</code> — e.g. <code>System.out::println</code><br>3. <code>ClassName::instanceMethod</code> — e.g. <code>String::toUpperCase</code> (instance is the first param)<br>4. <code>ClassName::new</code> — Constructor reference, e.g. <code>ArrayList::new</code></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent)">🔗 LINKS TO</div>
+        <div class="tags">
+          <div class="tag" style="background:rgba(0,212,170,0.1);color:var(--accent);border:1px solid rgba(0,212,170,0.2)">Java Collections (56)</div>
+          <div class="tag" style="background:rgba(0,212,170,0.1);color:var(--accent);border:1px solid rgba(0,212,170,0.2)">Multithreading (54)</div>
+          <div class="tag" style="background:rgba(0,212,170,0.1);color:var(--accent);border:1px solid rgba(0,212,170,0.2)">Reactive Programming (34)</div>
+          <div class="tag" style="background:rgba(0,212,170,0.1);color:var(--accent);border:1px solid rgba(0,212,170,0.2)">Spring Data JPA (23)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ TOPIC 42: JAVA 11 ═══════════════════════════ -->
+  <div class="topic-card" id="topic-1">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <div class="version-badge" style="background:rgba(79,163,255,0.12);color:var(--accent3);border:1px solid rgba(79,163,255,0.3)">Java 11</div>
+        <div>
+          <div class="card-title">Topic 42 — var keyword & New HttpClient API</div>
+          <div class="card-oneliner">// LTS release · Local type inference + modern HTTP without third-party libs</div>
+        </div>
+      </div>
+      <div class="toggle-icon">▾</div>
+    </div>
+    <div class="card-body">
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent3)">🔑 KEY CONCEPTS</div>
+        <div class="key-points">
+          <div class="point" style="border-left-color:var(--accent3)">
+            <div class="point-icon">📝</div>
+            <div class="point-text"><span class="highlight">var (Local Variable Type Inference)</span> — Introduced in Java 10, widely adopted in 11. The compiler <strong>infers the type</strong> from the right-hand side at compile time. NOT dynamic typing — still statically typed. Only works for <strong>local variables</strong> (not fields, method params, or return types). Cannot be used with <code>null</code> alone.</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent3)">
+            <div class="point-icon">🌐</div>
+            <div class="point-text"><span class="highlight">HttpClient API</span> — Replaces the old <code>HttpURLConnection</code>. Supports <strong>HTTP/1.1, HTTP/2, WebSocket</strong>. Supports <strong>synchronous</strong> (<code>send()</code>) and <strong>asynchronous</strong> (<code>sendAsync()</code> returns <code>CompletableFuture</code>). Builder pattern for both client and request. Immutable and reusable.</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent3)">
+            <div class="point-icon">🧵</div>
+            <div class="point-text"><span class="highlight">New String Methods</span> — Must-know: <code>isBlank()</code> (true if empty or whitespace), <code>strip()</code> (Unicode-aware trim), <code>stripLeading()/stripTrailing()</code>, <code>lines()</code> (returns Stream of lines), <code>repeat(n)</code> ("ha".repeat(3) = "hahaha").</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent3)">
+            <div class="point-icon">📁</div>
+            <div class="point-text"><span class="highlight">Files Utility Improvements</span> — <code>Files.readString(path)</code> and <code>Files.writeString(path, content)</code> — simple one-liner file I/O. Previously needed streams or Apache Commons.</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent3)">
+            <div class="point-icon">🗑️</div>
+            <div class="point-text"><span class="highlight">Removed/Deprecated</span> — Java EE modules removed (JAX-WS, JAXB now need explicit dependencies). <code>Thread.destroy()</code> and <code>Thread.stop()</code> removed. Important for migration discussions.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent3)">💻 MEMORIZABLE CODE</div>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+            <div class="code-lang">JAVA 11 · VAR + HTTPCLIENT + STRING METHODS</div>
+          </div>
+          <pre><span class="cm">// ── var: type inference (still statically typed!) ─</span>
+<span class="kw">var</span> list = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;<span class="tp">String</span>&gt;();   <span class="cm">// inferred: ArrayList&lt;String&gt;</span>
+<span class="kw">var</span> map  = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;<span class="tp">String</span>, <span class="tp">Integer</span>&gt;();
+<span class="kw">var</span> name = <span class="st">"Alice"</span>;                    <span class="cm">// String — NOT dynamic!</span>
+
+<span class="cm">// ❌ INVALID uses of var</span>
+<span class="kw">var</span> x = <span class="kw">null</span>;           <span class="cm">// compile error — type unknown</span>
+<span class="cm">// var in field, method param, return type — NOT allowed</span>
+
+<span class="cm">// ── New String Methods ──────────────────────────</span>
+<span class="st">"  hello  "</span>.<span class="fn">strip</span>();           <span class="cm">// "hello" (Unicode-aware)</span>
+<span class="st">"  "</span>.<span class="fn">isBlank</span>();               <span class="cm">// true</span>
+<span class="st">"ha"</span>.<span class="fn">repeat</span>(<span class="nb">3</span>);              <span class="cm">// "hahaha"</span>
+<span class="st">"a\nb\nc"</span>.<span class="fn">lines</span>()             <span class="cm">// Stream.of("a","b","c")</span>
+         .<span class="fn">collect</span>(<span class="tp">Collectors</span>.<span class="fn">toList</span>());
+
+<span class="cm">// ── Files utility ───────────────────────────────</span>
+<span class="tp">String</span> content = <span class="tp">Files</span>.<span class="fn">readString</span>(<span class="tp">Path</span>.<span class="fn">of</span>(<span class="st">"data.txt"</span>));
+<span class="tp">Files</span>.<span class="fn">writeString</span>(<span class="tp">Path</span>.<span class="fn">of</span>(<span class="st">"out.txt"</span>), <span class="st">"Hello World"</span>);
+
+<span class="cm">// ── HttpClient: Synchronous ──────────────────────</span>
+<span class="tp">HttpClient</span> client = <span class="tp">HttpClient</span>.<span class="fn">newHttpClient</span>();
+
+<span class="tp">HttpRequest</span> request = <span class="tp">HttpRequest</span>.<span class="fn">newBuilder</span>()
+    .<span class="fn">uri</span>(<span class="tp">URI</span>.<span class="fn">create</span>(<span class="st">"https://api.example.com/users"</span>))
+    .<span class="fn">GET</span>()
+    .<span class="fn">header</span>(<span class="st">"Accept"</span>, <span class="st">"application/json"</span>)
+    .<span class="fn">build</span>();
+
+<span class="tp">HttpResponse</span>&lt;<span class="tp">String</span>&gt; response = client.<span class="fn">send</span>(
+    request, <span class="tp">HttpResponse.BodyHandlers</span>.<span class="fn">ofString</span>()
+);
+<span class="fn">System.out.println</span>(response.<span class="fn">statusCode</span>()); <span class="cm">// 200</span>
+<span class="fn">System.out.println</span>(response.<span class="fn">body</span>());        <span class="cm">// JSON body</span>
+
+<span class="cm">// ── HttpClient: Asynchronous ─────────────────────</span>
+<span class="tp">CompletableFuture</span>&lt;<span class="tp">HttpResponse</span>&lt;<span class="tp">String</span>&gt;&gt; future =
+    client.<span class="fn">sendAsync</span>(request, <span class="tp">HttpResponse.BodyHandlers</span>.<span class="fn">ofString</span>());
+
+future.<span class="fn">thenApply</span>(<span class="tp">HttpResponse</span>::<span class="fn">body</span>)
+      .<span class="fn">thenAccept</span>(<span class="tp">System</span>.out::<span class="fn">println</span>)
+      .<span class="fn">join</span>();                              <span class="cm">// wait for completion</span>
+
+<span class="cm">// ── POST with body ───────────────────────────────</span>
+<span class="tp">HttpRequest</span> post = <span class="tp">HttpRequest</span>.<span class="fn">newBuilder</span>()
+    .<span class="fn">uri</span>(<span class="tp">URI</span>.<span class="fn">create</span>(<span class="st">"https://api.example.com/users"</span>))
+    .<span class="fn">POST</span>(<span class="tp">HttpRequest.BodyPublishers</span>.<span class="fn">ofString</span>(<span class="st">"""
+        {"name":"Alice"}
+        """</span>))
+    .<span class="fn">header</span>(<span class="st">"Content-Type"</span>, <span class="st">"application/json"</span>)
+    .<span class="fn">build</span>();</pre>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent3)">🧠 MEMORY TIP</div>
+        <div class="memory-tip">
+          <div class="memory-tip-icon">💡</div>
+          <div><strong>var = lazy shorthand, not lazy typing.</strong> The compiler still knows the exact type — you just don't have to write it. Use it when the type is obvious from context (e.g., constructor on the right). Avoid var when it harms readability (e.g., <code>var x = process()</code> — what type is that?).<br><br><strong>HttpClient = Builder pattern, two modes.</strong> Remember: <code>newHttpClient()</code> → <code>newBuilder().uri().GET().build()</code> → <code>send(req, BodyHandlers.ofString())</code>.</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent3)">❓ INTERVIEW QUESTIONS</div>
+        <div class="interview-qs">
+          <div class="iq" onclick="this.classList.toggle('open')">
+            <div class="iq-q">Is <code>var</code> dynamic typing? What are its limitations?</div>
+            <div class="iq-a">No — <code>var</code> is <strong>static typing with type inference</strong>. The type is resolved at compile time, not runtime. Limitations: only for local variables (not fields, method params, return types), cannot be used with <code>null</code> alone (type ambiguous), cannot be used in lambda parameter types (well, Java 11 allows it but it's unusual), and it can hurt readability when the right-hand side type is not obvious.</div>
+          </div>
+          <div class="iq" onclick="this.classList.toggle('open')">
+            <div class="iq-q">How does the Java 11 HttpClient differ from the old HttpURLConnection?</div>
+            <div class="iq-a">The new <code>HttpClient</code> supports HTTP/2 and WebSockets natively, provides both sync (<code>send()</code>) and async (<code>sendAsync()</code> → CompletableFuture) modes, uses an immutable builder pattern, handles redirects and authentication built-in, and is significantly less verbose. <code>HttpURLConnection</code> was HTTP/1.1 only, verbose, not thread-safe by design, and had no async support.</div>
+          </div>
+          <div class="iq" onclick="this.classList.toggle('open')">
+            <div class="iq-q">What's the difference between <code>trim()</code> and <code>strip()</code> in Java 11?</div>
+            <div class="iq-a"><code>trim()</code> removes only ASCII whitespace characters (characters with code ≤ U+0020). <code>strip()</code> is Unicode-aware and removes all Unicode whitespace as defined by <code>Character.isWhitespace()</code>. For modern applications, prefer <code>strip()</code>. Java 11 also added <code>stripLeading()</code> and <code>stripTrailing()</code> for one-sided trimming.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent3)">🔗 LINKS TO</div>
+        <div class="tags">
+          <div class="tag" style="background:rgba(79,163,255,0.1);color:var(--accent3);border:1px solid rgba(79,163,255,0.2)">Java 8 Lambdas (41)</div>
+          <div class="tag" style="background:rgba(79,163,255,0.1);color:var(--accent3);border:1px solid rgba(79,163,255,0.2)">Multithreading (54)</div>
+          <div class="tag" style="background:rgba(79,163,255,0.1);color:var(--accent3);border:1px solid rgba(79,163,255,0.2)">RESTful Services (16)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ TOPIC 43: JAVA 17 ═══════════════════════════ -->
+  <div class="topic-card" id="topic-2">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <div class="version-badge" style="background:rgba(198,120,221,0.12);color:var(--accent4);border:1px solid rgba(198,120,221,0.3)">Java 17</div>
+        <div>
+          <div class="card-title">Topic 43 — Sealed Classes & Pattern Matching instanceof</div>
+          <div class="card-oneliner">// LTS release · Sealed type hierarchies + smarter type checks</div>
+        </div>
+      </div>
+      <div class="toggle-icon">▾</div>
+    </div>
+    <div class="card-body">
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent4)">🔑 KEY CONCEPTS</div>
+        <div class="key-points">
+          <div class="point" style="border-left-color:var(--accent4)">
+            <div class="point-icon">🔒</div>
+            <div class="point-text"><span class="highlight">Sealed Classes</span> — A class/interface that <strong>restricts which other classes can extend/implement it</strong>. Use <code>sealed</code> keyword + <code>permits</code> clause. Each permitted subclass must be <code>final</code>, <code>sealed</code>, or <code>non-sealed</code>. Enables <strong>exhaustive pattern matching</strong> — the compiler knows all possible subtypes.</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent4)">
+            <div class="point-icon">🎯</div>
+            <div class="point-text"><span class="highlight">Pattern Matching for instanceof</span> — Eliminates the manual cast after an instanceof check. Old: <code>if (obj instanceof String) { String s = (String) obj; }</code>. New: <code>if (obj instanceof String s)</code> — variable <code>s</code> is automatically bound and scoped. Reduces boilerplate and avoids cast errors.</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent4)">
+            <div class="point-icon">📝</div>
+            <div class="point-text"><span class="highlight">Text Blocks</span> (finalized in 15, widely used in 17) — Multi-line string literals using triple quotes <code>"""</code>. Handles indentation automatically. Perfect for JSON, SQL, HTML in code. Supports <code>\</code> line continuation and <code>\s</code> for trailing space.</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent4)">
+            <div class="point-icon">📦</div>
+            <div class="point-text"><span class="highlight">Records</span> (finalized in 16, standard in 17) — Immutable data classes with auto-generated <code>constructor, getters, equals, hashCode, toString</code>. Syntax: <code>record Point(int x, int y) {}</code>. Cannot extend other classes (implicitly extends Record). Can implement interfaces.</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent4)">
+            <div class="point-icon">🧱</div>
+            <div class="point-text"><span class="highlight">Strong Encapsulation of JDK Internals</span> — Access to internal APIs (<code>sun.*</code>) is now strongly encapsulated. Important for frameworks and libraries that relied on internal APIs — this is a common migration discussion point in senior interviews.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent4)">💻 MEMORIZABLE CODE</div>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+            <div class="code-lang">JAVA 17 · SEALED CLASSES + PATTERN MATCHING + RECORDS + TEXT BLOCKS</div>
+          </div>
+          <pre><span class="cm">// ── Sealed Class Hierarchy ───────────────────────</span>
+<span class="kw">sealed interface</span> <span class="cl">Shape</span> <span class="kw">permits</span> <span class="cl">Circle</span>, <span class="cl">Rectangle</span>, <span class="cl">Triangle</span> {}
+
+<span class="kw">record</span> <span class="cl">Circle</span>(<span class="kw">double</span> radius) <span class="kw">implements</span> <span class="cl">Shape</span> {}
+<span class="kw">record</span> <span class="cl">Rectangle</span>(<span class="kw">double</span> width, <span class="kw">double</span> height) <span class="kw">implements</span> <span class="cl">Shape</span> {}
+<span class="kw">final class</span> <span class="cl">Triangle</span> <span class="kw">implements</span> <span class="cl">Shape</span> { <span class="kw">double</span> base, height; }
+
+<span class="cm">// compiler knows ALL possible subtypes of Shape</span>
+
+<span class="cm">// ── Pattern Matching instanceof ──────────────────</span>
+<span class="kw">void</span> <span class="fn">describe</span>(<span class="tp">Object</span> <span class="var">obj</span>) {
+    <span class="cm">// OLD WAY:</span>
+    <span class="kw">if</span> (<span class="var">obj</span> <span class="kw">instanceof</span> <span class="tp">String</span>) {
+        <span class="tp">String</span> <span class="var">s</span> = (<span class="tp">String</span>) <span class="var">obj</span>; <span class="cm">// redundant cast</span>
+        <span class="fn">System.out.println</span>(<span class="var">s</span>.<span class="fn">length</span>());
+    }
+
+    <span class="cm">// NEW WAY (Java 17):</span>
+    <span class="kw">if</span> (<span class="var">obj</span> <span class="kw">instanceof</span> <span class="tp">String</span> <span class="var">s</span>) {          <span class="cm">// s is bound here</span>
+        <span class="fn">System.out.println</span>(<span class="var">s</span>.<span class="fn">length</span>());      <span class="cm">// no cast needed</span>
+    }
+
+    <span class="cm">// Can combine with conditions:</span>
+    <span class="kw">if</span> (<span class="var">obj</span> <span class="kw">instanceof</span> <span class="tp">String</span> <span class="var">s</span> && <span class="var">s</span>.<span class="fn">length</span>() > <span class="nb">5</span>) {
+        <span class="fn">System.out.println</span>(<span class="st">"Long string: "</span> + <span class="var">s</span>);
+    }
+}
+
+<span class="cm">// ── Records ──────────────────────────────────────</span>
+<span class="kw">record</span> <span class="cl">Point</span>(<span class="kw">int</span> x, <span class="kw">int</span> y) {
+    <span class="cm">// Compact canonical constructor (validation)</span>
+    <span class="cl">Point</span> {
+        <span class="kw">if</span> (x < <span class="nb">0</span> || y < <span class="nb">0</span>) <span class="kw">throw new</span> <span class="tp">IllegalArgumentException</span>(<span class="st">"Negative!"</span>);
+    }
+    <span class="kw">double</span> <span class="fn">distanceFromOrigin</span>() {
+        <span class="kw">return</span> <span class="tp">Math</span>.<span class="fn">sqrt</span>(x*x + y*y); <span class="cm">// custom method OK</span>
+    }
+}
+
+<span class="kw">var</span> p = <span class="kw">new</span> <span class="cl">Point</span>(<span class="nb">3</span>, <span class="nb">4</span>);
+p.<span class="fn">x</span>();                    <span class="cm">// getter (no "get" prefix)</span>
+p.<span class="fn">distanceFromOrigin</span>();   <span class="cm">// 5.0</span>
+
+<span class="cm">// ── Text Blocks ───────────────────────────────────</span>
+<span class="tp">String</span> json = <span class="st">"""
+        {
+            "name": "Alice",
+            "age": 30
+        }
+        """</span>;
+
+<span class="tp">String</span> sql = <span class="st">"""
+        SELECT u.name, o.total
+        FROM users u
+        JOIN orders o ON u.id = o.user_id
+        WHERE u.active = true
+        """</span>;</pre>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent4)">🧠 MEMORY TIP</div>
+        <div class="memory-tip">
+          <div class="memory-tip-icon">💡</div>
+          <div><strong>Sealed = "I control my family tree."</strong> Like a parent who lists every allowed child. Useful when you want exhaustive switch/pattern matching — the compiler guarantees you haven't missed a case.<br><br><strong>Records = "POJO on steroids, immutable by default."</strong> Think DTOs, value objects, or event payloads. If you need mutation → use a regular class. If you need inheritance → records can't extend classes (but can implement interfaces).</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent4)">❓ INTERVIEW QUESTIONS</div>
+        <div class="interview-qs">
+          <div class="iq" onclick="this.classList.toggle('open')">
+            <div class="iq-q">What are Sealed Classes and why would you use them over a regular abstract class?</div>
+            <div class="iq-a">Sealed classes give you <strong>controlled, closed type hierarchies</strong>. With a regular abstract class, anyone can subclass it anywhere. With <code>sealed</code>, only the permitted subclasses can extend it. This enables the compiler to verify exhaustiveness in pattern matching (like switch expressions). Use case: modeling a finite set of states (e.g., <code>Success | Failure | Pending</code>) where you want the compiler to catch missed cases.</div>
+          </div>
+          <div class="iq" onclick="this.classList.toggle('open')">
+            <div class="iq-q">What's generated automatically in a Record? Can you override anything?</div>
+            <div class="iq-a">A record auto-generates: canonical constructor, accessor methods (named after components, no "get" prefix), <code>equals()</code>, <code>hashCode()</code>, <code>toString()</code>. You can override any of these. You can also add a compact canonical constructor for validation (without listing parameters — they're implicit). You can add custom methods and static methods. What you can't do: add mutable instance fields, extend other classes (records implicitly extend <code>java.lang.Record</code>).</div>
+          </div>
+          <div class="iq" onclick="this.classList.toggle('open')">
+            <div class="iq-q">How does pattern matching for instanceof improve code safety?</div>
+            <div class="iq-a">The old pattern of <code>instanceof</code> check followed by cast was error-prone — you could cast to the wrong type or the variable scope was unclear. With pattern matching, the binding variable <code>s</code> in <code>if (obj instanceof String s)</code> is only in scope when the check passes, eliminating ClassCastException risk. It also reduces boilerplate significantly, especially in visitor-like code or when processing heterogeneous collections.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent4)">🔗 LINKS TO</div>
+        <div class="tags">
+          <div class="tag" style="background:rgba(198,120,221,0.1);color:var(--accent4);border:1px solid rgba(198,120,221,0.2)">Java 21 Switch Patterns (44)</div>
+          <div class="tag" style="background:rgba(198,120,221,0.1);color:var(--accent4);border:1px solid rgba(198,120,221,0.2)">Design Patterns (58)</div>
+          <div class="tag" style="background:rgba(198,120,221,0.1);color:var(--accent4);border:1px solid rgba(198,120,221,0.2)">Exceptions (57)</div>
+          <div class="tag" style="background:rgba(198,120,221,0.1);color:var(--accent4);border:1px solid rgba(198,120,221,0.2)">Spring Data DTOs (23)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ TOPIC 44: JAVA 21 ═══════════════════════════ -->
+  <div class="topic-card" id="topic-3">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <div class="version-badge" style="background:rgba(229,192,123,0.12);color:var(--accent5);border:1px solid rgba(229,192,123,0.3)">Java 21</div>
+        <div>
+          <div class="card-title">Topic 44 — Pattern Matching for switch & Record Patterns</div>
+          <div class="card-oneliner">// LTS release · Expressive switch + structural deconstruction of records</div>
+        </div>
+      </div>
+      <div class="toggle-icon">▾</div>
+    </div>
+    <div class="card-body">
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent5)">🔑 KEY CONCEPTS</div>
+        <div class="key-points">
+          <div class="point" style="border-left-color:var(--accent5)">
+            <div class="point-icon">🔀</div>
+            <div class="point-text"><span class="highlight">Pattern Matching for switch</span> — switch can now match on <strong>types</strong>, not just values. Combines type check + binding in one step. Works with <code>sealed</code> hierarchies for exhaustive matching (compiler enforces all cases). Supports <strong>guarded patterns</strong> with <code>when</code> clause.</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent5)">
+            <div class="point-icon">📦</div>
+            <div class="point-text"><span class="highlight">Record Patterns</span> — Deconstruct a record directly in a pattern. Instead of <code>if (obj instanceof Point p) { p.x(); p.y(); }</code>, you write <code>if (obj instanceof Point(int x, int y))</code> — the components are extracted inline. Works in both <code>instanceof</code> and <code>switch</code> patterns.</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent5)">
+            <div class="point-icon">🧵</div>
+            <div class="point-text"><span class="highlight">Virtual Threads (Project Loom)</span> — Lightweight threads managed by the JVM, not the OS. Create millions of virtual threads without overhead. Use <code>Thread.ofVirtual().start(runnable)</code> or <code>Executors.newVirtualThreadPerTaskExecutor()</code>. Key for high-throughput I/O bound applications.</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent5)">
+            <div class="point-icon">📡</div>
+            <div class="point-text"><span class="highlight">Sequenced Collections</span> — New interfaces: <code>SequencedCollection</code>, <code>SequencedSet</code>, <code>SequencedMap</code> — provide uniform access to first/last elements via <code>getFirst(), getLast(), addFirst(), addLast(), reversed()</code>. Works on List, LinkedHashSet, LinkedHashMap etc.</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent5)">
+            <div class="point-icon">⚠️</div>
+            <div class="point-text"><span class="highlight">null Handling in switch</span> — Previously, switching on <code>null</code> threw NPE. Java 21 allows <code>case null</code> explicitly in switch expressions. Combine with <code>case null, default</code> for clean null-safe switching.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent5)">💻 MEMORIZABLE CODE</div>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+            <div class="code-lang">JAVA 21 · PATTERN SWITCH + RECORD PATTERNS + VIRTUAL THREADS</div>
+          </div>
+          <pre><span class="cm">// ── Pattern Matching for switch ──────────────────</span>
+<span class="kw">sealed interface</span> <span class="cl">Shape</span> <span class="kw">permits</span> <span class="cl">Circle</span>, <span class="cl">Rectangle</span> {}
+<span class="kw">record</span> <span class="cl">Circle</span>(<span class="kw">double</span> radius) <span class="kw">implements</span> <span class="cl">Shape</span> {}
+<span class="kw">record</span> <span class="cl">Rectangle</span>(<span class="kw">double</span> w, <span class="kw">double</span> h) <span class="kw">implements</span> <span class="cl">Shape</span> {}
+
+<span class="kw">double</span> <span class="fn">area</span>(<span class="cl">Shape</span> <span class="var">shape</span>) {
+    <span class="kw">return switch</span> (<span class="var">shape</span>) {
+        <span class="kw">case</span> <span class="cl">Circle</span> <span class="var">c</span>    -> <span class="tp">Math</span>.PI * <span class="var">c</span>.<span class="fn">radius</span>() * <span class="var">c</span>.<span class="fn">radius</span>();
+        <span class="kw">case</span> <span class="cl">Rectangle</span> <span class="var">r</span> -> <span class="var">r</span>.<span class="fn">w</span>() * <span class="var">r</span>.<span class="fn">h</span>();
+        <span class="cm">// No default needed — sealed hierarchy is exhaustive!</span>
+    };
+}
+
+<span class="cm">// ── Guarded patterns with 'when' clause ─────────</span>
+<span class="tp">String</span> <span class="fn">classify</span>(<span class="tp">Object</span> <span class="var">obj</span>) {
+    <span class="kw">return switch</span> (<span class="var">obj</span>) {
+        <span class="kw">case</span> <span class="tp">Integer</span> <span class="var">i</span> <span class="kw">when</span> <span class="var">i</span> > <span class="nb">0</span>  -> <span class="st">"positive int"</span>;
+        <span class="kw">case</span> <span class="tp">Integer</span> <span class="var">i</span> <span class="kw">when</span> <span class="var">i</span> < <span class="nb">0</span>  -> <span class="st">"negative int"</span>;
+        <span class="kw">case</span> <span class="tp">Integer</span> <span class="var">i</span>              -> <span class="st">"zero"</span>;
+        <span class="kw">case</span> <span class="tp">String</span> <span class="var">s</span>               -> <span class="st">"string: "</span> + <span class="var">s</span>;
+        <span class="kw">case null</span>                    -> <span class="st">"null value"</span>;
+        <span class="kw">default</span>                      -> <span class="st">"other"</span>;
+    };
+}
+
+<span class="cm">// ── Record Patterns (deconstruction) ────────────</span>
+<span class="kw">record</span> <span class="cl">Point</span>(<span class="kw">int</span> x, <span class="kw">int</span> y) {}
+<span class="kw">record</span> <span class="cl">Line</span>(<span class="cl">Point</span> start, <span class="cl">Point</span> end) {}
+
+<span class="kw">void</span> <span class="fn">printLine</span>(<span class="tp">Object</span> <span class="var">obj</span>) {
+    <span class="cm">// Nested record deconstruction!</span>
+    <span class="kw">if</span> (<span class="var">obj</span> <span class="kw">instanceof</span> <span class="cl">Line</span>(<span class="cl">Point</span>(<span class="kw">var</span> x1, <span class="kw">var</span> y1), <span class="cl">Point</span>(<span class="kw">var</span> x2, <span class="kw">var</span> y2))) {
+        <span class="fn">System.out.printf</span>(<span class="st">"(%d,%d) → (%d,%d)%n"</span>, x1, y1, x2, y2);
+    }
+}
+
+<span class="cm">// ── Virtual Threads ──────────────────────────────</span>
+<span class="cm">// Create one virtual thread</span>
+<span class="tp">Thread</span>.<span class="fn">ofVirtual</span>().<span class="fn">start</span>(() -> <span class="fn">System.out.println</span>(<span class="st">"Virtual!"</span>));
+
+<span class="cm">// ExecutorService with virtual threads (for HTTP servers, etc.)</span>
+<span class="kw">try</span> (<span class="kw">var</span> executor = <span class="tp">Executors</span>.<span class="fn">newVirtualThreadPerTaskExecutor</span>()) {
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nb">0</span>; i < <span class="nb">1_000_000</span>; i++) {
+        <span class="kw">final int</span> id = i;
+        executor.<span class="fn">submit</span>(() -> <span class="fn">processRequest</span>(id));
+    }
+} <span class="cm">// auto-close waits for all tasks</span>
+
+<span class="cm">// ── Sequenced Collections ────────────────────────</span>
+<span class="tp">List</span>&lt;<span class="tp">String</span>&gt; list = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;(<span class="tp">List</span>.<span class="fn">of</span>(<span class="st">"a"</span>,<span class="st">"b"</span>,<span class="st">"c"</span>));
+list.<span class="fn">getFirst</span>();     <span class="cm">// "a"</span>
+list.<span class="fn">getLast</span>();      <span class="cm">// "c"</span>
+list.<span class="fn">reversed</span>();    <span class="cm">// reversed view: ["c","b","a"]</span></pre>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent5)">🧠 MEMORY TIP</div>
+        <div class="memory-tip">
+          <div class="memory-tip-icon">💡</div>
+          <div><strong>Pattern switch = switch evolved into a type-safe visitor.</strong> When combined with sealed classes, the compiler is your safety net — miss a case, get a compile error. This replaces many uses of the Visitor design pattern with cleaner, less verbose code.<br><br><strong>Virtual Threads = threads as cheap as objects.</strong> 1 platform thread = ~1MB stack. 1 virtual thread = ~1KB. You can run 1M virtual threads on a typical JVM. Ideal for blocking I/O (REST calls, DB queries). Not for CPU-bound tasks — use platform threads there.</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent5)">❓ INTERVIEW QUESTIONS</div>
+        <div class="interview-qs">
+          <div class="iq" onclick="this.classList.toggle('open')">
+            <div class="iq-q">How do Virtual Threads differ from Platform Threads? When should you use them?</div>
+            <div class="iq-a">Platform threads are OS-managed (1:1 mapping to OS thread). Virtual threads are JVM-managed (M:N mapping — many virtual threads multiplexed onto fewer platform threads). Virtual threads have much lower memory (~1KB vs ~1MB) and creation overhead. Use virtual threads for <strong>I/O-bound, blocking tasks</strong> (HTTP calls, DB queries) where threads spend most time waiting. Avoid for CPU-bound computation — platform threads or ForkJoinPool are better there.</div>
+          </div>
+          <div class="iq" onclick="this.classList.toggle('open')">
+            <div class="iq-q">What is a Record Pattern and how does it differ from Pattern Matching instanceof from Java 17?</div>
+            <div class="iq-a">Java 17's pattern matching binds the <em>whole object</em>: <code>obj instanceof Point p</code> — you get <code>p</code> and then call <code>p.x()</code> separately. Java 21's record patterns <em>deconstruct</em> the record inline: <code>obj instanceof Point(int x, int y)</code> — components are extracted directly. You can even nest: <code>obj instanceof Line(Point(var x1, var y1), Point(var x2, var y2))</code>. This is structural pattern matching similar to Scala/Kotlin.</div>
+          </div>
+          <div class="iq" onclick="this.classList.toggle('open')">
+            <div class="iq-q">Why doesn't pattern matching switch need a <code>default</code> when used with sealed classes?</div>
+            <div class="iq-a">Because sealed classes have a <strong>finite, compiler-known set of subtypes</strong>. If the switch covers all permitted subclasses, the compiler can prove exhaustiveness — similar to how an enum switch doesn't need default if all values are covered. Adding <code>default</code> is still allowed but triggers a warning that it's redundant. This exhaustiveness checking is the main reason to combine sealed classes with switch pattern matching.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent5)">🔗 LINKS TO</div>
+        <div class="tags">
+          <div class="tag" style="background:rgba(229,192,123,0.1);color:var(--accent5);border:1px solid rgba(229,192,123,0.2)">Java 17 Sealed (43)</div>
+          <div class="tag" style="background:rgba(229,192,123,0.1);color:var(--accent5);border:1px solid rgba(229,192,123,0.2)">Multithreading (54)</div>
+          <div class="tag" style="background:rgba(229,192,123,0.1);color:var(--accent5);border:1px solid rgba(229,192,123,0.2)">Design Patterns (58)</div>
+          <div class="tag" style="background:rgba(229,192,123,0.1);color:var(--accent5);border:1px solid rgba(229,192,123,0.2)">Java Collections (56)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ TOPIC 45: JAVA 25 ═══════════════════════════ -->
+  <div class="topic-card" id="topic-4">
+    <div class="card-header" onclick="toggleCard(this)">
+      <div class="card-header-left">
+        <div class="version-badge" style="background:rgba(255,107,53,0.12);color:var(--accent2);border:1px solid rgba(255,107,53,0.3)">Java 25</div>
+        <div>
+          <div class="card-title">Topic 45 — Scalability Focus</div>
+          <div class="card-oneliner">// LTS · Loom, Valhalla, Panama — the next platform generation</div>
+        </div>
+      </div>
+      <div class="toggle-icon">▾</div>
+    </div>
+    <div class="card-body">
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent2)">🔑 KEY CONCEPTS</div>
+        <div class="key-points">
+          <div class="point" style="border-left-color:var(--accent2)">
+            <div class="point-icon">🧵</div>
+            <div class="point-text"><span class="highlight">Project Loom (Matured)</span> — Virtual threads are mainstream. <strong>Structured Concurrency</strong> (<code>StructuredTaskScope</code>) — treats a group of concurrent tasks as a single unit of work. Fail-fast with <code>ShutdownOnFailure</code>, or wait for first success with <code>ShutdownOnSuccess</code>. Cleaner than CompletableFuture chains.</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent2)">
+            <div class="point-icon">💎</div>
+            <div class="point-text"><span class="highlight">Project Valhalla (Value Types)</span> — <code>value class</code> — Objects with value semantics (like primitives). No identity (no <code>==</code> reference comparison), no null, stored inline in memory (not on heap as separate objects). Eliminates "wrapper penalty" — <code>List&lt;int&gt;</code> without boxing overhead. Major performance improvement for data-heavy code.</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent2)">
+            <div class="point-icon">🌉</div>
+            <div class="point-text"><span class="highlight">Project Panama (Foreign APIs)</span> — <code>Foreign Function & Memory API</code> — Safe, high-performance way to call native libraries and access off-heap memory. Replaces JNI (Java Native Interface) which was verbose and unsafe. Key for performance-critical native interop (e.g., ML libraries, OS APIs).</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent2)">
+            <div class="point-icon">🔗</div>
+            <div class="point-text"><span class="highlight">Scoped Values</span> — Like <code>ThreadLocal</code> but designed for virtual threads. Immutable, inherit into child threads, automatically cleaned up when scope ends. Use for passing context (user ID, trace ID) through a call stack without passing as parameters.</div>
+          </div>
+          <div class="point" style="border-left-color:var(--accent2)">
+            <div class="point-icon">🎭</div>
+            <div class="point-text"><span class="highlight">Stable Primitives in Generics</span> — Part of Valhalla: universal generics that work with both reference types AND primitives. <code>List&lt;int&gt;</code>, <code>Map&lt;long, double&gt;</code> — no boxing, no wrapper classes. Massive memory and CPU cache efficiency gain.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent2)">💻 MEMORIZABLE CODE</div>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+            <div class="code-lang">JAVA 25 · STRUCTURED CONCURRENCY + SCOPED VALUES (PREVIEW/CURRENT)</div>
+          </div>
+          <pre><span class="cm">// ── Structured Concurrency ────────────────────────</span>
+<span class="cm">// All subtasks treated as one unit — fail together, clean up together</span>
+<span class="kw">try</span> (<span class="kw">var</span> scope = <span class="kw">new</span> <span class="tp">StructuredTaskScope.ShutdownOnFailure</span>()) {
+
+    <span class="kw">var</span> userTask  = scope.<span class="fn">fork</span>(() -> <span class="fn">fetchUser</span>(userId));
+    <span class="kw">var</span> orderTask = scope.<span class="fn">fork</span>(() -> <span class="fn">fetchOrders</span>(userId));
+
+    scope.<span class="fn">join</span>();           <span class="cm">// wait for both</span>
+    scope.<span class="fn">throwIfFailed</span>(); <span class="cm">// propagate any failure</span>
+
+    <span class="kw">var</span> user   = userTask.<span class="fn">get</span>();   <span class="cm">// guaranteed non-null here</span>
+    <span class="kw">var</span> orders = orderTask.<span class="fn">get</span>();
+    <span class="kw">return new</span> <span class="cl">Dashboard</span>(user, orders);
+} <span class="cm">// scope closed → all threads cleaned up automatically</span>
+
+<span class="cm">// ── ShutdownOnSuccess: first result wins ─────────</span>
+<span class="kw">try</span> (<span class="kw">var</span> scope = <span class="kw">new</span> <span class="tp">StructuredTaskScope.ShutdownOnSuccess</span>&lt;<span class="tp">String</span>&gt;()) {
+    scope.<span class="fn">fork</span>(() -> <span class="fn">callPrimaryServer</span>());
+    scope.<span class="fn">fork</span>(() -> <span class="fn">callFallbackServer</span>());
+    scope.<span class="fn">join</span>();
+    <span class="kw">return</span> scope.<span class="fn">result</span>();  <span class="cm">// whichever finished first</span>
+}
+
+<span class="cm">// ── Scoped Values (instead of ThreadLocal) ───────</span>
+<span class="kw">static final</span> <span class="tp">ScopedValue</span>&lt;<span class="tp">User</span>&gt; CURRENT_USER = <span class="tp">ScopedValue</span>.<span class="fn">newInstance</span>();
+
+<span class="kw">void</span> <span class="fn">handleRequest</span>(<span class="tp">User</span> user) {
+    <span class="tp">ScopedValue</span>.<span class="fn">where</span>(CURRENT_USER, user).<span class="fn">run</span>(() -> {
+        <span class="fn">processOrder</span>();   <span class="cm">// can access CURRENT_USER.get() here</span>
+        <span class="fn">sendEmail</span>();      <span class="cm">// and in all called methods</span>
+    });
+    <span class="cm">// CURRENT_USER is unbound outside the run() block</span>
+}
+
+<span class="kw">void</span> <span class="fn">processOrder</span>() {
+    <span class="tp">User</span> u = CURRENT_USER.<span class="fn">get</span>();  <span class="cm">// safely read, immutable</span>
+}
+
+<span class="cm">// ── Value Types (Valhalla concept) ───────────────</span>
+<span class="cm">// (preview/upcoming syntax — conceptual)</span>
+<span class="kw">value class</span> <span class="cl">Point</span> {          <span class="cm">// no identity, no null, inline storage</span>
+    <span class="kw">double</span> x, y;
+}
+<span class="cm">// vs regular class: no heap allocation per Point in arrays!</span>
+<span class="cm">// Point[] of 1M points = contiguous memory block</span></pre>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent2)">📊 JAVA VERSION EVOLUTION SUMMARY</div>
+        <table class="compare-table">
+          <tr><th>Version</th><th>LTS?</th><th>Key Feature</th><th>Interview Weight</th></tr>
+          <tr><td><strong>Java 8</strong> (2014)</td><td>✅</td><td>Lambdas, Streams, Optional, Default methods</td><td>🔴 Must Know</td></tr>
+          <tr><td><strong>Java 11</strong> (2018)</td><td>✅</td><td>var, HttpClient, String methods, Files</td><td>🔴 Must Know</td></tr>
+          <tr><td><strong>Java 17</strong> (2021)</td><td>✅</td><td>Sealed classes, Records, Pattern instanceof, Text Blocks</td><td>🔴 Must Know</td></tr>
+          <tr><td><strong>Java 21</strong> (2023)</td><td>✅</td><td>Pattern switch, Record Patterns, Virtual Threads, Sequenced Collections</td><td>🔴 Must Know</td></tr>
+          <tr><td><strong>Java 25</strong> (2025)</td><td>✅</td><td>Structured Concurrency, Scoped Values, Valhalla (Value Types)</td><td>🟡 Awareness</td></tr>
+        </table>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent2)">🧠 MEMORY TIP</div>
+        <div class="memory-tip">
+          <div class="memory-tip-icon">💡</div>
+          <div><strong>Structured Concurrency = "fork-join but smarter."</strong> Think of it like a try-with-resources for threads — tasks are scoped, cleanly cancelled on failure, no orphaned threads. <strong>Scoped Values = ThreadLocal done right</strong> — immutable, scope-bound, virtual-thread-friendly. For Java 25, the interview keyword is <strong>scalability without complexity</strong>: virtual threads + structured concurrency let you write sequential-looking code that scales like async/reactive.</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent2)">❓ INTERVIEW QUESTIONS</div>
+        <div class="interview-qs">
+          <div class="iq" onclick="this.classList.toggle('open')">
+            <div class="iq-q">What problem does Structured Concurrency solve over CompletableFuture?</div>
+            <div class="iq-a">CompletableFuture chains are hard to reason about — exceptions can be swallowed, threads can leak if one task fails but others keep running, and the relationship between parent and child tasks is implicit. Structured Concurrency makes the scope explicit — all forked tasks <strong>must complete before the scope exits</strong>. If any task fails with <code>ShutdownOnFailure</code>, all are cancelled. This prevents thread leaks, makes error handling straightforward, and makes the code read like sequential logic.</div>
+          </div>
+          <div class="iq" onclick="this.classList.toggle('open')">
+            <div class="iq-q">What are Scoped Values and why are they better than ThreadLocal for virtual threads?</div>
+            <div class="iq-a"><code>ThreadLocal</code> was designed for platform threads — it stores mutable, per-thread state that persists until explicitly removed, which can cause memory leaks. With millions of virtual threads, this doesn't scale. <code>ScopedValue</code> is <strong>immutable</strong>, automatically cleaned up when the scope ends, and naturally <strong>inherits into child virtual threads</strong> without copying. It's also faster because the JVM can optimize immutable scoped lookups better than mutable ThreadLocal.</div>
+          </div>
+          <div class="iq" onclick="this.classList.toggle('open')">
+            <div class="iq-q">What is Project Valhalla and why does it matter for performance?</div>
+            <div class="iq-a">Valhalla introduces <strong>value types</strong> — objects with value semantics (no identity, no null) that can be stored <strong>inline in memory</strong> rather than as heap references. Today, <code>List&lt;Integer&gt;</code> stores references to boxed Integer objects scattered on the heap (bad for CPU cache). With Valhalla, <code>List&lt;int&gt;</code> stores raw ints contiguously in memory — dramatically better cache performance. This is critical for data-intensive applications (financial systems, ML, game engines) where boxing overhead is a real bottleneck.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title" style="color:var(--accent2)">🔗 LINKS TO</div>
+        <div class="tags">
+          <div class="tag" style="background:rgba(255,107,53,0.1);color:var(--accent2);border:1px solid rgba(255,107,53,0.2)">Multithreading (54)</div>
+          <div class="tag" style="background:rgba(255,107,53,0.1);color:var(--accent2);border:1px solid rgba(255,107,53,0.2)">Java 21 Virtual Threads (44)</div>
+          <div class="tag" style="background:rgba(255,107,53,0.1);color:var(--accent2);border:1px solid rgba(255,107,53,0.2)">JVM Internals (60)</div>
+          <div class="tag" style="background:rgba(255,107,53,0.1);color:var(--accent2);border:1px solid rgba(255,107,53,0.2)">Reactive Programming (34)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  PHASE 8 · JAVA VERSIONS · TOPICS 41–45 · Interview Prep Study Cards
+</div>
+
+<script>
+  let currentTopic = 0;
+
+  function showTopic(idx) {
+    document.querySelectorAll('.topic-card').forEach((c, i) => {
+      c.classList.toggle('active', i === idx);
+    });
+    document.querySelectorAll('.nav-btn').forEach((b, i) => {
+      b.classList.toggle('active', i === idx);
+    });
+    document.querySelectorAll('.pb-seg').forEach((s, i) => {
+      s.classList.remove('active', 'done');
+      if (i < idx) s.classList.add('done');
+      if (i === idx) s.classList.add('active');
+    });
+    currentTopic = idx;
+    // Auto-open the card
+    const card = document.getElementById('topic-' + idx);
+    if (!card.classList.contains('open')) {
+      card.classList.add('open');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleCard(header) {
+    const card = header.closest('.topic-card');
+    card.classList.toggle('open');
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' && currentTopic < 4) showTopic(currentTopic + 1);
+    if (e.key === 'ArrowLeft' && currentTopic > 0) showTopic(currentTopic - 1);
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Spring Core — Interview Study Cards</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #f5f2ed;
+  --surface: #ffffff;
+  --surface2: #f9f7f4;
+  --border: #e4ddd4;
+  --border2: #d0c8bc;
+  --ink: #1a1612;
+  --ink2: #3d3730;
+  --muted: #8a7f74;
+  --muted2: #b5a99c;
+
+  --spring: #4a7c59;
+  --spring-light: #eef4f0;
+  --spring-mid: #c8ddd0;
+  --spring-border: #a8c8b4;
+
+  --amber: #c17f2a;
+  --amber-light: #fdf4e7;
+  --amber-border: #e8c88a;
+
+  --blue: #2a5f8f;
+  --blue-light: #eaf1f8;
+  --blue-border: #a8c8e4;
+
+  --red: #b94040;
+  --red-light: #fdf0f0;
+  --red-border: #e4b0b0;
+
+  --violet: #6b3fa0;
+  --violet-light: #f3eefb;
+  --violet-border: #c8a8e8;
+
+  --code-bg: #1e1b18;
+  --code-surface: #252220;
+
+  --kw: #d4a843;
+  --tp: #7ec8a0;
+  --fn: #64b0d8;
+  --st: #e89060;
+  --cm: #6b6460;
+  --nb: #c89060;
+  --an: #d07090;
+  --cl: #98d8a8;
+  --op: #78c8c8;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
+
+/* ── HEADER ─────────────────────────────────────── */
+.header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  padding: 40px 48px 36px;
+  position: relative;
+  overflow: hidden;
+}
+.header-bg {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 340px;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 12px,
+    rgba(74,124,89,0.04) 12px,
+    rgba(74,124,89,0.04) 13px
+  );
+  pointer-events: none;
+}
+.phase-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--spring);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.phase-label::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 2px;
+  background: var(--spring);
+}
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 800;
+  line-height: 1.08;
+  color: var(--ink);
+  letter-spacing: -1px;
+}
+h1 em {
+  font-style: normal;
+  color: var(--spring);
+}
+.header-sub {
+  margin-top: 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+}
+.header-meta {
+  display: flex;
+  gap: 28px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.hmeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+}
+.hmeta strong { color: var(--spring); }
+
+/* ── PROGRESS ───────────────────────────────────── */
+.progress-wrap {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 48px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.prog-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-right: 6px;
+  white-space: nowrap;
+}
+.prog-seg {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+  cursor: pointer;
+  transition: background 0.25s;
+  position: relative;
+}
+.prog-seg::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  font-family: 'DM Mono', monospace;
+  color: var(--muted2);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.prog-seg:hover::after { opacity: 1; }
+.prog-seg.done { background: var(--spring-mid); }
+.prog-seg.active { background: var(--spring); }
+
+/* ── NAV ─────────────────────────────────────────── */
+.nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 48px;
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav::-webkit-scrollbar { display: none; }
+.nav-btn {
+  flex-shrink: 0;
+  padding: 14px 18px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.nav-btn:hover { color: var(--ink2); background: var(--surface2); }
+.nav-btn.active { color: var(--spring); border-bottom-color: var(--spring); }
+.nav-btn .num {
+  background: var(--border);
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+.nav-btn.active .num { background: var(--spring-light); color: var(--spring); }
+
+/* ── MAIN ────────────────────────────────────────── */
+.main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 36px 48px 60px;
+}
+
+/* ── TOPIC CARD ──────────────────────────────────── */
+.topic-card {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+.topic-card.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── CARD HEADER BAND ─────────────────────────────  */
+.card-band {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px 16px 0 0;
+  padding: 28px 32px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: none;
+}
+.band-left { display: flex; align-items: flex-start; gap: 16px; }
+.topic-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--border2);
+  flex-shrink: 0;
+  margin-top: 2px;
+  width: 52px;
+  text-align: right;
+}
+.band-title-group {}
+.band-version {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+.band-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.band-oneliner {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+  line-height: 1.5;
+}
+.priority-badge {
+  flex-shrink: 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-top: 4px;
+}
+
+/* ── CONTENT AREA ────────────────────────────────── */
+.card-content {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  padding: 0 32px 32px;
+  margin-bottom: 0;
+}
+
+/* section tabs inside card */
+.section-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin: 0 -32px 28px;
+  padding: 0 32px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.section-tabs::-webkit-scrollbar { display: none; }
+.stab {
+  flex-shrink: 0;
+  padding: 12px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.5px;
+  display: flex; align-items: center; gap: 5px;
+}
+.stab:hover { color: var(--ink2); }
+.stab.active { color: var(--spring); border-bottom-color: var(--spring); }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── KEY POINTS ──────────────────────────────────── */
+.key-points { display: flex; flex-direction: column; gap: 10px; }
+.point {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  font-size: 14px;
+  line-height: 1.65;
+  transition: border-color 0.2s;
+}
+.point:hover { border-color: var(--border2); }
+.point-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.point-text { flex: 1; }
+.point-text strong { color: var(--ink); }
+.point-text code {
+  background: var(--spring-light);
+  border: 1px solid var(--spring-border);
+  color: var(--spring);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+}
+.label-green { color: #2d7a4f; font-weight: 600; }
+.label-amber { color: var(--amber); font-weight: 600; }
+.label-red { color: var(--red); font-weight: 600; }
+.label-blue { color: var(--blue); font-weight: 600; }
+.label-violet { color: var(--violet); font-weight: 600; }
+
+/* ── CODE BLOCK ──────────────────────────────────── */
+.code-block {
+  background: var(--code-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--code-surface);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.code-dots { display: flex; gap: 6px; align-items: center; }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot-r { background: #ff5f57; } .dot-y { background: #febc2e; } .dot-g { background: #28c840; }
+.code-lang {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: rgba(255,255,255,0.3);
+  text-transform: uppercase;
+}
+pre {
+  padding: 22px;
+  overflow-x: auto;
+  font-family: 'DM Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: #cdc8c0;
+}
+.kw { color: var(--kw); }
+.tp { color: var(--tp); }
+.fn { color: var(--fn); }
+.st { color: var(--st); }
+.cm { color: var(--cm); font-style: italic; }
+.nb { color: var(--nb); }
+.an { color: var(--an); }
+.cl { color: var(--cl); }
+.op { color: var(--op); }
+
+/* ── INTERVIEW Q ─────────────────────────────────── */
+.iq-list { display: flex; flex-direction: column; gap: 10px; }
+.iq {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.iq:hover { border-color: var(--border2); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.iq-header {
+  padding: 14px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--surface2);
+  user-select: none;
+}
+.iq-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 1px;
+  text-transform: uppercase;
+}
+.iq-q-text { font-size: 13px; font-weight: 600; color: var(--ink); flex: 1; line-height: 1.5; }
+.iq-toggle { color: var(--muted); font-size: 16px; flex-shrink: 0; margin-top: 2px; transition: transform 0.25s; }
+.iq.open .iq-toggle { transform: rotate(180deg); }
+.iq-body {
+  display: none;
+  padding: 16px;
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--ink2);
+  border-top: 1px solid var(--border);
+  background: #fff;
+}
+.iq.open .iq-body { display: block; }
+.iq-body code {
+  background: var(--spring-light);
+  border: 1px solid var(--spring-border);
+  color: var(--spring);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+}
+.iq-body strong { color: var(--ink); }
+.iq-body .trick {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: var(--amber-light);
+  border-left: 3px solid var(--amber);
+  border-radius: 0 6px 6px 0;
+  font-size: 12px;
+  color: var(--amber);
+}
+.iq-body .trick strong { color: var(--amber); }
+
+/* tag styles */
+.tag-must { background: #fff0f0; color: var(--red); border: 1px solid #f0c0c0; }
+.tag-tricky { background: var(--amber-light); color: var(--amber); border: 1px solid var(--amber-border); }
+.tag-concept { background: var(--blue-light); color: var(--blue); border: 1px solid var(--blue-border); }
+.tag-design { background: var(--violet-light); color: var(--violet); border: 1px solid var(--violet-border); }
+.tag-compare { background: var(--spring-light); color: var(--spring); border: 1px solid var(--spring-border); }
+
+/* ── TABLE ───────────────────────────────────────── */
+.ctable { width: 100%; border-collapse: collapse; font-size: 13px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+.ctable th { background: var(--surface2); padding: 10px 14px; text-align: left; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); font-weight: 500; }
+.ctable td { padding: 10px 14px; border-bottom: 1px solid rgba(228,221,212,0.6); color: var(--ink2); vertical-align: top; line-height: 1.55; }
+.ctable tr:last-child td { border-bottom: none; }
+.ctable tr:hover td { background: var(--surface2); }
+.ctable td code { background: var(--spring-light); color: var(--spring); padding: 1px 6px; border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 11px; border: 1px solid var(--spring-border); }
+
+/* ── MEMORY TIP ──────────────────────────────────── */
+.mem-tip {
+  background: var(--spring-light);
+  border: 1px solid var(--spring-border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  font-size: 13.5px;
+  line-height: 1.7;
+  display: flex;
+  gap: 12px;
+}
+.mem-icon { font-size: 20px; flex-shrink: 0; }
+.mem-text strong { color: var(--spring); }
+
+/* ── TAGS ────────────────────────────────────────── */
+.topic-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.ttag {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+  background: var(--spring-light);
+  color: var(--spring);
+  border: 1px solid var(--spring-border);
+}
+
+/* ── SECTION TITLE ───────────────────────────────── */
+.sec-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sec-title span { color: var(--spring); }
+
+/* ── FLOW DIAGRAM (text-based) ───────────────────── */
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  overflow-x: auto;
+}
+.flow-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex-shrink: 0;
+}
+.flow-box {
+  background: var(--surface);
+  border: 1px solid var(--spring-border);
+  color: var(--spring);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.flow-sub { font-size: 10px; color: var(--muted); margin-top: 4px; font-family: 'DM Mono', monospace; }
+.flow-arrow { color: var(--spring); font-size: 18px; padding: 0 6px; flex-shrink: 0; line-height: 1; margin-bottom: 16px; }
+
+/* ── SPACER ──────────────────────────────────────── */
+.gap { margin-bottom: 24px; }
+.gap-sm { margin-bottom: 14px; }
+
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media (max-width: 640px) {
+  .header, .nav, .main, .progress-wrap { padding-left: 20px; padding-right: 20px; }
+  .card-band { padding: 20px; }
+  .card-content { padding: 0 20px 24px; }
+  .section-tabs { margin: 0 -20px 24px; padding: 0 20px; }
+}
+
+/* ── FOOTER ──────────────────────────────────────── */
+.footer {
+  text-align: center;
+  padding: 32px 48px;
+  color: var(--muted2);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  border-top: 1px solid var(--border);
+  margin-top: 40px;
+  background: var(--surface);
+}
+
+/* keyboard hint */
+.kb-hint { 
+  text-align: center; 
+  padding: 8px; 
+  font-family: 'DM Mono', monospace; 
+  font-size: 10px; 
+  color: var(--muted2);
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+kbd { background: var(--border); padding: 1px 5px; border-radius: 3px; font-size: 10px; }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div class="header">
+  <div class="header-bg"></div>
+  <div class="phase-label">Phase 1 · Spring Core</div>
+  <h1>Spring Core<br><em>Interview Cards</em></h1>
+  <div class="header-sub">// Topics 1–10 · Senior Engineer Level · Memorizable + Interview-Ready</div>
+  <div class="header-meta">
+    <div class="hmeta">Topics <strong>10</strong></div>
+    <div class="hmeta">Priority <strong>🔴 HIGH</strong></div>
+    <div class="hmeta">Estimated <strong>3–4 days</strong></div>
+    <div class="hmeta">Framework <strong>Spring 6.x / Boot 3.x</strong></div>
+  </div>
+</div>
+
+<div class="kb-hint">Navigate: <kbd>←</kbd> <kbd>→</kbd> arrow keys · Click tabs for sections</div>
+
+<!-- ═══ PROGRESS ═══ -->
+<div class="progress-wrap">
+  <span class="prog-label">Progress</span>
+  <div class="prog-seg active" data-label="DI & IoC" onclick="showTopic(0)"></div>
+  <div class="prog-seg" data-label="Bean Lifecycle" onclick="showTopic(1)"></div>
+  <div class="prog-seg" data-label="Context" onclick="showTopic(2)"></div>
+  <div class="prog-seg" data-label="Config" onclick="showTopic(3)"></div>
+  <div class="prog-seg" data-label="Annotations" onclick="showTopic(4)"></div>
+  <div class="prog-seg" data-label="AOP Concepts" onclick="showTopic(5)"></div>
+  <div class="prog-seg" data-label="AOP Annotations" onclick="showTopic(6)"></div>
+  <div class="prog-seg" data-label="JDBC Template" onclick="showTopic(7)"></div>
+  <div class="prog-seg" data-label="ORM+Hibernate" onclick="showTopic(8)"></div>
+  <div class="prog-seg" data-label="Transactions" onclick="showTopic(9)"></div>
+</div>
+
+<!-- ═══ NAV ═══ -->
+<div class="nav">
+  <button class="nav-btn active" onclick="showTopic(0)"><span class="num">01</span> DI &amp; IoC</button>
+  <button class="nav-btn" onclick="showTopic(1)"><span class="num">02</span> Bean Lifecycle</button>
+  <button class="nav-btn" onclick="showTopic(2)"><span class="num">03</span> Context</button>
+  <button class="nav-btn" onclick="showTopic(3)"><span class="num">04</span> Configuration</button>
+  <button class="nav-btn" onclick="showTopic(4)"><span class="num">05</span> Annotations</button>
+  <button class="nav-btn" onclick="showTopic(5)"><span class="num">06</span> AOP Concepts</button>
+  <button class="nav-btn" onclick="showTopic(6)"><span class="num">07</span> AOP Annotations</button>
+  <button class="nav-btn" onclick="showTopic(7)"><span class="num">08</span> JDBC Template</button>
+  <button class="nav-btn" onclick="showTopic(8)"><span class="num">09</span> ORM + Hibernate</button>
+  <button class="nav-btn" onclick="showTopic(9)"><span class="num">10</span> Transactions</button>
+</div>
+
+<div class="main">
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  TOPIC 1 — DI & IoC                              ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<div class="topic-card active" id="t0">
+  <div class="card-band">
+    <div class="band-left">
+      <div class="topic-num">01</div>
+      <div>
+        <div class="band-version" style="background:var(--spring-light);color:var(--spring);border:1px solid var(--spring-border)">Spring Core</div>
+        <div class="band-title">Dependency Injection &amp; Inversion of Control</div>
+        <div class="band-oneliner">"Don't call us, we'll call you" — the Hollywood Principle</div>
+      </div>
+    </div>
+    <div class="priority-badge" style="background:#fff0f0;color:var(--red);border:1px solid #f0c0c0">🔴 Must Know</div>
+  </div>
+  <div class="card-content">
+    <div class="section-tabs" id="tabs-0">
+      <div class="stab active" onclick="switchTab(0,'concepts')">📌 Concepts</div>
+      <div class="stab" onclick="switchTab(0,'code')">💻 Code</div>
+      <div class="stab" onclick="switchTab(0,'interview')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="switchTab(0,'memory')">🧠 Memory Tip</div>
+    </div>
+
+    <div class="tab-panel active" id="t0-concepts">
+      <div class="sec-title"><span>◆</span> Core Concepts</div>
+      <div class="key-points">
+        <div class="point"><div class="point-icon">🎯</div><div class="point-text"><strong class="label-green">IoC (Inversion of Control)</strong> — A design principle where the control of object creation and wiring is <em>inverted</em> from the application code to a container/framework. You don't <code>new</code> dependencies yourself — Spring does it for you.</div></div>
+        <div class="point"><div class="point-icon">💉</div><div class="point-text"><strong class="label-green">DI (Dependency Injection)</strong> — The implementation technique of IoC. Spring injects dependencies into your class instead of you creating them. 3 types: <code>Constructor Injection</code> (preferred), <code>Setter Injection</code>, and <code>Field Injection</code> (@Autowired on field — avoid in production).</div></div>
+        <div class="point"><div class="point-icon">🏗️</div><div class="point-text"><strong class="label-green">Constructor Injection</strong> — Preferred because: dependencies are <strong>immutable</strong> (final fields), object is always in valid state, makes dependencies <strong>explicit</strong>, enables easier unit testing without Spring container. Spring 4.3+ auto-injects single-constructor beans.</div></div>
+        <div class="point"><div class="point-icon">⚙️</div><div class="point-text"><strong class="label-amber">Setter Injection</strong> — Used for <strong>optional dependencies</strong>. Allows reconfiguration after construction. Beware: object can be in partially initialized state if setter not called.</div></div>
+        <div class="point"><div class="point-icon">⚠️</div><div class="point-text"><strong class="label-red">Field Injection</strong> — <code>@Autowired</code> directly on field. Avoid in production: hides dependencies, can't be used with <code>final</code>, cannot test without Spring context, violates encapsulation. Fine only for test classes.</div></div>
+        <div class="point"><div class="point-icon">🔄</div><div class="point-text"><strong class="label-blue">Circular Dependency</strong> — When A depends on B and B depends on A — Spring throws <code>BeanCurrentlyInCreationException</code> with constructor injection. Fix options: use setter injection for one side, use <code>@Lazy</code>, or redesign to break the cycle.</div></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="t0-code">
+      <div class="sec-title"><span>◆</span> Memorizable Code</div>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="code-lang">DI — CONSTRUCTOR vs SETTER vs FIELD</div></div>
+        <pre><span class="cm">// ── ✅ Constructor Injection (PREFERRED) ─────────</span>
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">OrderService</span> {
+    <span class="kw">private final</span> <span class="tp">PaymentService</span> paymentService;
+    <span class="kw">private final</span> <span class="tp">InventoryService</span> inventoryService;
+
+    <span class="cm">// @Autowired optional with single constructor (Spring 4.3+)</span>
+    <span class="kw">public</span> <span class="fn">OrderService</span>(<span class="tp">PaymentService</span> ps, <span class="tp">InventoryService</span> is) {
+        <span class="kw">this</span>.paymentService   = ps;  <span class="cm">// final = immutable ✅</span>
+        <span class="kw">this</span>.inventoryService = is;
+    }
+}
+
+<span class="cm">// ── ⚠️ Setter Injection (optional deps only) ──────</span>
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">ReportService</span> {
+    <span class="kw">private</span> <span class="tp">NotificationService</span> notifier; <span class="cm">// optional</span>
+
+    <span class="an">@Autowired</span>(required = <span class="kw">false</span>)
+    <span class="kw">public void</span> <span class="fn">setNotifier</span>(<span class="tp">NotificationService</span> n) {
+        <span class="kw">this</span>.notifier = n;
+    }
+}
+
+<span class="cm">// ── ❌ Field Injection (avoid in prod) ────────────</span>
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">BadService</span> {
+    <span class="an">@Autowired</span>
+    <span class="kw">private</span> <span class="tp">SomeService</span> someService; <span class="cm">// hidden dep, not testable</span>
+}
+
+<span class="cm">// ── Circular Dependency Fix with @Lazy ───────────</span>
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">A</span> {
+    <span class="kw">private final</span> <span class="tp">B</span> b;
+    <span class="kw">public</span> <span class="fn">A</span>(<span class="an">@Lazy</span> <span class="tp">B</span> b) { <span class="kw">this</span>.b = b; } <span class="cm">// B created on first use</span>
+}
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">B</span> {
+    <span class="kw">private final</span> <span class="tp">A</span> a;
+    <span class="kw">public</span> <span class="fn">B</span>(<span class="tp">A</span> a) { <span class="kw">this</span>.a = a; }
+}</pre>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="t0-interview">
+      <div class="sec-title"><span>◆</span> Interview Questions</div>
+      <div class="iq-list">
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-must">Must Know</span><div class="iq-q-text">What is the difference between IoC and DI?</div><div class="iq-toggle">▾</div></div><div class="iq-body">IoC is a <strong>design principle</strong> — it means you give up control of object lifecycle to a container. DI is a <strong>concrete implementation</strong> of IoC — the container injects required dependencies into your object rather than you creating them inside the class. Think of IoC as the "what" and DI as the "how". Spring IoC container manages bean creation, wiring, and lifecycle; DI is the mechanism it uses to wire beans together.</div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-must">Must Know</span><div class="iq-q-text">Why is Constructor Injection preferred over Field Injection?</div><div class="iq-toggle">▾</div></div><div class="iq-body"><strong>4 key reasons:</strong><br>1. <strong>Immutability</strong> — fields can be <code>final</code>, preventing accidental reassignment<br>2. <strong>Testability</strong> — you can instantiate the class directly in unit tests without Spring context<br>3. <strong>Explicit contract</strong> — dependencies are visible in the constructor signature, not hidden inside the class<br>4. <strong>Fail-fast</strong> — if a required bean is missing, Spring fails at startup, not at runtime<br><div class="trick"><strong>⚡ Tricky add-on:</strong> With field injection you can have a bean that compiles and starts but NPEs at runtime because Spring didn't inject it (e.g., if the class is <code>new</code>'d manually). Constructor injection makes this impossible.</div></div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-tricky">Tricky</span><div class="iq-q-text">What happens when there's a circular dependency in Spring? How do you fix it?</div><div class="iq-toggle">▾</div></div><div class="iq-body">With <strong>constructor injection</strong>, Spring throws <code>BeanCurrentlyInCreationException</code> at startup because it can't instantiate A without B and can't instantiate B without A. Fixes:<br>1. <code>@Lazy</code> on one constructor param — defers creation to first use<br>2. Use setter injection for one side — Spring can create both objects first, then inject<br>3. <strong>Best fix:</strong> redesign — circular deps usually indicate poor separation of concerns (extract a third class)<br><div class="trick"><strong>⚡ Note:</strong> Spring Boot 2.6+ disabled circular dependency by default. You'll get a startup error with a hint to refactor, or use <code>spring.main.allow-circular-references=true</code> (not recommended).</div></div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-tricky">Tricky</span><div class="iq-q-text">Can you inject a prototype-scoped bean into a singleton bean? What goes wrong?</div><div class="iq-toggle">▾</div></div><div class="iq-body">Yes, but it doesn't work as expected. When a singleton bean has a prototype dependency injected via constructor/field, the prototype is <strong>injected only once at startup</strong> — you always get the same instance, defeating the purpose of prototype scope. Fixes:<br>1. Inject <code>ApplicationContext</code> and call <code>ctx.getBean()</code> each time<br>2. Use <strong>Method Injection</strong> — <code>@Lookup</code> annotation on an abstract method<br>3. Use <code>ObjectFactory&lt;YourBean&gt;</code> or <code>Provider&lt;YourBean&gt;</code> for lazy retrieval<div class="trick"><strong>⚡ Classic interview trap!</strong> Many devs assume the prototype scope is respected automatically — it's not.</div></div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-concept">Concept</span><div class="iq-q-text">What is the Hollywood Principle and how does it relate to IoC?</div><div class="iq-toggle">▾</div></div><div class="iq-body">The Hollywood Principle states: <strong>"Don't call us, we'll call you."</strong> In traditional code, your classes control the flow — they create dependencies via <code>new</code> and call framework code. With IoC, the framework (Spring) controls the flow — it creates your objects and calls your code. You register components; Spring decides when and how to instantiate and wire them. This inverts the dependency direction — high-level modules no longer depend on low-level modules directly.</div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-compare">Compare</span><div class="iq-q-text">When would you use Setter Injection over Constructor Injection?</div><div class="iq-toggle">▾</div></div><div class="iq-body">Use setter injection for <strong>optional dependencies</strong> — ones the bean can function without. Annotate with <code>@Autowired(required = false)</code>. Also used when dealing with <strong>circular dependencies</strong> that can't be refactored (Spring handles them by first creating both objects, then calling the setter). However, always document which dependencies are optional to maintain clear contracts. Default to constructor injection for everything required.</div></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="t0-memory">
+      <div class="sec-title"><span>◆</span> Memory Tip</div>
+      <div class="mem-tip"><div class="mem-icon">💡</div><div class="mem-text"><strong>IoC = Vending Machine. DI = The Slot.</strong><br>You don't go into the machine and manually connect components. You insert a coin (configure) and the machine (IoC container) delivers the product (injected dependency) to you. Constructor Injection = the machine delivers everything upfront. Setter Injection = add-ons delivered separately. Field Injection = sneaking parts directly into the machine's internals — messy and untestable.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  TOPIC 2 — Bean Lifecycle & Scopes               ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<div class="topic-card" id="t1">
+  <div class="card-band">
+    <div class="band-left">
+      <div class="topic-num">02</div>
+      <div>
+        <div class="band-version" style="background:var(--spring-light);color:var(--spring);border:1px solid var(--spring-border)">Spring Core</div>
+        <div class="band-title">Bean Lifecycle &amp; Scopes</div>
+        <div class="band-oneliner">From instantiation to destruction — what Spring does between <code>new</code> and garbage collection</div>
+      </div>
+    </div>
+    <div class="priority-badge" style="background:#fff0f0;color:var(--red);border:1px solid #f0c0c0">🔴 Must Know</div>
+  </div>
+  <div class="card-content">
+    <div class="section-tabs" id="tabs-1">
+      <div class="stab active" onclick="switchTab(1,'concepts')">📌 Concepts</div>
+      <div class="stab" onclick="switchTab(1,'code')">💻 Code</div>
+      <div class="stab" onclick="switchTab(1,'interview')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="switchTab(1,'memory')">🧠 Memory Tip</div>
+    </div>
+
+    <div class="tab-panel active" id="t1-concepts">
+      <div class="sec-title"><span>◆</span> Bean Lifecycle Steps</div>
+      <div class="flow" style="margin-bottom:20px">
+        <div class="flow-step"><div class="flow-box">1. Instantiate</div><div class="flow-sub">new MyBean()</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-box">2. Populate Properties</div><div class="flow-sub">DI / @Autowired</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-box">3. Aware Interfaces</div><div class="flow-sub">setBeanName etc.</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-box">4. BeanPostProcessor</div><div class="flow-sub">Before init</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-box">5. @PostConstruct</div><div class="flow-sub">Init hook</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-box">6. In Use</div><div class="flow-sub">Business logic</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-box">7. @PreDestroy</div><div class="flow-sub">Cleanup</div></div>
+      </div>
+      <div class="key-points">
+        <div class="point"><div class="point-icon">🏗️</div><div class="point-text"><strong class="label-green">Lifecycle Hooks</strong> — Preferred: <code>@PostConstruct</code> (runs after DI, before use) and <code>@PreDestroy</code> (runs before bean removed from context). Alternatives: implement <code>InitializingBean.afterPropertiesSet()</code> / <code>DisposableBean.destroy()</code>, or use <code>@Bean(initMethod="start", destroyMethod="stop")</code>.</div></div>
+        <div class="point"><div class="point-icon">📦</div><div class="point-text"><strong class="label-blue">Singleton Scope</strong> — Default. One instance per ApplicationContext. Shared across all requests. Spring manages the full lifecycle. <strong>Not thread-safe by design</strong> — you must handle thread safety in your code.</div></div>
+        <div class="point"><div class="point-icon">🔄</div><div class="point-text"><strong class="label-amber">Prototype Scope</strong> — New instance every time <code>getBean()</code> is called. Spring creates it but <strong>does NOT manage destruction</strong> — <code>@PreDestroy</code> is never called. Your responsibility to clean up.</div></div>
+        <div class="point"><div class="point-icon">🌐</div><div class="point-text"><strong class="label-violet">Web Scopes</strong> — <code>request</code> (new per HTTP request), <code>session</code> (new per HTTP session), <code>application</code> (one per ServletContext, like singleton for web), <code>websocket</code>. Only available in web-aware ApplicationContext.</div></div>
+        <div class="point"><div class="point-icon">🔧</div><div class="point-text"><strong class="label-green">BeanPostProcessor</strong> — Intercepts ALL beans during initialization. <code>postProcessBeforeInitialization()</code> runs before <code>@PostConstruct</code>; <code>postProcessAfterInitialization()</code> runs after. This is how Spring creates AOP proxies — replaces bean with proxy at this stage.</div></div>
+      </div>
+      <div class="gap-sm"></div>
+      <div class="sec-title"><span>◆</span> Scopes Comparison</div>
+      <table class="ctable">
+        <tr><th>Scope</th><th>Instances</th><th>Lifecycle by Spring?</th><th>Use Case</th></tr>
+        <tr><td><code>singleton</code></td><td>1 per Context</td><td>Full ✅</td><td>Stateless services, repos</td></tr>
+        <tr><td><code>prototype</code></td><td>New per request</td><td>Init only ⚠️</td><td>Stateful helper objects</td></tr>
+        <tr><td><code>request</code></td><td>1 per HTTP req</td><td>Full ✅</td><td>Request-scoped data</td></tr>
+        <tr><td><code>session</code></td><td>1 per session</td><td>Full ✅</td><td>User session state</td></tr>
+        <tr><td><code>application</code></td><td>1 per ServletCtx</td><td>Full ✅</td><td>App-wide shared state</td></tr>
+      </table>
+    </div>
+
+    <div class="tab-panel" id="t1-code">
+      <div class="sec-title"><span>◆</span> Memorizable Code</div>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="code-lang">BEAN LIFECYCLE + SCOPES</div></div>
+        <pre><span class="cm">// ── Lifecycle hooks ───────────────────────────────</span>
+<span class="an">@Component</span>
+<span class="kw">public class</span> <span class="cl">CacheService</span> {
+
+    <span class="an">@PostConstruct</span>                <span class="cm">// runs after injection, before use</span>
+    <span class="kw">public void</span> <span class="fn">init</span>() {
+        <span class="cm">// warm up cache, open connections</span>
+        System.out.<span class="fn">println</span>(<span class="st">"Cache warming up..."</span>);
+    }
+
+    <span class="an">@PreDestroy</span>                   <span class="cm">// runs before context closes</span>
+    <span class="kw">public void</span> <span class="fn">shutdown</span>() {
+        <span class="cm">// close connections, flush to disk</span>
+        System.out.<span class="fn">println</span>(<span class="st">"Cache shutting down..."</span>);
+    }
+}
+
+<span class="cm">// ── Prototype scope ───────────────────────────────</span>
+<span class="an">@Component</span>
+<span class="an">@Scope</span>(<span class="st">"prototype"</span>)           <span class="cm">// new instance every getBean()</span>
+<span class="kw">public class</span> <span class="cl">ReportBuilder</span> { }
+
+<span class="cm">// ── Inject prototype into singleton via @Lookup ───</span>
+<span class="an">@Component</span>
+<span class="kw">public abstract class</span> <span class="cl">ReportService</span> {
+
+    <span class="an">@Lookup</span>                      <span class="cm">// Spring overrides this method</span>
+    <span class="kw">public abstract</span> <span class="tp">ReportBuilder</span> <span class="fn">getReportBuilder</span>();
+
+    <span class="kw">public void</span> <span class="fn">generate</span>() {
+        <span class="tp">ReportBuilder</span> builder = <span class="fn">getReportBuilder</span>(); <span class="cm">// fresh instance</span>
+    }
+}
+
+<span class="cm">// ── Web scopes ────────────────────────────────────</span>
+<span class="an">@Component</span>
+<span class="an">@Scope</span>(value = <span class="st">"request"</span>, proxyMode = <span class="tp">ScopedProxyMode</span>.<span class="cl">TARGET_CLASS</span>)
+<span class="kw">public class</span> <span class="cl">RequestContext</span> { }
+<span class="cm">// proxyMode needed when injecting short-lived scope into singleton</span>
+
+<span class="cm">// ── @Bean with explicit lifecycle ─────────────────</span>
+<span class="an">@Bean</span>(initMethod = <span class="st">"start"</span>, destroyMethod = <span class="st">"stop"</span>)
+<span class="kw">public</span> <span class="tp">DataSource</span> <span class="fn">dataSource</span>() {
+    <span class="kw">return new</span> <span class="cl">HikariDataSource</span>(config);
+}</pre>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="t1-interview">
+      <div class="sec-title"><span>◆</span> Interview Questions</div>
+      <div class="iq-list">
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-must">Must Know</span><div class="iq-q-text">What is the default bean scope in Spring and is it thread-safe?</div><div class="iq-toggle">▾</div></div><div class="iq-body">The default scope is <strong>singleton</strong> — one instance per ApplicationContext, shared across all threads. It is <strong>NOT inherently thread-safe</strong>. If your singleton bean holds mutable state, you must synchronize access manually or use <code>ThreadLocal</code>. This is why Spring services and repositories should be <strong>stateless</strong> by design. Thread-safety is your responsibility, not Spring's.</div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-tricky">Tricky</span><div class="iq-q-text">Does Spring call @PreDestroy on prototype-scoped beans?</div><div class="iq-toggle">▾</div></div><div class="iq-body"><strong>No.</strong> Spring creates prototype beans but doesn't track them after handing them over. Because Spring doesn't hold a reference to prototype beans post-creation, it can't call <code>@PreDestroy</code> or <code>destroy()</code> on them. This is by design — prototype beans can have long or short lives, and Spring doesn't know when you're done with them. <strong>You are responsible for cleanup.</strong> If you need lifecycle management, use singleton scope with careful state management, or implement a custom factory.<div class="trick"><strong>⚡ Classic trick:</strong> Interviewer asks "Name a case where @PreDestroy is NOT called." Answer: prototype-scoped beans.</div></div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-tricky">Tricky</span><div class="iq-q-text">What is BeanPostProcessor and how does it relate to AOP?</div><div class="iq-toggle">▾</div></div><div class="iq-body"><code>BeanPostProcessor</code> intercepts every bean before and after initialization. Spring's AOP auto-proxy creator (<code>AnnotationAwareAspectJAutoProxyCreator</code>) is itself a <code>BeanPostProcessor</code>. It detects beans with matching pointcuts and replaces them with CGLIB/JDK proxy objects in <code>postProcessAfterInitialization()</code>. This is why <strong>AOP doesn't work if you call methods on <code>this</code></strong> inside a bean — you bypass the proxy.</div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-concept">Concept</span><div class="iq-q-text">What is the order of lifecycle callbacks: @PostConstruct, afterPropertiesSet(), and initMethod?</div><div class="iq-toggle">▾</div></div><div class="iq-body">Order: <strong>1. @PostConstruct</strong> → <strong>2. afterPropertiesSet()</strong> (InitializingBean) → <strong>3. custom initMethod</strong> (from @Bean or XML). All run after properties are set by Spring. For destruction: <strong>1. @PreDestroy</strong> → <strong>2. destroy()</strong> (DisposableBean) → <strong>3. custom destroyMethod</strong>. Recommendation: use <code>@PostConstruct/@PreDestroy</code> — they're JSR-250 standard annotations and don't couple your code to Spring interfaces.</div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-compare">Compare</span><div class="iq-q-text">When would you use request scope vs session scope?</div><div class="iq-toggle">▾</div></div><div class="iq-body"><strong>Request scope:</strong> New bean per HTTP request. Use for data specific to a single request — form data, request-level caching, per-request audit context. Destroyed after response is sent.<br><br><strong>Session scope:</strong> New bean per HTTP session. Use for user-specific data that should persist across multiple requests — shopping cart, user preferences, authentication state. Destroyed when session expires.<br><div class="trick"><strong>⚡ Important:</strong> When injecting a request/session-scoped bean into a singleton, you MUST use <code>proxyMode = ScopedProxyMode.TARGET_CLASS</code>. Without this, Spring injects the proxy at startup (when no request exists) and the singleton holds a stale reference forever.</div></div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-tricky">Tricky</span><div class="iq-q-text">What is the difference between ApplicationContext and a singleton? Can you have two instances of a singleton bean?</div><div class="iq-toggle">▾</div></div><div class="iq-body">Spring's singleton scope means <strong>one instance per ApplicationContext</strong>, NOT one instance per JVM. If you create two <code>ApplicationContext</code>s (e.g., in tests, or parent/child contexts in Spring MVC), you'll have two instances of the same singleton bean. This is different from the Gang-of-Four Singleton pattern. You can also call <code>context.getBean()</code> multiple times — you'll get the same instance. But in a multi-context scenario, they're different objects.<div class="trick"><strong>⚡ Senior-level nuance:</strong> Spring MVC has two contexts — root context (Services, Repos) and servlet context (Controllers). A singleton bean in the root context is not the same instance as a bean with the same name in the servlet context.</div></div></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="t1-memory">
+      <div class="sec-title"><span>◆</span> Memory Tip</div>
+      <div class="mem-tip"><div class="mem-icon">💡</div><div class="mem-text"><strong>Lifecycle = Birth → Setup → Work → Cleanup → Death.</strong><br>@PostConstruct = "I'm ready for work" (connect to DB, warm cache).<br>@PreDestroy = "I'm clocking out" (close connections, flush state).<br><br><strong>Scopes mnemonic — SPRAWS:</strong> Singleton, Prototype, Request, Application, Websocket, Session. Singleton = one for all. Prototype = one for each ask. The rest = web-only.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  TOPIC 3 — ApplicationContext & BeanFactory      ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<div class="topic-card" id="t2">
+  <div class="card-band">
+    <div class="band-left">
+      <div class="topic-num">03</div>
+      <div>
+        <div class="band-version" style="background:var(--blue-light);color:var(--blue);border:1px solid var(--blue-border)">Spring Container</div>
+        <div class="band-title">ApplicationContext &amp; BeanFactory</div>
+        <div class="band-oneliner">The IoC container — BeanFactory is the engine, ApplicationContext is the full car</div>
+      </div>
+    </div>
+    <div class="priority-badge" style="background:var(--amber-light);color:var(--amber);border:1px solid var(--amber-border)">🟡 Medium</div>
+  </div>
+  <div class="card-content">
+    <div class="section-tabs" id="tabs-2">
+      <div class="stab active" onclick="switchTab(2,'concepts')">📌 Concepts</div>
+      <div class="stab" onclick="switchTab(2,'code')">💻 Code</div>
+      <div class="stab" onclick="switchTab(2,'interview')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="switchTab(2,'memory')">🧠 Memory Tip</div>
+    </div>
+    <div class="tab-panel active" id="t2-concepts">
+      <div class="sec-title"><span>◆</span> Core Concepts</div>
+      <div class="key-points">
+        <div class="point"><div class="point-icon">🏭</div><div class="point-text"><strong class="label-blue">BeanFactory</strong> — The root interface (<code>org.springframework.beans.factory.BeanFactory</code>). Basic DI container. Uses <strong>lazy initialization</strong> — beans created only when first requested. Lightweight — suitable for resource-constrained environments. Does NOT support AOP, events, or i18n out of the box.</div></div>
+        <div class="point"><div class="point-icon">🏙️</div><div class="point-text"><strong class="label-green">ApplicationContext</strong> — Extends BeanFactory. Adds: <strong>eager initialization</strong> (all singleton beans on startup), event publishing (<code>ApplicationEvent</code>), i18n (<code>MessageSource</code>), AOP integration, environment abstraction. Use this in all real applications.</div></div>
+        <div class="point"><div class="point-icon">📁</div><div class="point-text"><strong class="label-amber">Common Implementations</strong> — <code>ClassPathXmlApplicationContext</code> (XML from classpath), <code>FileSystemXmlApplicationContext</code> (XML from filesystem), <code>AnnotationConfigApplicationContext</code> (Java config, most common today), <code>WebApplicationContext</code> (Spring MVC web apps).</div></div>
+        <div class="point"><div class="point-icon">👨‍👩‍👧</div><div class="point-text"><strong class="label-violet">Parent-Child Context</strong> — Spring MVC creates two contexts: <strong>Root context</strong> (loaded by ContextLoaderListener — Services, Repos, Config) and <strong>Servlet context</strong> (loaded by DispatcherServlet — Controllers, MVC beans). Child context can see parent beans; parent CANNOT see child beans.</div></div>
+        <div class="point"><div class="point-icon">🌱</div><div class="point-text"><strong class="label-green">Spring Boot Auto-context</strong> — <code>SpringApplication.run()</code> creates a <code>AnnotationConfigServletWebServerApplicationContext</code> automatically. You rarely create contexts manually in Spring Boot.</div></div>
+      </div>
+      <div class="gap-sm"></div>
+      <table class="ctable">
+        <tr><th>Feature</th><th>BeanFactory</th><th>ApplicationContext</th></tr>
+        <tr><td>Bean initialization</td><td>Lazy (on demand)</td><td>Eager (on startup)</td></tr>
+        <tr><td>AOP support</td><td>❌ No</td><td>✅ Yes</td></tr>
+        <tr><td>Event publishing</td><td>❌ No</td><td>✅ Yes</td></tr>
+        <tr><td>i18n / MessageSource</td><td>❌ No</td><td>✅ Yes</td></tr>
+        <tr><td>BeanPostProcessors</td><td>Manual register</td><td>Auto-detected</td></tr>
+        <tr><td>Use in production</td><td>Rarely</td><td>Always</td></tr>
+      </table>
+    </div>
+    <div class="tab-panel" id="t2-code">
+      <div class="sec-title"><span>◆</span> Memorizable Code</div>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="code-lang">APPLICATION CONTEXT USAGE</div></div>
+        <pre><span class="cm">// ── Programmatic context creation ─────────────────</span>
+<span class="tp">ApplicationContext</span> ctx = <span class="kw">new</span>
+    <span class="cl">AnnotationConfigApplicationContext</span>(<span class="cl">AppConfig</span>.<span class="kw">class</span>);
+
+<span class="tp">UserService</span> svc = ctx.<span class="fn">getBean</span>(<span class="cl">UserService</span>.<span class="kw">class</span>);
+
+<span class="cm">// ── Multiple config classes ───────────────────────</span>
+<span class="tp">ApplicationContext</span> ctx = <span class="kw">new</span>
+    <span class="cl">AnnotationConfigApplicationContext</span>(
+        <span class="cl">AppConfig</span>.<span class="kw">class</span>, <span class="cl">SecurityConfig</span>.<span class="kw">class</span>, <span class="cl">DbConfig</span>.<span class="kw">class</span>
+    );
+
+<span class="cm">// ── Implement ApplicationContextAware ─────────────</span>
+<span class="an">@Component</span>
+<span class="kw">public class</span> <span class="cl">AppContextHolder</span> <span class="kw">implements</span> <span class="tp">ApplicationContextAware</span> {
+    <span class="kw">private static</span> <span class="tp">ApplicationContext</span> context;
+
+    <span class="an">@Override</span>
+    <span class="kw">public void</span> <span class="fn">setApplicationContext</span>(<span class="tp">ApplicationContext</span> ctx) {
+        context = ctx;
+    }
+
+    <span class="kw">public static</span> &lt;<span class="tp">T</span>&gt; <span class="tp">T</span> <span class="fn">getBean</span>(<span class="tp">Class</span>&lt;<span class="tp">T</span>&gt; type) {
+        <span class="kw">return</span> context.<span class="fn">getBean</span>(type); <span class="cm">// utility for static access</span>
+    }
+}
+
+<span class="cm">// ── Check bean existence ──────────────────────────</span>
+<span class="kw">boolean</span> exists = ctx.<span class="fn">containsBean</span>(<span class="st">"myBean"</span>);
+<span class="tp">String</span>[] names = ctx.<span class="fn">getBeanNamesForType</span>(<span class="tp">UserService</span>.<span class="kw">class</span>);
+
+<span class="cm">// ── Spring Boot — context is auto-created ─────────</span>
+<span class="an">@SpringBootApplication</span>
+<span class="kw">public class</span> <span class="cl">MyApp</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="tp">ConfigurableApplicationContext</span> ctx =
+            <span class="tp">SpringApplication</span>.<span class="fn">run</span>(<span class="cl">MyApp</span>.<span class="kw">class</span>, args);
+        <span class="cm">// ctx is AnnotationConfigServletWebServerApplicationContext</span>
+    }
+}</pre>
+      </div>
+    </div>
+    <div class="tab-panel" id="t2-interview">
+      <div class="sec-title"><span>◆</span> Interview Questions</div>
+      <div class="iq-list">
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-must">Must Know</span><div class="iq-q-text">What is the difference between BeanFactory and ApplicationContext?</div><div class="iq-toggle">▾</div></div><div class="iq-body">Both are IoC containers but ApplicationContext extends BeanFactory with additional enterprise features. <strong>BeanFactory</strong>: lazy bean initialization, no AOP, no events, no i18n, lightweight. <strong>ApplicationContext</strong>: eager initialization of singletons at startup (catches config errors early), automatic BeanPostProcessor detection, event publishing, i18n via MessageSource, environment abstraction. In practice, always use ApplicationContext. BeanFactory is mainly for embedded or resource-constrained systems.</div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-tricky">Tricky</span><div class="iq-q-text">What is the advantage of eager initialization in ApplicationContext?</div><div class="iq-toggle">▾</div></div><div class="iq-body"><strong>Fail-fast at startup.</strong> Since all singleton beans are initialized when the ApplicationContext starts, configuration errors (missing beans, wrong types, failed @PostConstruct) are detected immediately — not when a user first hits that code path in production. With BeanFactory's lazy initialization, a misconfigured bean might go unnoticed until it's first requested at runtime, potentially hours or days after deployment.<div class="trick"><strong>⚡ Tip:</strong> You can selectively opt into lazy loading even with ApplicationContext using <code>@Lazy</code> on a bean or <code>spring.main.lazy-initialization=true</code> in Spring Boot (useful to speed up startup in dev).</div></div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-concept">Concept</span><div class="iq-q-text">In Spring MVC, why are there two ApplicationContexts (parent and child)?</div><div class="iq-toggle">▾</div></div><div class="iq-body">Spring MVC historically had two contexts for separation of concerns: the <strong>root context</strong> (created by ContextLoaderListener) holds shared infrastructure beans — services, repositories, datasources. The <strong>servlet context</strong> (created by DispatcherServlet) holds web-tier beans — controllers, view resolvers, handler mappings. This separation allows multiple DispatcherServlets to share the root context. The child (servlet) context can access parent beans; the parent cannot see child beans — this is why you sometimes can't inject a Controller into a Service (the parent can't see the child). Note: In Spring Boot, this distinction is largely invisible as Boot creates a single context.</div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-tricky">Tricky</span><div class="iq-q-text">How would you get access to ApplicationContext inside a bean?</div><div class="iq-toggle">▾</div></div><div class="iq-body">Three ways:<br>1. <strong>@Autowired</strong> — inject <code>ApplicationContext</code> directly (Spring can inject itself)<br>2. <strong>Implement ApplicationContextAware</strong> — Spring calls <code>setApplicationContext()</code> after construction<br>3. <strong>@Autowired ApplicationContext</strong> — simplest in modern Spring<br><br>Use case: accessing beans dynamically at runtime (e.g., plugin system, strategy pattern where the bean name is determined at runtime).<div class="trick"><strong>⚡ Anti-pattern warning:</strong> Overusing ApplicationContext.getBean() is the "Service Locator" pattern — it hides dependencies and makes testing harder. Prefer DI.</div></div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="t2-memory">
+      <div class="sec-title"><span>◆</span> Memory Tip</div>
+      <div class="mem-tip"><div class="mem-icon">💡</div><div class="mem-text"><strong>BeanFactory = Engine. ApplicationContext = Full Car.</strong><br>You can drive with just the engine theoretically, but you need the full car (AC, GPS, radio = events, i18n, AOP) for real-world use. ApplicationContext IS-A BeanFactory — every ApplicationContext implements BeanFactory. Never use raw BeanFactory in production Spring apps.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  TOPIC 4 — XML vs Java Config                    ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<div class="topic-card" id="t3">
+  <div class="card-band">
+    <div class="band-left">
+      <div class="topic-num">04</div>
+      <div>
+        <div class="band-version" style="background:var(--amber-light);color:var(--amber);border:1px solid var(--amber-border)">Spring Config</div>
+        <div class="band-title">XML vs. Java-based Configuration</div>
+        <div class="band-oneliner">Evolution of Spring configuration — from verbose XML to concise @Configuration</div>
+      </div>
+    </div>
+    <div class="priority-badge" style="background:var(--amber-light);color:var(--amber);border:1px solid var(--amber-border)">🟡 Medium</div>
+  </div>
+  <div class="card-content">
+    <div class="section-tabs" id="tabs-3">
+      <div class="stab active" onclick="switchTab(3,'concepts')">📌 Concepts</div>
+      <div class="stab" onclick="switchTab(3,'code')">💻 Code</div>
+      <div class="stab" onclick="switchTab(3,'interview')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="switchTab(3,'memory')">🧠 Memory Tip</div>
+    </div>
+    <div class="tab-panel active" id="t3-concepts">
+      <div class="sec-title"><span>◆</span> Core Concepts</div>
+      <div class="key-points">
+        <div class="point"><div class="point-icon">📄</div><div class="point-text"><strong class="label-amber">XML Configuration</strong> — Original Spring approach (Spring 1.x). Beans defined in <code>applicationContext.xml</code>. Verbose but: externalized from code (can change without recompile), supports all Spring features, useful for legacy systems. Rarely used in new projects.</div></div>
+        <div class="point"><div class="point-icon">☕</div><div class="point-text"><strong class="label-green">Java-based Config (@Configuration)</strong> — Modern approach (Spring 3.x+). A class annotated <code>@Configuration</code> acts as the bean definition source. Methods annotated <code>@Bean</code> define beans. Benefits: type-safe, refactorable, IDE-friendly, can use Java logic in bean creation.</div></div>
+        <div class="point"><div class="point-icon">🔍</div><div class="point-text"><strong class="label-blue">Component Scanning (@ComponentScan)</strong> — Auto-detects classes with <code>@Component, @Service, @Repository, @Controller</code> in specified packages. Eliminates manual bean registration. Enabled by <code>@SpringBootApplication</code> in Boot.</div></div>
+        <div class="point"><div class="point-icon">🔀</div><div class="point-text"><strong class="label-violet">Mixing Both</strong> — You can import XML into Java config with <code>@ImportResource("classpath:beans.xml")</code> or import Java config classes with <code>@Import(OtherConfig.class)</code>. Common during legacy migration.</div></div>
+        <div class="point"><div class="point-icon">🔧</div><div class="point-text"><strong class="label-green">@Configuration vs @Component</strong> — Both register the class as a bean. Key difference: <code>@Configuration</code> classes are CGLIB-proxied — calls between <code>@Bean</code> methods are intercepted to return the same bean instance. <code>@Component</code> (with @Bean methods) is NOT proxied — each call creates a new object (called "lite mode").</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="t3-code">
+      <div class="sec-title"><span>◆</span> Memorizable Code</div>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="code-lang">XML vs JAVA CONFIG</div></div>
+        <pre><span class="cm">// ══ XML (legacy) ══════════════════════════════════</span>
+<span class="cm">// applicationContext.xml</span>
+<span class="cm">// &lt;bean id="userService" class="com.app.UserService"&gt;</span>
+<span class="cm">//   &lt;constructor-arg ref="userRepository"/&gt;</span>
+<span class="cm">// &lt;/bean&gt;</span>
+<span class="cm">// &lt;bean id="userRepository" class="com.app.UserRepository"/&gt;</span>
+
+<span class="cm">// ══ Java Config (modern) ══════════════════════════</span>
+<span class="an">@Configuration</span>
+<span class="an">@ComponentScan</span>(<span class="st">"com.app"</span>)              <span class="cm">// auto-detect @Component etc.</span>
+<span class="an">@PropertySource</span>(<span class="st">"classpath:app.properties"</span>)
+<span class="kw">public class</span> <span class="cl">AppConfig</span> {
+
+    <span class="an">@Bean</span>                               <span class="cm">// manually register bean</span>
+    <span class="kw">public</span> <span class="tp">DataSource</span> <span class="fn">dataSource</span>() {
+        <span class="tp">HikariDataSource</span> ds = <span class="kw">new</span> <span class="tp">HikariDataSource</span>();
+        ds.<span class="fn">setJdbcUrl</span>(<span class="st">"jdbc:mysql://localhost/mydb"</span>);
+        <span class="kw">return</span> ds;
+    }
+
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="tp">JdbcTemplate</span> <span class="fn">jdbcTemplate</span>(<span class="tp">DataSource</span> ds) {
+        <span class="kw">return new</span> <span class="tp">JdbcTemplate</span>(ds);    <span class="cm">// Spring injects dataSource()</span>
+    }
+}
+
+<span class="cm">// ── @Configuration CGLIB proxy magic ─────────────</span>
+<span class="an">@Configuration</span>
+<span class="kw">public class</span> <span class="cl">Config</span> {
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="tp">A</span> <span class="fn">a</span>() { <span class="kw">return new</span> <span class="tp">A</span>(); }
+
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="tp">B</span> <span class="fn">b</span>() {
+        <span class="kw">return new</span> <span class="tp">B</span>(<span class="fn">a</span>()); <span class="cm">// calls a() — Spring intercepts, returns</span>
+    }                        <span class="cm">// the SAME singleton 'a' bean, not new A()</span>
+}
+
+<span class="cm">// ── Import between configs ────────────────────────</span>
+<span class="an">@Configuration</span>
+<span class="an">@Import</span>({<span class="cl">SecurityConfig</span>.<span class="kw">class</span>, <span class="cl">DbConfig</span>.<span class="kw">class</span>})
+<span class="an">@ImportResource</span>(<span class="st">"classpath:legacy-beans.xml"</span>) <span class="cm">// import XML</span>
+<span class="kw">public class</span> <span class="cl">RootConfig</span> { }</pre>
+      </div>
+    </div>
+    <div class="tab-panel" id="t3-interview">
+      <div class="sec-title"><span>◆</span> Interview Questions</div>
+      <div class="iq-list">
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-tricky">Tricky</span><div class="iq-q-text">What's the difference between @Configuration and @Component when used with @Bean methods?</div><div class="iq-toggle">▾</div></div><div class="iq-body"><code>@Configuration</code> classes are enhanced by CGLIB — Spring subclasses them to intercept <code>@Bean</code> method calls. If <code>b()</code> calls <code>a()</code>, Spring returns the existing singleton <code>A</code> bean (not a new instance). This is called <strong>full mode</strong>. <code>@Component</code> with <code>@Bean</code> methods is <strong>lite mode</strong> — no CGLIB proxying. Each call to <code>a()</code> creates a brand new <code>A</code> instance. This is a subtle but important distinction — use <code>@Configuration</code> when beans depend on each other.<div class="trick"><strong>⚡ Watch out:</strong> If you annotate a config class with <code>@Configuration(proxyBeanMethods = false)</code> (default in Spring Boot auto-configs for performance), you get lite mode behavior.</div></div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-must">Must Know</span><div class="iq-q-text">What does @ComponentScan do and what happens without it?</div><div class="iq-toggle">▾</div></div><div class="iq-body"><code>@ComponentScan</code> tells Spring which packages to scan for stereotype annotations (<code>@Component, @Service, @Repository, @Controller, @RestController</code>). Without it, Spring only registers beans explicitly defined via <code>@Bean</code> in <code>@Configuration</code> classes. In Spring Boot, <code>@SpringBootApplication</code> includes <code>@ComponentScan</code> that scans the package of the main class and all sub-packages. Beans in packages outside this tree won't be auto-detected.</div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-concept">Concept</span><div class="iq-q-text">Why would you still use XML configuration in a modern Spring project?</div><div class="iq-toggle">▾</div></div><div class="iq-body">Rare but valid cases: <strong>1. Legacy codebases</strong> — gradual migration using <code>@ImportResource</code>. <strong>2. External configuration</strong> — XML is externalized from compiled code; you can change bean wiring without recompiling (though <code>@PropertySource</code> + externalized properties handles most of this). <strong>3. Third-party integration</strong> — some older frameworks or tools still generate or expect Spring XML config. In greenfield projects, always prefer Java config.</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="t3-memory">
+      <div class="sec-title"><span>◆</span> Memory Tip</div>
+      <div class="mem-tip"><div class="mem-icon">💡</div><div class="mem-text"><strong>XML = Blueprint on paper. Java Config = Blueprint in code.</strong><br>Both describe the same building, but Java config is type-safe (no XML typos), refactorable, and IDE-autocompleted. The key trick: <code>@Configuration</code> CGLIB-proxies your class so that <code>@Bean</code> method calls are intercepted — you always get the singleton, not a new object. Think of it as Spring saying "I'll take over that method call."</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  TOPIC 5 — Core Annotations                      ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<div class="topic-card" id="t4">
+  <div class="card-band">
+    <div class="band-left">
+      <div class="topic-num">05</div>
+      <div>
+        <div class="band-version" style="background:var(--spring-light);color:var(--spring);border:1px solid var(--spring-border)">Spring Core</div>
+        <div class="band-title">Core Annotations: @Component, @Autowired, @Qualifier, @Value</div>
+        <div class="band-oneliner">The annotation vocabulary every Spring developer must know cold</div>
+      </div>
+    </div>
+    <div class="priority-badge" style="background:#fff0f0;color:var(--red);border:1px solid #f0c0c0">🔴 Must Know</div>
+  </div>
+  <div class="card-content">
+    <div class="section-tabs" id="tabs-4">
+      <div class="stab active" onclick="switchTab(4,'concepts')">📌 Concepts</div>
+      <div class="stab" onclick="switchTab(4,'code')">💻 Code</div>
+      <div class="stab" onclick="switchTab(4,'interview')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="switchTab(4,'memory')">🧠 Memory Tip</div>
+    </div>
+    <div class="tab-panel active" id="t4-concepts">
+      <div class="sec-title"><span>◆</span> Core Concepts</div>
+      <div class="key-points">
+        <div class="point"><div class="point-icon">🏷️</div><div class="point-text"><strong class="label-green">@Component</strong> — Generic stereotype. Marks a class as a Spring-managed bean. Specialized aliases: <code>@Service</code> (business logic layer — semantic only), <code>@Repository</code> (data layer — adds exception translation), <code>@Controller</code> (MVC controller), <code>@RestController</code> = @Controller + @ResponseBody.</div></div>
+        <div class="point"><div class="point-icon">💉</div><div class="point-text"><strong class="label-green">@Autowired</strong> — Triggers Spring DI. Resolution order: <strong>1) by type</strong> → <strong>2) by name</strong> (if multiple matches). Can be on constructor (preferred), setter, or field. <code>required=false</code> makes it optional (inject null if not found). In Spring 4.3+, a single-constructor class is auto-wired without the annotation.</div></div>
+        <div class="point"><div class="point-icon">🎯</div><div class="point-text"><strong class="label-amber">@Qualifier</strong> — Disambiguates when multiple beans of the same type exist. Used alongside <code>@Autowired</code>. Specify the bean name: <code>@Qualifier("mysqlDataSource")</code>. You can also create <strong>custom qualifier annotations</strong> for cleaner code.</div></div>
+        <div class="point"><div class="point-icon">📋</div><div class="point-text"><strong class="label-blue">@Value</strong> — Injects values from properties files, environment variables, or Spring Expression Language (SpEL). Syntax: <code>@Value("${property.key}")</code> for property placeholder, <code>@Value("#{beanName.method()}")</code> for SpEL expression. Default value: <code>@Value("${key:defaultValue}")</code>.</div></div>
+        <div class="point"><div class="point-icon">🥇</div><div class="point-text"><strong class="label-violet">@Primary</strong> — Marks one bean as the default when multiple beans of the same type exist. Lower precedence than <code>@Qualifier</code> — if both are present, @Qualifier wins.</div></div>
+      </div>
+      <div class="gap-sm"></div>
+      <table class="ctable">
+        <tr><th>Stereotype</th><th>Layer</th><th>Extra Behavior</th></tr>
+        <tr><td><code>@Component</code></td><td>Any</td><td>Generic — just registers bean</td></tr>
+        <tr><td><code>@Service</code></td><td>Business</td><td>Semantic only (same as @Component)</td></tr>
+        <tr><td><code>@Repository</code></td><td>Data</td><td>Translates persistence exceptions to Spring's DataAccessException</td></tr>
+        <tr><td><code>@Controller</code></td><td>Web MVC</td><td>Returns view name, used with @RequestMapping</td></tr>
+        <tr><td><code>@RestController</code></td><td>Web REST</td><td>= @Controller + @ResponseBody (returns data, not view)</td></tr>
+      </table>
+    </div>
+    <div class="tab-panel" id="t4-code">
+      <div class="sec-title"><span>◆</span> Memorizable Code</div>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="code-lang">@COMPONENT · @AUTOWIRED · @QUALIFIER · @VALUE</div></div>
+        <pre><span class="cm">// ── Stereotype annotations ────────────────────────</span>
+<span class="an">@Repository</span>
+<span class="kw">public class</span> <span class="cl">UserRepository</span> { }  <span class="cm">// exception translation</span>
+
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">UserService</span> { }
+
+<span class="an">@RestController</span>                   <span class="cm">// = @Controller + @ResponseBody</span>
+<span class="kw">public class</span> <span class="cl">UserController</span> { }
+
+<span class="cm">// ── @Autowired resolution + @Qualifier ───────────</span>
+<span class="kw">public interface</span> <span class="cl">NotificationService</span> { <span class="kw">void</span> <span class="fn">send</span>(<span class="tp">String</span> msg); }
+
+<span class="an">@Service</span>(<span class="st">"emailNotifier"</span>)           <span class="cm">// explicit bean name</span>
+<span class="kw">public class</span> <span class="cl">EmailNotificationService</span> <span class="kw">implements</span> <span class="cl">NotificationService</span> { }
+
+<span class="an">@Service</span>(<span class="st">"smsNotifier"</span>)
+<span class="kw">public class</span> <span class="cl">SmsNotificationService</span> <span class="kw">implements</span> <span class="cl">NotificationService</span> { }
+
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">AlertService</span> {
+    <span class="kw">private final</span> <span class="tp">NotificationService</span> notifier;
+
+    <span class="kw">public</span> <span class="fn">AlertService</span>(<span class="an">@Qualifier</span>(<span class="st">"emailNotifier"</span>) <span class="tp">NotificationService</span> n) {
+        <span class="kw">this</span>.notifier = n;  <span class="cm">// Spring picks emailNotifier</span>
+    }
+}
+
+<span class="cm">// ── @Primary — default when no qualifier ─────────</span>
+<span class="an">@Service</span>
+<span class="an">@Primary</span>                           <span class="cm">// default for NotificationService</span>
+<span class="kw">public class</span> <span class="cl">EmailNotificationService</span> <span class="kw">implements</span> <span class="cl">NotificationService</span> { }
+
+<span class="cm">// ── @Value ────────────────────────────────────────</span>
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">AppSettings</span> {
+    <span class="an">@Value</span>(<span class="st">"${app.name}"</span>)                  <span class="cm">// from application.properties</span>
+    <span class="kw">private</span> <span class="tp">String</span> appName;
+
+    <span class="an">@Value</span>(<span class="st">"${app.max-retries:3}"</span>)         <span class="cm">// with default value</span>
+    <span class="kw">private int</span> maxRetries;
+
+    <span class="an">@Value</span>(<span class="st">"${app.feature.enabled:false}"</span>) <span class="cm">// boolean</span>
+    <span class="kw">private boolean</span> featureEnabled;
+
+    <span class="an">@Value</span>(<span class="st">"#{systemProperties['os.name']}"</span>) <span class="cm">// SpEL expression</span>
+    <span class="kw">private</span> <span class="tp">String</span> osName;
+
+    <span class="an">@Value</span>(<span class="st">"#{T(java.lang.Math).PI}"</span>)       <span class="cm">// SpEL: static method</span>
+    <span class="kw">private double</span> pi;
+}</pre>
+      </div>
+    </div>
+    <div class="tab-panel" id="t4-interview">
+      <div class="sec-title"><span>◆</span> Interview Questions</div>
+      <div class="iq-list">
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-must">Must Know</span><div class="iq-q-text">What is the difference between @Component, @Service, and @Repository?</div><div class="iq-toggle">▾</div></div><div class="iq-body">All three are specializations of <code>@Component</code> — they register the class as a Spring bean and are detected by component scanning. The differences are: <strong>@Service</strong> is purely semantic — communicates intent (business logic layer) but has no additional behavior. <strong>@Repository</strong> adds one concrete feature: it enables Spring's <strong>persistence exception translation</strong> — vendor-specific exceptions (like Hibernate's <code>HibernateException</code>) are translated to Spring's <code>DataAccessException</code> hierarchy, making your code database-agnostic. <strong>@Controller</strong> marks MVC controllers and enables handler mapping detection.</div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-tricky">Tricky</span><div class="iq-q-text">What's the difference between @Autowired resolution by type vs by name?</div><div class="iq-toggle">▾</div></div><div class="iq-body">Spring first tries to match by <strong>type</strong>. If exactly one bean of that type exists, it's injected. If multiple beans exist, Spring tries to match by <strong>field/param name</strong> as the bean name. If that also fails, it throws <code>NoUniqueBeanDefinitionException</code>. Use <code>@Qualifier</code> to be explicit. Example: if you have <code>EmailService emailService</code> and two beans of type <code>EmailService</code> — one named "emailService" and one named "smsEmailService" — Spring picks "emailService" by name match on the field.<div class="trick"><strong>⚡ Tricky:</strong> Changing a field name from <code>emailNotifier</code> to <code>notifier</code> can break autowiring in code that relied on name-matching as the tiebreaker!</div></div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-tricky">Tricky</span><div class="iq-q-text">What is the difference between @Value("${...}") and @Value("#{...}")?</div><div class="iq-toggle">▾</div></div><div class="iq-body"><code>${...}</code> is a <strong>property placeholder</strong> — resolves a key from a properties file, environment variable, or system property. Simple string substitution.<br><code>#{...}</code> is <strong>Spring Expression Language (SpEL)</strong> — a full expression language that can reference other beans, call methods, evaluate math, access system properties, etc. Example: <code>#{userService.getDefaultTimeout()}</code> calls a method on a bean. You can also combine them: <code>#{'${app.name}'.toUpperCase()}</code>.</div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-compare">Compare</span><div class="iq-q-text">@Primary vs @Qualifier — which takes precedence?</div><div class="iq-toggle">▾</div></div><div class="iq-body"><code>@Qualifier</code> always wins over <code>@Primary</code>. <code>@Primary</code> is a <em>default preference</em> — used when no qualifier is specified and multiple beans of the same type exist. <code>@Qualifier</code> is an <em>explicit selection</em> — it overrides any primary designation. Think of it as: @Primary = "pick me if you don't have an opinion"; @Qualifier = "I specifically want this one."</div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-must">Must Know</span><div class="iq-q-text">What happens if @Autowired finds no matching bean? Or too many?</div><div class="iq-toggle">▾</div></div><div class="iq-body"><strong>No matching bean:</strong> throws <code>NoSuchBeanDefinitionException</code> at startup. Prevent with <code>@Autowired(required=false)</code> — Spring injects null instead. Or use <code>Optional&lt;T&gt;</code> as the parameter type — Spring injects an empty Optional if no bean found.<br><strong>Multiple matching beans:</strong> throws <code>NoUniqueBeanDefinitionException</code>. Fix with <code>@Qualifier</code>, <code>@Primary</code>, or rename the field/param to match the desired bean name. You can also inject <code>List&lt;T&gt;</code> or <code>Map&lt;String,T&gt;</code> to get all matching beans.</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="t4-memory">
+      <div class="sec-title"><span>◆</span> Memory Tip</div>
+      <div class="mem-tip"><div class="mem-icon">💡</div><div class="mem-text"><strong>Autowiring resolution: Type → Name → Qualifier → Error.</strong><br>Spring is like a smart recruiter: first looks for candidates with the right skills (type). If many qualify, picks by matching job title (field name). If still ambiguous, you need a specific reference letter (@Qualifier). @Primary = preferred candidate when no specific request.<br><br><strong>Stereotype layers:</strong> Controller (door) → Service (worker) → Repository (vault). @Repository is the only one with extra power — it translates vendor exceptions.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  TOPIC 6 — AOP Concepts                         ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<div class="topic-card" id="t5">
+  <div class="card-band">
+    <div class="band-left">
+      <div class="topic-num">06</div>
+      <div>
+        <div class="band-version" style="background:var(--violet-light);color:var(--violet);border:1px solid var(--violet-border)">Spring AOP</div>
+        <div class="band-title">Pointcuts, Advice, Joinpoints &amp; Aspects</div>
+        <div class="band-oneliner">Cross-cutting concerns solved elegantly — logging, security, and transactions without code pollution</div>
+      </div>
+    </div>
+    <div class="priority-badge" style="background:#fff0f0;color:var(--red);border:1px solid #f0c0c0">🔴 Must Know</div>
+  </div>
+  <div class="card-content">
+    <div class="section-tabs" id="tabs-5">
+      <div class="stab active" onclick="switchTab(5,'concepts')">📌 Concepts</div>
+      <div class="stab" onclick="switchTab(5,'code')">💻 Code</div>
+      <div class="stab" onclick="switchTab(5,'interview')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="switchTab(5,'memory')">🧠 Memory Tip</div>
+    </div>
+    <div class="tab-panel active" id="t5-concepts">
+      <div class="sec-title"><span>◆</span> AOP Vocabulary — Must Know All 5</div>
+      <div class="key-points">
+        <div class="point"><div class="point-icon">📍</div><div class="point-text"><strong class="label-violet">Joinpoint</strong> — A specific point in program execution where AOP can plug in. In Spring AOP, joinpoints are always <strong>method executions</strong>. Spring AOP does NOT support field-level or constructor-level joinpoints (AspectJ does).</div></div>
+        <div class="point"><div class="point-icon">🔍</div><div class="point-text"><strong class="label-blue">Pointcut</strong> — An expression that <strong>selects which joinpoints</strong> to intercept. Uses AspectJ pointcut expression language. Example: <code>execution(* com.app.service.*.*(..))</code> — all methods in all service classes. Pointcut = filter on joinpoints.</div></div>
+        <div class="point"><div class="point-icon">💊</div><div class="point-text"><strong class="label-green">Advice</strong> — The <strong>action to take</strong> at a matched joinpoint. Types: <code>@Before</code> (before method), <code>@After</code> (after method, always), <code>@AfterReturning</code> (after successful return), <code>@AfterThrowing</code> (after exception), <code>@Around</code> (wraps the method — most powerful, must call <code>proceed()</code>).</div></div>
+        <div class="point"><div class="point-icon">🏗️</div><div class="point-text"><strong class="label-amber">Aspect</strong> — A class that contains <strong>Pointcuts + Advice</strong>. Annotated with <code>@Aspect</code>. It's the modularization of a cross-cutting concern (e.g., <code>LoggingAspect</code>, <code>SecurityAspect</code>).</div></div>
+        <div class="point"><div class="point-icon">🎭</div><div class="point-text"><strong class="label-red">Weaving</strong> — The process of linking aspects with the application code. Spring AOP uses <strong>runtime proxy weaving</strong> (at bean creation via BeanPostProcessor). AspectJ also supports compile-time and load-time weaving for finer control.</div></div>
+        <div class="point"><div class="point-icon">🛡️</div><div class="point-text"><strong class="label-violet">Spring AOP vs AspectJ</strong> — Spring AOP: proxy-based, only method execution joinpoints, simpler, sufficient for 95% of use cases. AspectJ: bytecode manipulation, all joinpoints (fields, constructors, static methods), more powerful, more complex setup.</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="t5-code">
+      <div class="sec-title"><span>◆</span> Memorizable Code</div>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="code-lang">AOP CONCEPTS — POINTCUT EXPRESSIONS</div></div>
+        <pre><span class="cm">// ── Pointcut Expression Patterns ─────────────────</span>
+<span class="cm">// execution([modifier] return-type [class].method(params) [throws])</span>
+
+<span class="st">"execution(* com.app.service.*.*(..))"</span>
+<span class="cm">// Any method, any return type, any class in service pkg, any args</span>
+
+<span class="st">"execution(public String com.app.UserService.find*(String))"</span>
+<span class="cm">// Public methods starting with "find", returning String, one String arg</span>
+
+<span class="st">"within(com.app.service..*)"</span>
+<span class="cm">// All methods in service package and sub-packages</span>
+
+<span class="st">"@annotation(org.springframework.transaction.annotation.Transactional)"</span>
+<span class="cm">// Methods annotated with @Transactional</span>
+
+<span class="st">"@within(org.springframework.stereotype.Service)"</span>
+<span class="cm">// All methods in classes annotated with @Service</span>
+
+<span class="st">"bean(*Service)"</span>                 <span class="cm">// Spring AOP only: beans named *Service</span>
+
+<span class="cm">// ── Combining pointcuts ───────────────────────────</span>
+<span class="st">"execution(* com.app..*(..)) && !execution(* com.app..*get*(..))'"</span>
+<span class="cm">// All methods in com.app but NOT getters</span>
+
+<span class="cm">// ── Advice types summary ──────────────────────────</span>
+<span class="cm">//  @Before        → runs BEFORE method</span>
+<span class="cm">//  @After         → runs AFTER method (like finally)</span>
+<span class="cm">//  @AfterReturning→ runs only on SUCCESS (can access return value)</span>
+<span class="cm">//  @AfterThrowing → runs only on EXCEPTION (can access exception)</span>
+<span class="cm">//  @Around        → wraps method; MUST call joinPoint.proceed()</span></pre>
+      </div>
+    </div>
+    <div class="tab-panel" id="t5-interview">
+      <div class="sec-title"><span>◆</span> Interview Questions</div>
+      <div class="iq-list">
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-must">Must Know</span><div class="iq-q-text">Explain the difference between a Joinpoint and a Pointcut.</div><div class="iq-toggle">▾</div></div><div class="iq-body">A <strong>Joinpoint</strong> is any specific moment during execution where advice could be applied — in Spring AOP, that's every method call. A <strong>Pointcut</strong> is the filter/selector that says "out of all possible joinpoints, apply advice to these specific ones." Analogy: all intersections in a city are joinpoints; a Pointcut is the traffic camera placement rule (e.g., "install cameras at all intersections on Main Street").</div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-tricky">Tricky</span><div class="iq-q-text">Why doesn't AOP work when you call a method on 'this' within the same bean?</div><div class="iq-toggle">▾</div></div><div class="iq-body">Spring AOP works by wrapping your bean in a <strong>proxy</strong>. When external code calls your bean, it goes through the proxy (which applies advice). But when your method calls another method on <code>this</code>, it's a <strong>direct Java call</strong> — it bypasses the proxy entirely. So <code>@Transactional</code>, <code>@Cacheable</code>, and custom aspects won't apply to self-invocations. Fixes: inject the bean into itself (<code>@Lazy @Autowired MyBean self</code>), use <code>AopContext.currentProxy()</code>, or use AspectJ load-time weaving.<div class="trick"><strong>⚡ This is the #1 Spring AOP gotcha in interviews and production bugs.</strong></div></div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-compare">Compare</span><div class="iq-q-text">What is the difference between Spring AOP and AspectJ?</div><div class="iq-toggle">▾</div></div><div class="iq-body"><strong>Spring AOP:</strong> Runtime proxy-based, only intercepts method executions on Spring-managed beans, simpler setup (just add spring-aspects dependency), no compile step needed. Limited to public methods on proxy-eligible beans.<br><strong>AspectJ:</strong> Full AOP framework, can intercept constructors, field access, static methods, private methods — any joinpoint. Requires compile-time weaving (ajc compiler) or load-time weaving (Java agent). Spring can use AspectJ annotations with its own proxy mechanism or full AspectJ weaving.</div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-tricky">Tricky</span><div class="iq-q-text">What are the limitations of Spring AOP? When does it NOT work?</div><div class="iq-toggle">▾</div></div><div class="iq-body">Spring AOP does NOT work for: <strong>1. Self-invocation</strong> (calling methods on <code>this</code>). <strong>2. Private methods</strong> (proxies can't override private methods). <strong>3. Final classes/methods</strong> (CGLIB proxying requires subclassing). <strong>4. Non-Spring beans</strong> (objects created with <code>new</code> are not proxied). <strong>5. Static methods</strong> (not intercepted by proxy). <strong>6. Inner classes</strong> in some cases. If you need any of these, use AspectJ weaving.</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="t5-memory">
+      <div class="sec-title"><span>◆</span> Memory Tip</div>
+      <div class="mem-tip"><div class="mem-icon">💡</div><div class="mem-text"><strong>AOP in one sentence: "Intercept method calls to add behavior without changing the class."</strong><br><br>Mnemonic — <strong>JWAPA:</strong> Joinpoint (where it could happen) → Pointcut (where it WILL happen) → Advice (what to do) → Aspect (the class holding it all) → Weaving (how it's applied).<br><br>Advice order to remember: <strong>Around wraps everything. Before runs first. After runs last (always). AfterReturning/Throwing run in the middle based on outcome.</strong></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  TOPIC 7 — AOP Annotations                       ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<div class="topic-card" id="t6">
+  <div class="card-band">
+    <div class="band-left">
+      <div class="topic-num">07</div>
+      <div>
+        <div class="band-version" style="background:var(--violet-light);color:var(--violet);border:1px solid var(--violet-border)">Spring AOP</div>
+        <div class="band-title">AOP Annotations: @Aspect, @Before, @After, @Around</div>
+        <div class="band-oneliner">Writing real aspects — logging, timing, and auditing in practice</div>
+      </div>
+    </div>
+    <div class="priority-badge" style="background:var(--amber-light);color:var(--amber);border:1px solid var(--amber-border)">🟡 Medium</div>
+  </div>
+  <div class="card-content">
+    <div class="section-tabs" id="tabs-6">
+      <div class="stab active" onclick="switchTab(6,'concepts')">📌 Concepts</div>
+      <div class="stab" onclick="switchTab(6,'code')">💻 Code</div>
+      <div class="stab" onclick="switchTab(6,'interview')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="switchTab(6,'memory')">🧠 Memory Tip</div>
+    </div>
+    <div class="tab-panel active" id="t6-concepts">
+      <div class="sec-title"><span>◆</span> Advice Types Deep Dive</div>
+      <div class="key-points">
+        <div class="point"><div class="point-icon">▶️</div><div class="point-text"><strong class="label-violet">@Before</strong> — Runs before the method. Cannot prevent method execution (use @Around for that). Can access method args via <code>JoinPoint</code>. Common uses: input validation, logging, security checks.</div></div>
+        <div class="point"><div class="point-icon">⏹️</div><div class="point-text"><strong class="label-violet">@After</strong> — Runs after method completes — <strong>always</strong>, whether it returned normally or threw an exception. Like a <code>finally</code> block. Cannot access return value.</div></div>
+        <div class="point"><div class="point-icon">✅</div><div class="point-text"><strong class="label-green">@AfterReturning</strong> — Runs only when method returns <strong>successfully</strong>. Can access and inspect the return value via <code>returning</code> attribute. Cannot modify the return value (use @Around for that).</div></div>
+        <div class="point"><div class="point-icon">💥</div><div class="point-text"><strong class="label-red">@AfterThrowing</strong> — Runs only when method throws an <strong>exception</strong>. Can access the exception via <code>throwing</code> attribute. Cannot suppress the exception (use @Around for that). Common use: error logging.</div></div>
+        <div class="point"><div class="point-icon">🔄</div><div class="point-text"><strong class="label-amber">@Around</strong> — Most powerful. Wraps the entire method. <strong>Must call <code>joinPoint.proceed()</code></strong> to execute the actual method (or not — to completely prevent execution). Can modify args, return value, and catch/suppress exceptions. Used for: caching, transactions, retries, timing.</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="t6-code">
+      <div class="sec-title"><span>◆</span> Memorizable Code</div>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="code-lang">FULL ASPECT EXAMPLE — LOGGING + TIMING + AUDIT</div></div>
+        <pre><span class="an">@Aspect</span>
+<span class="an">@Component</span>                         <span class="cm">// must be a Spring bean!</span>
+<span class="kw">public class</span> <span class="cl">LoggingAspect</span> {
+
+    <span class="cm">// ── Reusable pointcut ─────────────────────────</span>
+    <span class="an">@Pointcut</span>(<span class="st">"execution(* com.app.service.*.*(..))"</span>)
+    <span class="kw">public void</span> <span class="fn">serviceLayer</span>() {}    <span class="cm">// empty method, just a handle</span>
+
+    <span class="cm">// ── @Before ───────────────────────────────────</span>
+    <span class="an">@Before</span>(<span class="st">"serviceLayer()"</span>)
+    <span class="kw">public void</span> <span class="fn">logBefore</span>(<span class="tp">JoinPoint</span> jp) {
+        <span class="tp">String</span> method = jp.<span class="fn">getSignature</span>().<span class="fn">getName</span>();
+        <span class="tp">Object</span>[] args = jp.<span class="fn">getArgs</span>();
+        log.<span class="fn">info</span>(<span class="st">"Calling: {} with args: {}"</span>, method, args);
+    }
+
+    <span class="cm">// ── @AfterReturning — access return value ─────</span>
+    <span class="an">@AfterReturning</span>(pointcut = <span class="st">"serviceLayer()"</span>, returning = <span class="st">"result"</span>)
+    <span class="kw">public void</span> <span class="fn">logReturn</span>(<span class="tp">JoinPoint</span> jp, <span class="tp">Object</span> result) {
+        log.<span class="fn">info</span>(<span class="st">"Returned: {}"</span>, result);   <span class="cm">// can inspect, NOT modify</span>
+    }
+
+    <span class="cm">// ── @AfterThrowing — access exception ─────────</span>
+    <span class="an">@AfterThrowing</span>(pointcut = <span class="st">"serviceLayer()"</span>, throwing = <span class="st">"ex"</span>)
+    <span class="kw">public void</span> <span class="fn">logError</span>(<span class="tp">JoinPoint</span> jp, <span class="tp">Exception</span> ex) {
+        log.<span class="fn">error</span>(<span class="st">"Exception in {}: {}"</span>, jp.<span class="fn">getSignature</span>(), ex.<span class="fn">getMessage</span>());
+    }
+
+    <span class="cm">// ── @Around — timing + modify return + retry ──</span>
+    <span class="an">@Around</span>(<span class="st">"serviceLayer()"</span>)
+    <span class="kw">public</span> <span class="tp">Object</span> <span class="fn">timeExecution</span>(<span class="tp">ProceedingJoinPoint</span> pjp) <span class="kw">throws</span> <span class="tp">Throwable</span> {
+        <span class="kw">long</span> start = <span class="tp">System</span>.<span class="fn">currentTimeMillis</span>();
+        <span class="kw">try</span> {
+            <span class="tp">Object</span> result = pjp.<span class="fn">proceed</span>();       <span class="cm">// ← MUST call this</span>
+            <span class="kw">long</span> elapsed = <span class="tp">System</span>.<span class="fn">currentTimeMillis</span>() - start;
+            log.<span class="fn">info</span>(<span class="st">"{} took {}ms"</span>, pjp.<span class="fn">getSignature</span>(), elapsed);
+            <span class="kw">return</span> result;                        <span class="cm">// can modify return value</span>
+        } <span class="kw">catch</span> (<span class="tp">Exception</span> e) {
+            log.<span class="fn">error</span>(<span class="st">"Failed after {}ms"</span>, <span class="tp">System</span>.<span class="fn">currentTimeMillis</span>() - start);
+            <span class="kw">throw</span> e;                              <span class="cm">// re-throw or suppress</span>
+        }
+    }
+
+    <span class="cm">// ── Custom annotation-based pointcut ──────────</span>
+    <span class="an">@Around</span>(<span class="st">"@annotation(com.app.annotation.Audited)"</span>)
+    <span class="kw">public</span> <span class="tp">Object</span> <span class="fn">auditMethod</span>(<span class="tp">ProceedingJoinPoint</span> pjp) <span class="kw">throws</span> <span class="tp">Throwable</span> {
+        <span class="fn">saveAuditLog</span>(pjp.<span class="fn">getSignature</span>(), pjp.<span class="fn">getArgs</span>());
+        <span class="kw">return</span> pjp.<span class="fn">proceed</span>();
+    }
+}</pre>
+      </div>
+    </div>
+    <div class="tab-panel" id="t6-interview">
+      <div class="sec-title"><span>◆</span> Interview Questions</div>
+      <div class="iq-list">
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-must">Must Know</span><div class="iq-q-text">What happens if you forget to call proceed() in an @Around advice?</div><div class="iq-toggle">▾</div></div><div class="iq-body">The actual method is <strong>never executed</strong>. The @Around advice completely replaces the method. If you return null without calling <code>proceed()</code>, the caller gets null (or default value for primitives). This is intentional in some cases — like a caching aspect that returns a cached value without calling the real method. But forgetting it accidentally is a common bug that can silently break functionality with no exception thrown.</div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-compare">Compare</span><div class="iq-q-text">When should you use @Around vs @Before + @AfterReturning?</div><div class="iq-toggle">▾</div></div><div class="iq-body">Use <strong>@Around</strong> when you need to: modify the return value, modify method arguments, conditionally skip method execution, implement retry logic, catch and handle exceptions, measure timing (need both before and after in same method). Use <strong>@Before/@After</strong> when you only need to observe (logging, auditing) without modifying behavior — simpler and less error-prone since you can't accidentally prevent method execution.</div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-tricky">Tricky</span><div class="iq-q-text">If multiple aspects apply to the same method, what is the execution order?</div><div class="iq-toggle">▾</div></div><div class="iq-body">If multiple aspects apply, order is <strong>undefined by default</strong>. Control it with <code>@Order(n)</code> on the aspect class — lower value = higher priority. High priority aspects run their @Before first, their @After last (like nested try-finally blocks). Example: <code>@Order(1)</code> SecurityAspect wraps <code>@Order(2)</code> LoggingAspect. Security runs @Before first, then Logging @Before, then the method, then Logging @After, then Security @After.<div class="trick"><strong>⚡ Think of it like Russian nesting dolls — outer aspect wraps inner aspects.</strong></div></div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="t6-memory">
+      <div class="sec-title"><span>◆</span> Memory Tip</div>
+      <div class="mem-tip"><div class="mem-icon">💡</div><div class="mem-text"><strong>Advice types = different moments in a restaurant visit:</strong><br>@Before = waiter checks reservation before seating you.<br>@After = staff clears the table (always, whether you liked the food or not).<br>@AfterReturning = chef asks for feedback only if the meal was good.<br>@AfterThrowing = manager apologizes only if something went wrong.<br>@Around = the entire maître d' experience — controls everything from arrival to departure.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  TOPIC 8 — JDBC Template                        ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<div class="topic-card" id="t7">
+  <div class="card-band">
+    <div class="band-left">
+      <div class="topic-num">08</div>
+      <div>
+        <div class="band-version" style="background:var(--blue-light);color:var(--blue);border:1px solid var(--blue-border)">Spring Data</div>
+        <div class="band-title">JDBC Template</div>
+        <div class="band-oneliner">JDBC without the boilerplate — connection, statement, result set handling all done for you</div>
+      </div>
+    </div>
+    <div class="priority-badge" style="background:var(--amber-light);color:var(--amber);border:1px solid var(--amber-border)">🟡 Medium</div>
+  </div>
+  <div class="card-content">
+    <div class="section-tabs" id="tabs-7">
+      <div class="stab active" onclick="switchTab(7,'concepts')">📌 Concepts</div>
+      <div class="stab" onclick="switchTab(7,'code')">💻 Code</div>
+      <div class="stab" onclick="switchTab(7,'interview')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="switchTab(7,'memory')">🧠 Memory Tip</div>
+    </div>
+    <div class="tab-panel active" id="t7-concepts">
+      <div class="sec-title"><span>◆</span> Core Concepts</div>
+      <div class="key-points">
+        <div class="point"><div class="point-icon">🧹</div><div class="point-text"><strong class="label-blue">What JdbcTemplate solves</strong> — Raw JDBC requires: open connection → create PreparedStatement → execute → iterate ResultSet → handle exceptions → close ResultSet → close Statement → close Connection. JdbcTemplate handles ALL resource management and exception handling automatically via the <strong>Template Method pattern</strong>.</div></div>
+        <div class="point"><div class="point-icon">🗺️</div><div class="point-text"><strong class="label-green">RowMapper&lt;T&gt;</strong> — Maps each ResultSet row to an object. Implement <code>mapRow(ResultSet rs, int rowNum)</code>. Use <code>BeanPropertyRowMapper.newInstance(User.class)</code> for automatic mapping when column names match field names.</div></div>
+        <div class="point"><div class="point-icon">📊</div><div class="point-text"><strong class="label-amber">Key Methods</strong> — <code>queryForObject(sql, type, args)</code> — expects exactly 1 row. <code>query(sql, rowMapper, args)</code> — returns List. <code>queryForList(sql, type)</code> — returns List of scalar values. <code>update(sql, args)</code> — INSERT/UPDATE/DELETE, returns rows affected. <code>batchUpdate(sql, batchArgs)</code> — bulk operations.</div></div>
+        <div class="point"><div class="point-icon">⚠️</div><div class="point-text"><strong class="label-red">Exception Translation</strong> — JdbcTemplate converts <strong>checked SQLExceptions</strong> into <strong>unchecked DataAccessExceptions</strong>. No more try-catch-SQLException boilerplate. The exception hierarchy is database-agnostic (e.g., <code>DuplicateKeyException, DataIntegrityViolationException</code>).</div></div>
+        <div class="point"><div class="point-icon">🔄</div><div class="point-text"><strong class="label-violet">NamedParameterJdbcTemplate</strong> — Extension that uses named params (<code>:name</code>) instead of <code>?</code> positional params. More readable for complex queries. Pass params via <code>MapSqlParameterSource</code> or <code>SqlParameterSource</code>.</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="t7-code">
+      <div class="sec-title"><span>◆</span> Memorizable Code</div>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="code-lang">JDBC TEMPLATE — CRUD PATTERNS</div></div>
+        <pre><span class="an">@Repository</span>
+<span class="kw">public class</span> <span class="cl">UserRepository</span> {
+    <span class="kw">private final</span> <span class="tp">JdbcTemplate</span> jdbc;
+
+    <span class="kw">public</span> <span class="fn">UserRepository</span>(<span class="tp">JdbcTemplate</span> jdbc) { <span class="kw">this</span>.jdbc = jdbc; }
+
+    <span class="cm">// ── SELECT single object ──────────────────────</span>
+    <span class="kw">public</span> <span class="tp">User</span> <span class="fn">findById</span>(<span class="kw">long</span> id) {
+        <span class="kw">return</span> jdbc.<span class="fn">queryForObject</span>(
+            <span class="st">"SELECT * FROM users WHERE id = ?"</span>,
+            <span class="kw">new</span> <span class="tp">BeanPropertyRowMapper</span>&lt;&gt;(<span class="tp">User</span>.<span class="kw">class</span>),
+            id
+        );  <span class="cm">// throws EmptyResultDataAccessException if not found</span>
+    }
+
+    <span class="cm">// ── SELECT list ───────────────────────────────</span>
+    <span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">User</span>&gt; <span class="fn">findAll</span>() {
+        <span class="kw">return</span> jdbc.<span class="fn">query</span>(
+            <span class="st">"SELECT * FROM users"</span>,
+            (rs, rowNum) -> <span class="kw">new</span> <span class="tp">User</span>(   <span class="cm">// inline RowMapper lambda</span>
+                rs.<span class="fn">getLong</span>(<span class="st">"id"</span>),
+                rs.<span class="fn">getString</span>(<span class="st">"name"</span>),
+                rs.<span class="fn">getString</span>(<span class="st">"email"</span>)
+            )
+        );
+    }
+
+    <span class="cm">// ── SELECT scalar value ───────────────────────</span>
+    <span class="kw">public int</span> <span class="fn">countUsers</span>() {
+        <span class="kw">return</span> jdbc.<span class="fn">queryForObject</span>(<span class="st">"SELECT COUNT(*) FROM users"</span>, <span class="tp">Integer</span>.<span class="kw">class</span>);
+    }
+
+    <span class="cm">// ── INSERT / UPDATE / DELETE ──────────────────</span>
+    <span class="kw">public int</span> <span class="fn">save</span>(<span class="tp">User</span> user) {
+        <span class="kw">return</span> jdbc.<span class="fn">update</span>(
+            <span class="st">"INSERT INTO users (name, email) VALUES (?, ?)"</span>,
+            user.<span class="fn">getName</span>(), user.<span class="fn">getEmail</span>()
+        );  <span class="cm">// returns rows affected</span>
+    }
+
+    <span class="cm">// ── Named params (NamedParameterJdbcTemplate) ─</span>
+    <span class="an">@Autowired</span>
+    <span class="kw">private</span> <span class="tp">NamedParameterJdbcTemplate</span> namedJdbc;
+
+    <span class="kw">public</span> <span class="tp">User</span> <span class="fn">findByEmail</span>(<span class="tp">String</span> email) {
+        <span class="tp">MapSqlParameterSource</span> params = <span class="kw">new</span> <span class="tp">MapSqlParameterSource</span>()
+            .<span class="fn">addValue</span>(<span class="st">"email"</span>, email);
+        <span class="kw">return</span> namedJdbc.<span class="fn">queryForObject</span>(
+            <span class="st">"SELECT * FROM users WHERE email = :email"</span>,
+            params, <span class="kw">new</span> <span class="tp">BeanPropertyRowMapper</span>&lt;&gt;(<span class="tp">User</span>.<span class="kw">class</span>)
+        );
+    }
+
+    <span class="cm">// ── Batch insert ──────────────────────────────</span>
+    <span class="kw">public int</span>[] <span class="fn">batchInsert</span>(<span class="tp">List</span>&lt;<span class="tp">User</span>&gt; users) {
+        <span class="kw">return</span> jdbc.<span class="fn">batchUpdate</span>(
+            <span class="st">"INSERT INTO users (name, email) VALUES (?, ?)"</span>,
+            users, users.<span class="fn">size</span>(),
+            (ps, user) -> {
+                ps.<span class="fn">setString</span>(<span class="nb">1</span>, user.<span class="fn">getName</span>());
+                ps.<span class="fn">setString</span>(<span class="nb">2</span>, user.<span class="fn">getEmail</span>());
+            }
+        );
+    }
+}</pre>
+      </div>
+    </div>
+    <div class="tab-panel" id="t7-interview">
+      <div class="sec-title"><span>◆</span> Interview Questions</div>
+      <div class="iq-list">
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-must">Must Know</span><div class="iq-q-text">What does JdbcTemplate handle automatically that raw JDBC doesn't?</div><div class="iq-toggle">▾</div></div><div class="iq-body">JdbcTemplate eliminates: <strong>1.</strong> Opening/closing connections (returns to pool). <strong>2.</strong> Creating and closing Statements/PreparedStatements. <strong>3.</strong> Iterating ResultSets. <strong>4.</strong> Exception handling — converts checked <code>SQLException</code> to unchecked <code>DataAccessException</code>. <strong>5.</strong> Transaction management integration. You only provide the SQL and the RowMapper — JdbcTemplate handles the rest via the Template Method pattern.</div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-tricky">Tricky</span><div class="iq-q-text">What exception does queryForObject throw when no row is found? How do you handle it?</div><div class="iq-toggle">▾</div></div><div class="iq-body"><code>queryForObject</code> throws <code>EmptyResultDataAccessException</code> (subclass of DataAccessException) when no rows are returned, and <code>IncorrectResultSizeDataAccessException</code> when more than one row is returned. Best practice: wrap in a try-catch or use a query() + stream().findFirst() approach to return Optional: <code>jdbc.query(sql, rowMapper, id).stream().findFirst()</code> — returns <code>Optional&lt;User&gt;</code> cleanly.<div class="trick"><strong>⚡ Senior tip:</strong> Never use queryForObject when 0 results is a valid outcome — it will throw, not return null.</div></div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-compare">Compare</span><div class="iq-q-text">RowMapper vs ResultSetExtractor — when to use which?</div><div class="iq-toggle">▾</div></div><div class="iq-body"><strong>RowMapper&lt;T&gt;</strong>: Maps one ResultSet row to one object. Called per row. Spring handles the iteration. Use for standard queries returning a list of objects.<br><strong>ResultSetExtractor&lt;T&gt;</strong>: Gives you the entire ResultSet — you handle iteration yourself. Use when: one result set should produce a complex object (e.g., parent + children), you need to process rows in groups, or you need special traversal logic. More flexible but more code.</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="t7-memory">
+      <div class="sec-title"><span>◆</span> Memory Tip</div>
+      <div class="mem-tip"><div class="mem-icon">💡</div><div class="mem-text"><strong>JdbcTemplate = JDBC with the boring parts automated.</strong><br>You bring: SQL + RowMapper. Spring brings: connection, cleanup, exception handling.<br><br>Key method map: <strong>queryForObject</strong> = one row, one type. <strong>query</strong> = multiple rows, List. <strong>queryForList</strong> = list of scalars. <strong>update</strong> = INSERT/UPDATE/DELETE. <strong>batchUpdate</strong> = bulk operations.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  TOPIC 9 — Spring ORM with Hibernate             ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<div class="topic-card" id="t8">
+  <div class="card-band">
+    <div class="band-left">
+      <div class="topic-num">09</div>
+      <div>
+        <div class="band-version" style="background:var(--spring-light);color:var(--spring);border:1px solid var(--spring-border)">Spring ORM</div>
+        <div class="band-title">Spring ORM with Hibernate</div>
+        <div class="band-oneliner">JPA + Hibernate — the standard way to persist objects in enterprise Java</div>
+      </div>
+    </div>
+    <div class="priority-badge" style="background:#fff0f0;color:var(--red);border:1px solid #f0c0c0">🔴 Must Know</div>
+  </div>
+  <div class="card-content">
+    <div class="section-tabs" id="tabs-8">
+      <div class="stab active" onclick="switchTab(8,'concepts')">📌 Concepts</div>
+      <div class="stab" onclick="switchTab(8,'code')">💻 Code</div>
+      <div class="stab" onclick="switchTab(8,'interview')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="switchTab(8,'memory')">🧠 Memory Tip</div>
+    </div>
+    <div class="tab-panel active" id="t8-concepts">
+      <div class="sec-title"><span>◆</span> Core Concepts</div>
+      <div class="key-points">
+        <div class="point"><div class="point-icon">📐</div><div class="point-text"><strong class="label-green">JPA vs Hibernate</strong> — JPA (Jakarta Persistence API) is the <strong>specification</strong> — a set of interfaces and annotations (<code>@Entity, @Table, EntityManager</code>). Hibernate is the most popular <strong>implementation</strong> of JPA. Spring Data JPA wraps JPA/Hibernate with repository abstractions. You program to JPA interfaces; Hibernate does the work.</div></div>
+        <div class="point"><div class="point-icon">🔑</div><div class="point-text"><strong class="label-blue">EntityManager</strong> — JPA's core API. Manages the <strong>persistence context</strong> (first-level cache). Operations: <code>persist()</code> (insert), <code>find()</code> (select by PK), <code>merge()</code> (update detached entity), <code>remove()</code> (delete), <code>createQuery()</code> (JPQL). Spring manages the EntityManager lifecycle — inject with <code>@PersistenceContext</code>.</div></div>
+        <div class="point"><div class="point-icon">💾</div><div class="point-text"><strong class="label-amber">Entity States</strong> — 4 states: <strong>Transient</strong> (new, not managed), <strong>Managed/Persistent</strong> (in persistence context, changes auto-synced to DB), <strong>Detached</strong> (was managed, context closed — changes NOT tracked), <strong>Removed</strong> (marked for deletion). Understanding state transitions is critical.</div></div>
+        <div class="point"><div class="point-icon">⚡</div><div class="point-text"><strong class="label-violet">N+1 Problem</strong> — When fetching a list of N entities, and for each entity a separate query fires for a related entity. Results in N+1 total queries. Solve with: <code>JOIN FETCH</code> in JPQL, <code>@EntityGraph</code>, or <code>FetchType.EAGER</code> on the relationship (last resort).</div></div>
+        <div class="point"><div class="point-icon">🔄</div><div class="point-text"><strong class="label-green">FetchType</strong> — <code>LAZY</code> (default for collections): related data loaded only when accessed. <code>EAGER</code>: related data loaded immediately with the parent. Prefer LAZY — it avoids loading unnecessary data. <strong>But:</strong> accessing lazy data outside a transaction throws <code>LazyInitializationException</code>.</div></div>
+      </div>
+      <div class="gap-sm"></div>
+      <table class="ctable">
+        <tr><th>Entity State</th><th>In Persistence Context?</th><th>DB Sync?</th><th>Transition</th></tr>
+        <tr><td>Transient</td><td>❌</td><td>❌</td><td><code>new Entity()</code></td></tr>
+        <tr><td>Managed</td><td>✅</td><td>✅ auto on flush</td><td><code>persist() / find()</code></td></tr>
+        <tr><td>Detached</td><td>❌</td><td>❌ changes lost</td><td>Context closed / <code>detach()</code></td></tr>
+        <tr><td>Removed</td><td>✅ (pending)</td><td>✅ on flush</td><td><code>remove()</code></td></tr>
+      </table>
+    </div>
+    <div class="tab-panel" id="t8-code">
+      <div class="sec-title"><span>◆</span> Memorizable Code</div>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="code-lang">JPA ENTITY + ENTITY MANAGER + N+1 FIX</div></div>
+        <pre><span class="cm">// ── JPA Entity ────────────────────────────────────</span>
+<span class="an">@Entity</span>
+<span class="an">@Table</span>(name = <span class="st">"users"</span>)
+<span class="kw">public class</span> <span class="cl">User</span> {
+    <span class="an">@Id</span>
+    <span class="an">@GeneratedValue</span>(strategy = <span class="tp">GenerationType</span>.<span class="cl">IDENTITY</span>)
+    <span class="kw">private</span> <span class="tp">Long</span> id;
+
+    <span class="an">@Column</span>(nullable = <span class="kw">false</span>, unique = <span class="kw">true</span>)
+    <span class="kw">private</span> <span class="tp">String</span> email;
+
+    <span class="an">@OneToMany</span>(mappedBy = <span class="st">"user"</span>, fetch = <span class="tp">FetchType</span>.<span class="cl">LAZY</span>,
+               cascade = <span class="tp">CascadeType</span>.<span class="cl">ALL</span>)
+    <span class="kw">private</span> <span class="tp">List</span>&lt;<span class="tp">Order</span>&gt; orders;   <span class="cm">// LAZY — not loaded until accessed</span>
+}
+
+<span class="cm">// ── EntityManager usage ───────────────────────────</span>
+<span class="an">@Repository</span>
+<span class="kw">public class</span> <span class="cl">UserDao</span> {
+    <span class="an">@PersistenceContext</span>                  <span class="cm">// Spring injects scoped EM proxy</span>
+    <span class="kw">private</span> <span class="tp">EntityManager</span> em;
+
+    <span class="kw">public void</span> <span class="fn">save</span>(<span class="tp">User</span> user) {
+        em.<span class="fn">persist</span>(user);               <span class="cm">// Transient → Managed</span>
+    }
+
+    <span class="kw">public</span> <span class="tp">User</span> <span class="fn">update</span>(<span class="tp">User</span> detachedUser) {
+        <span class="kw">return</span> em.<span class="fn">merge</span>(detachedUser);  <span class="cm">// Detached → Managed (returns new)</span>
+    }
+
+    <span class="kw">public void</span> <span class="fn">delete</span>(<span class="kw">long</span> id) {
+        <span class="tp">User</span> u = em.<span class="fn">find</span>(<span class="tp">User</span>.<span class="kw">class</span>, id);
+        em.<span class="fn">remove</span>(u);                    <span class="cm">// Managed → Removed</span>
+    }
+}
+
+<span class="cm">// ── N+1 Problem & Fix ─────────────────────────────</span>
+<span class="cm">// ❌ BAD: N+1 — 1 query for users + N queries for orders</span>
+<span class="tp">List</span>&lt;<span class="tp">User</span>&gt; users = em.<span class="fn">createQuery</span>(<span class="st">"SELECT u FROM User u"</span>, <span class="tp">User</span>.<span class="kw">class</span>).<span class="fn">getResultList</span>();
+users.<span class="fn">forEach</span>(u -> u.<span class="fn">getOrders</span>().<span class="fn">size</span>()); <span class="cm">// each triggers a query!</span>
+
+<span class="cm">// ✅ FIX 1: JOIN FETCH in JPQL</span>
+<span class="tp">List</span>&lt;<span class="tp">User</span>&gt; users = em.<span class="fn">createQuery</span>(
+    <span class="st">"SELECT DISTINCT u FROM User u LEFT JOIN FETCH u.orders"</span>, <span class="tp">User</span>.<span class="kw">class</span>
+).<span class="fn">getResultList</span>();                       <span class="cm">// 1 query, all data fetched</span>
+
+<span class="cm">// ✅ FIX 2: @EntityGraph (Spring Data JPA)</span>
+<span class="an">@EntityGraph</span>(attributePaths = {<span class="st">"orders"</span>})
+<span class="tp">List</span>&lt;<span class="tp">User</span>&gt; <span class="fn">findAll</span>();                     <span class="cm">// eager-loads orders for this query</span></pre>
+      </div>
+    </div>
+    <div class="tab-panel" id="t8-interview">
+      <div class="sec-title"><span>◆</span> Interview Questions</div>
+      <div class="iq-list">
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-must">Must Know</span><div class="iq-q-text">What is the difference between persist() and merge() in JPA?</div><div class="iq-toggle">▾</div></div><div class="iq-body"><code>persist()</code>: Takes a <strong>transient</strong> (new, no ID) entity and makes it <strong>managed</strong>. The entity must not already have an ID. Modifying the object after persist() still updates it (within the same transaction).<br><code>merge()</code>: Takes a <strong>detached</strong> entity (has ID, not tracked by EM) and returns a <strong>new managed copy</strong>. The original detached object is NOT managed after merge(). Always use the returned object: <code>User managed = em.merge(detached)</code>.<div class="trick"><strong>⚡ Common mistake:</strong> Using the original detached object after <code>merge()</code> instead of the returned managed copy — changes to the original are lost.</div></div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-tricky">Tricky</span><div class="iq-q-text">What is LazyInitializationException and how do you fix it?</div><div class="iq-toggle">▾</div></div><div class="iq-body"><code>LazyInitializationException</code> occurs when you access a LAZY-loaded association outside of an active persistence context (after the transaction/session closes). Common scenario: loading a User in the service layer, closing the transaction, then accessing <code>user.getOrders()</code> in the controller. Fixes:<br>1. <strong>JOIN FETCH</strong> or <code>@EntityGraph</code> — load eagerly for that specific query<br>2. <strong>DTO projection</strong> — fetch only what you need, no lazy associations<br>3. <strong>Open Session in View</strong> — keep session open per request (anti-pattern in most cases)<br>4. <code>@Transactional</code> on the calling method — extends transaction scope<div class="trick"><strong>⚡ Best practice:</strong> Use DTOs at service layer boundaries — never expose entities to presentation layer. Eliminates LazyInitializationException entirely.</div></div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-must">Must Know</span><div class="iq-q-text">Explain the N+1 problem and its solutions.</div><div class="iq-toggle">▾</div></div><div class="iq-body">When you load N entities and each entity's lazy collection triggers a separate query. Example: 100 users × 1 query each for their orders = 101 total queries. Solutions in order of preference:<br>1. <strong>JOIN FETCH</strong> in JPQL — single query with a join<br>2. <strong>@EntityGraph</strong> — define fetch plan on the repository method<br>3. <strong>Batch fetching</strong> — <code>@BatchSize(size=20)</code> on the collection — fetches in groups<br>4. <strong>DTO projection</strong> — select only needed columns, no association loading<br>5. <strong>FetchType.EAGER</strong> — last resort, loads everywhere even when not needed</div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-tricky">Tricky</span><div class="iq-q-text">What is the first-level cache in Hibernate and when can it cause bugs?</div><div class="iq-toggle">▾</div></div><div class="iq-body">The <strong>first-level cache is the persistence context</strong> (EntityManager/Session). Within one transaction, if you call <code>em.find(User.class, 1L)</code> twice, Hibernate returns the cached object — no second DB query. This is usually beneficial but causes bugs when: <strong>1.</strong> Bulk updates via JPQL (bypasses the cache — entities in cache are stale). <strong>2.</strong> Expecting the DB to have changed from another session. Fix: call <code>em.refresh(entity)</code> or <code>em.clear()</code> to invalidate the cache.<div class="trick"><strong>⚡ The second-level cache</strong> (L2) is optional and shared across sessions — configured with providers like Ehcache, Redis. Unlike L1, L2 is not enabled by default.</div></div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="t8-memory">
+      <div class="sec-title"><span>◆</span> Memory Tip</div>
+      <div class="mem-tip"><div class="mem-icon">💡</div><div class="mem-text"><strong>JPA = contract. Hibernate = implementation. Spring Data JPA = convenience layer on top.</strong><br><br>Entity states mnemonic — <strong>TMDR:</strong> Transient (born) → Managed (working) → Detached (retired) → Removed (fired).<br><br>N+1 is your production enemy. Always think: "Am I loading a collection in a loop?" If yes, use JOIN FETCH or @EntityGraph.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════╗ -->
+<!-- ║  TOPIC 10 — Transactions                         ║ -->
+<!-- ╚══════════════════════════════════════════════════╝ -->
+<div class="topic-card" id="t9">
+  <div class="card-band">
+    <div class="band-left">
+      <div class="topic-num">10</div>
+      <div>
+        <div class="band-version" style="background:var(--red-light);color:var(--red);border:1px solid var(--red-border)">Spring TX</div>
+        <div class="band-title">Transactions: Programmatic vs Declarative</div>
+        <div class="band-oneliner">ACID guarantees in Spring — @Transactional is the most important annotation to understand deeply</div>
+      </div>
+    </div>
+    <div class="priority-badge" style="background:#fff0f0;color:var(--red);border:1px solid #f0c0c0">🔴 Must Know</div>
+  </div>
+  <div class="card-content">
+    <div class="section-tabs" id="tabs-9">
+      <div class="stab active" onclick="switchTab(9,'concepts')">📌 Concepts</div>
+      <div class="stab" onclick="switchTab(9,'code')">💻 Code</div>
+      <div class="stab" onclick="switchTab(9,'interview')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="switchTab(9,'memory')">🧠 Memory Tip</div>
+    </div>
+    <div class="tab-panel active" id="t9-concepts">
+      <div class="sec-title"><span>◆</span> Core Concepts</div>
+      <div class="key-points">
+        <div class="point"><div class="point-icon">📝</div><div class="point-text"><strong class="label-red">Programmatic Transactions</strong> — Manually manage transactions using <code>TransactionTemplate</code> or <code>PlatformTransactionManager</code>. Fine-grained control (begin, commit, rollback inline in code). More verbose. Use when transaction boundaries are dynamic or conditional.</div></div>
+        <div class="point"><div class="point-icon">✨</div><div class="point-text"><strong class="label-green">Declarative Transactions (@Transactional)</strong> — Preferred. Annotate a method or class with <code>@Transactional</code> — Spring wraps it in a proxy that begins the transaction before the method and commits/rolls back after. No transaction code in your business logic. Works via AOP.</div></div>
+        <div class="point"><div class="point-icon">🔄</div><div class="point-text"><strong class="label-amber">Propagation</strong> — Defines behavior when a transactional method calls another. Key ones: <code>REQUIRED</code> (default — join existing or create new), <code>REQUIRES_NEW</code> (always new transaction, suspends existing), <code>NESTED</code> (savepoint within existing), <code>SUPPORTS</code> (join if exists, non-transactional if not), <code>MANDATORY</code> (must have existing, else exception), <code>NEVER</code> (must not have existing).</div></div>
+        <div class="point"><div class="point-icon">🔐</div><div class="point-text"><strong class="label-blue">Isolation Levels</strong> — Controls visibility of concurrent transactions. <code>READ_UNCOMMITTED</code> (dirty reads possible), <code>READ_COMMITTED</code> (default in most DBs), <code>REPEATABLE_READ</code>, <code>SERIALIZABLE</code> (strictest — no concurrency issues but lowest throughput). Each level prevents certain concurrency problems: dirty read, non-repeatable read, phantom read.</div></div>
+        <div class="point"><div class="point-icon">⚠️</div><div class="point-text"><strong class="label-red">Rollback Rules</strong> — By default, Spring rolls back only on <strong>unchecked exceptions</strong> (RuntimeException and Error). <strong>Checked exceptions do NOT trigger rollback</strong> by default. Override with <code>rollbackFor = Exception.class</code> or <code>noRollbackFor = SpecificException.class</code>.</div></div>
+        <div class="point"><div class="point-icon">🎭</div><div class="point-text"><strong class="label-violet">Proxy Limitation</strong> — Same self-invocation problem as AOP — calling a @Transactional method from within the same class bypasses the proxy. The called method runs in the same transaction as the caller, ignoring its own @Transactional settings.</div></div>
+      </div>
+      <div class="gap-sm"></div>
+      <table class="ctable">
+        <tr><th>Propagation</th><th>Existing TX?</th><th>Behavior</th></tr>
+        <tr><td><code>REQUIRED</code> (default)</td><td>Yes / No</td><td>Join existing OR create new</td></tr>
+        <tr><td><code>REQUIRES_NEW</code></td><td>Yes</td><td>Suspend existing, create new</td></tr>
+        <tr><td><code>NESTED</code></td><td>Yes</td><td>Run within a savepoint</td></tr>
+        <tr><td><code>MANDATORY</code></td><td>No</td><td>Throw exception</td></tr>
+        <tr><td><code>NEVER</code></td><td>Yes</td><td>Throw exception</td></tr>
+        <tr><td><code>SUPPORTS</code></td><td>Yes / No</td><td>Join existing OR run without TX</td></tr>
+        <tr><td><code>NOT_SUPPORTED</code></td><td>Yes</td><td>Suspend existing, run without TX</td></tr>
+      </table>
+    </div>
+    <div class="tab-panel" id="t9-code">
+      <div class="sec-title"><span>◆</span> Memorizable Code</div>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><div class="code-lang">DECLARATIVE + PROGRAMMATIC TRANSACTIONS</div></div>
+        <pre><span class="cm">// ── Declarative: @Transactional (preferred) ───────</span>
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">OrderService</span> {
+
+    <span class="an">@Transactional</span>                       <span class="cm">// REQUIRED by default</span>
+    <span class="kw">public void</span> <span class="fn">placeOrder</span>(<span class="tp">Order</span> order) {
+        orderRepo.<span class="fn">save</span>(order);
+        paymentService.<span class="fn">charge</span>(order);   <span class="cm">// if this throws → rollback</span>
+        inventoryService.<span class="fn">deduct</span>(order);
+    }
+
+    <span class="cm">// Rollback for checked exception too</span>
+    <span class="an">@Transactional</span>(rollbackFor = <span class="tp">Exception</span>.<span class="kw">class</span>)
+    <span class="kw">public void</span> <span class="fn">importData</span>(<span class="tp">File</span> file) <span class="kw">throws</span> <span class="tp">IOException</span> { }
+
+    <span class="cm">// Read-only optimization (tells DB + JPA to skip dirty-checking)</span>
+    <span class="an">@Transactional</span>(readOnly = <span class="kw">true</span>)
+    <span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">Order</span>&gt; <span class="fn">getAllOrders</span>() {
+        <span class="kw">return</span> orderRepo.<span class="fn">findAll</span>();
+    }
+
+    <span class="cm">// REQUIRES_NEW: separate transaction, commits independently</span>
+    <span class="an">@Transactional</span>(propagation = <span class="tp">Propagation</span>.<span class="cl">REQUIRES_NEW</span>)
+    <span class="kw">public void</span> <span class="fn">logAudit</span>(<span class="tp">String</span> action) {
+        auditRepo.<span class="fn">save</span>(<span class="kw">new</span> <span class="tp">AuditLog</span>(action));
+        <span class="cm">// commits even if parent TX rolls back!</span>
+    }
+
+    <span class="cm">// Custom isolation</span>
+    <span class="an">@Transactional</span>(isolation = <span class="tp">Isolation</span>.<span class="cl">SERIALIZABLE</span>)
+    <span class="kw">public void</span> <span class="fn">criticalOperation</span>() { }
+}
+
+<span class="cm">// ── Programmatic: TransactionTemplate ────────────</span>
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">BatchService</span> {
+    <span class="kw">private final</span> <span class="tp">TransactionTemplate</span> txTemplate;
+
+    <span class="kw">public</span> <span class="fn">BatchService</span>(<span class="tp">PlatformTransactionManager</span> txMgr) {
+        <span class="kw">this</span>.txTemplate = <span class="kw">new</span> <span class="tp">TransactionTemplate</span>(txMgr);
+        txTemplate.<span class="fn">setIsolationLevel</span>(<span class="tp">TransactionDefinition</span>.<span class="cl">ISOLATION_READ_COMMITTED</span>);
+    }
+
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">runBatch</span>() {
+        <span class="kw">return</span> txTemplate.<span class="fn">execute</span>(status -> {
+            <span class="kw">try</span> {
+                <span class="fn">doWork</span>();
+                <span class="kw">return</span> <span class="st">"success"</span>;
+            } <span class="kw">catch</span> (<span class="tp">Exception</span> e) {
+                status.<span class="fn">setRollbackOnly</span>(); <span class="cm">// programmatic rollback</span>
+                <span class="kw">return</span> <span class="st">"failed"</span>;
+            }
+        });
+    }
+}</pre>
+      </div>
+    </div>
+    <div class="tab-panel" id="t9-interview">
+      <div class="sec-title"><span>◆</span> Interview Questions</div>
+      <div class="iq-list">
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-must">Must Know</span><div class="iq-q-text">By default, which exceptions trigger @Transactional rollback?</div><div class="iq-toggle">▾</div></div><div class="iq-body">By default, Spring rolls back on <strong>unchecked exceptions</strong> (subclasses of <code>RuntimeException</code>) and <strong>Error</strong>. <strong>Checked exceptions do NOT trigger rollback</strong> — the transaction commits even if a checked exception propagates out. Override with <code>@Transactional(rollbackFor = Exception.class)</code> to include checked exceptions, or <code>noRollbackFor = SpecificRuntimeException.class</code> to exclude specific unchecked ones.<div class="trick"><strong>⚡ Classic interview question:</strong> "If a method throws IOException, does @Transactional roll back?" Answer: No, unless you specify <code>rollbackFor = IOException.class</code>.</div></div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-tricky">Tricky</span><div class="iq-q-text">What is the difference between REQUIRES_NEW and NESTED propagation?</div><div class="iq-toggle">▾</div></div><div class="iq-body"><strong>REQUIRES_NEW:</strong> Creates a completely independent transaction. The outer transaction is <em>suspended</em>. If the inner commits and outer rolls back, the inner's work is <em>preserved</em>. Use for audit logging that must succeed regardless of business logic.<br><br><strong>NESTED:</strong> Creates a <em>savepoint</em> within the existing transaction. If inner rolls back, it only reverts to the savepoint — the outer transaction can still commit. If outer rolls back, everything including the inner is rolled back. More efficient (no separate DB connection), but not all DBs/drivers support savepoints.</div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-tricky">Tricky</span><div class="iq-q-text">@Transactional on a private method — does it work?</div><div class="iq-toggle">▾</div></div><div class="iq-body"><strong>No.</strong> @Transactional works via AOP proxy. Spring's proxy can only intercept <strong>public</strong> methods (for CGLIB proxies) or methods on the interface (for JDK proxies). Putting @Transactional on a private method is silently ignored — no error, no transaction. Also, calling a @Transactional method from within the same class (self-invocation) bypasses the proxy. Always put @Transactional on public service methods and call them from different beans.<div class="trick"><strong>⚡ This is one of the most common production bugs with Spring transactions.</strong> "Why isn't my transaction working?" — check for private method or self-invocation.</div></div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-concept">Concept</span><div class="iq-q-text">What does readOnly=true do in @Transactional?</div><div class="iq-toggle">▾</div></div><div class="iq-body">It's a <strong>hint to the underlying infrastructure</strong> that no modifications will be made. Effects: <strong>1. JPA</strong> — skips dirty checking at flush time (performance gain for large object graphs). <strong>2. Database</strong> — some DBs optimize read-only transactions (no locking, read from replica). <strong>3. Spring Data</strong> — automatically adds <code>readOnly=true</code> on query methods. It does NOT prevent you from writing — it's just a hint, not enforcement. Use on all read-only service methods.</div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-tricky">Tricky</span><div class="iq-q-text">What concurrency issues exist at each transaction isolation level?</div><div class="iq-toggle">▾</div></div><div class="iq-body"><table style="width:100%;font-size:12px;border-collapse:collapse"><tr style="background:#f5f2ed"><th style="padding:6px;text-align:left;border:1px solid #e4ddd4">Level</th><th style="padding:6px;text-align:left;border:1px solid #e4ddd4">Dirty Read</th><th style="padding:6px;text-align:left;border:1px solid #e4ddd4">Non-repeatable Read</th><th style="padding:6px;text-align:left;border:1px solid #e4ddd4">Phantom Read</th></tr><tr><td style="padding:6px;border:1px solid #e4ddd4">READ_UNCOMMITTED</td><td style="padding:6px;border:1px solid #e4ddd4;color:#b94040">Possible</td><td style="padding:6px;border:1px solid #e4ddd4;color:#b94040">Possible</td><td style="padding:6px;border:1px solid #e4ddd4;color:#b94040">Possible</td></tr><tr><td style="padding:6px;border:1px solid #e4ddd4">READ_COMMITTED</td><td style="padding:6px;border:1px solid #e4ddd4;color:#2d7a4f">Prevented</td><td style="padding:6px;border:1px solid #e4ddd4;color:#b94040">Possible</td><td style="padding:6px;border:1px solid #e4ddd4;color:#b94040">Possible</td></tr><tr><td style="padding:6px;border:1px solid #e4ddd4">REPEATABLE_READ</td><td style="padding:6px;border:1px solid #e4ddd4;color:#2d7a4f">Prevented</td><td style="padding:6px;border:1px solid #e4ddd4;color:#2d7a4f">Prevented</td><td style="padding:6px;border:1px solid #e4ddd4;color:#b94040">Possible</td></tr><tr><td style="padding:6px;border:1px solid #e4ddd4">SERIALIZABLE</td><td style="padding:6px;border:1px solid #e4ddd4;color:#2d7a4f">Prevented</td><td style="padding:6px;border:1px solid #e4ddd4;color:#2d7a4f">Prevented</td><td style="padding:6px;border:1px solid #e4ddd4;color:#2d7a4f">Prevented</td></tr></table></div></div>
+
+        <div class="iq"><div class="iq-header" onclick="this.parentElement.classList.toggle('open')"><span class="iq-tag tag-must">Must Know</span><div class="iq-q-text">Where should @Transactional be placed — on the interface or implementation?</div><div class="iq-toggle">▾</div></div><div class="iq-body">Always on the <strong>implementation class or method</strong>, not the interface. Spring recommends this because: if you use CGLIB proxying (the default), annotations on the interface are not inherited by the proxy. Spring's documentation explicitly says: "do not annotate interfaces — only concrete classes." Putting @Transactional on an interface method technically works with JDK dynamic proxies, but CGLIB ignores interface annotations. Since Spring Boot defaults to CGLIB proxies, always annotate the implementation.</div></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="t9-memory">
+      <div class="sec-title"><span>◆</span> Memory Tip</div>
+      <div class="mem-tip"><div class="mem-icon">💡</div><div class="mem-text"><strong>@Transactional = "All or nothing" enforced by Spring's proxy bouncer.</strong><br><br>The proxy starts a transaction, lets your method run, then either commits (method returned normally) or rolls back (RuntimeException thrown). Remember the 3 traps:<br>1. <strong>Self-invocation</strong> = bypasses proxy = no transaction<br>2. <strong>Private method</strong> = proxy can't intercept = no transaction<br>3. <strong>Checked exception</strong> = no rollback by default<br><br>Propagation cheat: <strong>REQUIRED</strong> = team player (join or create). <strong>REQUIRES_NEW</strong> = lone wolf (always own). <strong>NESTED</strong> = sub-team (savepoint).</div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end main -->
+
+<div class="footer">PHASE 1 · SPRING CORE · TOPICS 1–10 · Senior Engineer Interview Prep · Study Cards</div>
+
+<script>
+let current = 0;
+const TOTAL = 10;
+
+function showTopic(idx) {
+  document.querySelectorAll('.topic-card').forEach((c, i) => c.classList.toggle('active', i === idx));
+  document.querySelectorAll('.nav-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  document.querySelectorAll('.prog-seg').forEach((s, i) => {
+    s.classList.remove('active','done');
+    if (i < idx) s.classList.add('done');
+    if (i === idx) s.classList.add('active');
+  });
+  current = idx;
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function switchTab(topicIdx, panelName) {
+  const tabs = document.querySelectorAll(`#tabs-${topicIdx} .stab`);
+  const panelMap = ['concepts','code','interview','memory'];
+  tabs.forEach((t, i) => t.classList.toggle('active', panelMap[i] === panelName));
+
+  const card = document.getElementById(`t${topicIdx}`);
+  card.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById(`t${topicIdx}-${panelName}`);
+  if (target) target.classList.add('active');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' && current < TOTAL - 1) showTopic(current + 1);
+  if (e.key === 'ArrowLeft' && current > 0) showTopic(current - 1);
+});
+</script>
+</body>
+</html>

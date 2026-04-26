@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Phase 10 — Core Java DSA & CS Fundamentals</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:        #f0ece4;
+  --surface:   #faf8f4;
+  --surface2:  #f2ede5;
+  --border:    #ddd5c8;
+  --border2:   #c8bdb0;
+  --ink:       #18140e;
+  --ink2:      #3a3028;
+  --muted:     #7a6e62;
+  --muted2:    #b0a498;
+
+  --java:       #c04a00;
+  --java-light: #fff2eb;
+  --java-mid:   #f5c8a8;
+  --java-border:#e8a070;
+
+  --teal:       #1a7a6e;
+  --teal-light: #e8f5f3;
+  --teal-border:#8fccc5;
+
+  --navy:       #1a3a6e;
+  --navy-light: #e8eef8;
+  --navy-border:#90aad8;
+
+  --plum:       #6e1a5a;
+  --plum-light: #f5e8f2;
+  --plum-border:#c890bc;
+
+  --gold:       #8a6a00;
+  --gold-light: #fdf5dc;
+  --gold-border:#d4b840;
+
+  --forest:     #2a5a30;
+  --forest-light:#e8f2e8;
+  --forest-border:#80c090;
+
+  --code-bg:   #1a1612;
+  --code-surf: #221e18;
+  --kw:#e0944a; --tp:#6ec89a; --fn:#60b0e0; --st:#d88858;
+  --cm:#685e54; --nb:#c8985a; --an:#d078a0; --cl:#88d0a8; --op:#68c8c8;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--ink);font-family:'Outfit',sans-serif;min-height:100vh;}
+
+/* ── HEADER ── */
+.hdr{
+  background:var(--surface);
+  border-bottom:2px solid var(--border);
+  padding:44px 52px 38px;
+  position:relative;overflow:hidden;
+}
+.hdr-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(var(--border) 1px,transparent 1px),
+    linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:40px 40px;
+  opacity:0.35;pointer-events:none;
+}
+.hdr-accent{
+  position:absolute;right:52px;top:50%;transform:translateY(-50%);
+  font-family:'Fraunces',serif;font-size:160px;font-weight:900;
+  color:rgba(192,74,0,0.06);line-height:1;pointer-events:none;
+  user-select:none;letter-spacing:-8px;
+}
+.phase-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'Fira Code',monospace;font-size:11px;font-weight:600;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--java);margin-bottom:14px;
+}
+.phase-tag::before{content:'▶';font-size:8px;}
+h1{font-family:'Fraunces',serif;font-size:clamp(34px,5vw,56px);font-weight:900;line-height:1.05;letter-spacing:-1.5px;}
+h1 em{font-style:italic;color:var(--java);}
+.hdr-sub{margin-top:10px;font-family:'Fira Code',monospace;font-size:12px;color:var(--muted);}
+.hdr-chips{display:flex;gap:20px;margin-top:20px;flex-wrap:wrap;}
+.chip{font-family:'Fira Code',monospace;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;}
+.chip b{color:var(--java);}
+
+/* ── PROGRESS ── */
+.prog-bar{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:14px 52px;display:flex;align-items:center;gap:5px;
+}
+.prog-lbl{font-family:'Fira Code',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-right:8px;white-space:nowrap;}
+.seg{flex:1;height:4px;border-radius:2px;background:var(--border);cursor:pointer;transition:background .25s;}
+.seg.done{background:var(--java-mid);}
+.seg.active{background:var(--java);}
+
+/* ── NAV ── */
+.nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 52px;display:flex;overflow-x:auto;scrollbar-width:none;}
+.nav::-webkit-scrollbar{display:none;}
+.nbtn{flex-shrink:0;padding:13px 16px;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:7px;}
+.nbtn:hover{color:var(--ink2);background:var(--surface2);}
+.nbtn.active{color:var(--java);border-bottom-color:var(--java);}
+.nbtn .n{background:var(--border);color:var(--muted);font-family:'Fira Code',monospace;font-size:9px;padding:2px 5px;border-radius:3px;}
+.nbtn.active .n{background:var(--java-light);color:var(--java);}
+
+.kbhint{text-align:center;padding:8px;font-family:'Fira Code',monospace;font-size:10px;color:var(--muted2);background:var(--surface2);border-bottom:1px solid var(--border);}
+kbd{background:var(--border);padding:1px 5px;border-radius:3px;font-size:10px;}
+
+/* ── MAIN ── */
+.main{max-width:1080px;margin:0 auto;padding:36px 52px 60px;}
+.card{display:none;animation:fadeUp .3s ease;}
+.card.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── CARD BAND ── */
+.band{background:var(--surface);border:1px solid var(--border);border-radius:16px 16px 0 0;border-bottom:none;padding:26px 32px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;}
+.band-l{display:flex;align-items:flex-start;gap:16px;}
+.tnum{font-family:'Fraunces',serif;font-size:44px;font-weight:900;line-height:1;color:var(--border2);flex-shrink:0;width:56px;text-align:right;margin-top:2px;}
+.ttag{display:inline-flex;align-items:center;font-family:'Fira Code',monospace;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:4px;margin-bottom:8px;}
+.btitle{font-family:'Fraunces',serif;font-size:23px;font-weight:700;color:var(--ink);line-height:1.2;}
+.bsub{margin-top:5px;font-size:13px;color:var(--muted);font-style:italic;line-height:1.5;}
+.pbadge{flex-shrink:0;font-family:'Fira Code',monospace;font-size:10px;font-weight:600;letter-spacing:1px;padding:5px 12px;border-radius:20px;margin-top:4px;}
+
+/* ── CONTENT ── */
+.content{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 16px 16px;padding:0 32px 32px;margin-bottom:0;}
+
+/* tabs */
+.stabs{display:flex;border-bottom:1px solid var(--border);margin:0 -32px 26px;padding:0 32px;overflow-x:auto;scrollbar-width:none;}
+.stabs::-webkit-scrollbar{display:none;}
+.stab{flex-shrink:0;padding:12px 15px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;font-family:'Fira Code',monospace;letter-spacing:.5px;display:flex;align-items:center;gap:5px;}
+.stab:hover{color:var(--ink2);}
+.stab.on{color:var(--java);border-bottom-color:var(--java);}
+.panel{display:none;}.panel.on{display:block;}
+
+/* section title */
+.stitle{font-family:'Fira Code',monospace;font-size:10px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.stitle span{color:var(--java);}
+
+/* key points */
+.kps{display:flex;flex-direction:column;gap:9px;}
+.kp{display:flex;gap:13px;padding:13px 15px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);font-size:13.5px;line-height:1.65;transition:border-color .2s;}
+.kp:hover{border-color:var(--border2);}
+.ki{font-size:16px;flex-shrink:0;margin-top:1px;}
+.kt{flex:1;}
+.kt strong{color:var(--ink);}
+.kt code{background:var(--java-light);border:1px solid var(--java-border);color:var(--java);padding:1px 6px;border-radius:4px;font-family:'Fira Code',monospace;font-size:11.5px;}
+.g{color:var(--forest);font-weight:600;}
+.a{color:var(--gold);font-weight:600;}
+.r{color:var(--java);font-weight:600;}
+.b{color:var(--navy);font-weight:600;}
+.p{color:var(--plum);font-weight:600;}
+.t{color:var(--teal);font-weight:600;}
+
+/* code */
+.cblock{background:var(--code-bg);border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);}
+.chdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--code-surf);border-bottom:1px solid rgba(255,255,255,0.07);}
+.cdots{display:flex;gap:6px;align-items:center;}
+.dot{width:10px;height:10px;border-radius:50%;}
+.dr{background:#ff5f57;}.dy{background:#febc2e;}.dg{background:#28c840;}
+.clang{font-family:'Fira Code',monospace;font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,0.28);text-transform:uppercase;}
+pre{padding:22px;overflow-x:auto;font-family:'Fira Code',monospace;font-size:12.5px;line-height:1.78;color:#cdc0b0;}
+.kw{color:var(--kw);}.tp{color:var(--tp);}.fn{color:var(--fn);}.st{color:var(--st);}
+.cm{color:var(--cm);font-style:italic;}.nb{color:var(--nb);}.an{color:var(--an);}.cl{color:var(--cl);}.op{color:var(--op);}
+
+/* interview */
+.iqs{display:flex;flex-direction:column;gap:10px;}
+.iq{border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .2s,box-shadow .2s;}
+.iq:hover{border-color:var(--border2);box-shadow:0 2px 12px rgba(0,0,0,0.05);}
+.iqh{padding:13px 16px;cursor:pointer;display:flex;align-items:flex-start;gap:11px;background:var(--surface2);user-select:none;}
+.iqtag{font-family:'Fira Code',monospace;font-size:9px;font-weight:600;letter-spacing:1px;padding:3px 7px;border-radius:4px;white-space:nowrap;flex-shrink:0;margin-top:2px;text-transform:uppercase;}
+.tm{background:#fff2eb;color:var(--java);border:1px solid var(--java-border);}
+.tt{background:var(--gold-light);color:var(--gold);border:1px solid var(--gold-border);}
+.tc{background:var(--navy-light);color:var(--navy);border:1px solid var(--navy-border);}
+.tco{background:var(--teal-light);color:var(--teal);border:1px solid var(--teal-border);}
+.tp2{background:var(--plum-light);color:var(--plum);border:1px solid var(--plum-border);}
+.iqqt{font-size:13px;font-weight:600;color:var(--ink);flex:1;line-height:1.5;}
+.iqtgl{color:var(--muted);font-size:16px;flex-shrink:0;margin-top:2px;transition:transform .25s;}
+.iq.open .iqtgl{transform:rotate(180deg);}
+.iqb{display:none;padding:16px;font-size:13px;line-height:1.78;color:var(--ink2);border-top:1px solid var(--border);background:#fff;}
+.iq.open .iqb{display:block;}
+.iqb code{background:var(--java-light);border:1px solid var(--java-border);color:var(--java);padding:1px 6px;border-radius:4px;font-family:'Fira Code',monospace;font-size:11.5px;}
+.iqb strong{color:var(--ink);}
+.trick{margin-top:10px;padding:10px 14px;background:var(--gold-light);border-left:3px solid var(--gold);border-radius:0 6px 6px 0;font-size:12px;color:var(--gold);}
+.trick strong{color:var(--gold);}
+.warn{margin-top:10px;padding:10px 14px;background:var(--java-light);border-left:3px solid var(--java);border-radius:0 6px 6px 0;font-size:12px;color:var(--java);}
+
+/* table */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;border-radius:10px;overflow:hidden;border:1px solid var(--border);}
+.tbl th{background:var(--surface2);padding:10px 14px;text-align:left;font-family:'Fira Code',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);font-weight:500;}
+.tbl td{padding:10px 14px;border-bottom:1px solid rgba(221,213,200,.6);color:var(--ink2);vertical-align:top;line-height:1.5;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--surface2);}
+.tbl td code{background:var(--java-light);color:var(--java);padding:1px 6px;border-radius:4px;font-family:'Fira Code',monospace;font-size:11px;border:1px solid var(--java-border);}
+
+/* memory tip */
+.mtip{background:var(--java-light);border:1px solid var(--java-border);border-radius:10px;padding:16px 18px;font-size:13.5px;line-height:1.72;display:flex;gap:13px;}
+.mico{font-size:20px;flex-shrink:0;}
+.mtip strong{color:var(--java);}
+
+/* algo viz */
+.algo-row{display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin-bottom:10px;}
+.abox{min-width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:6px;font-family:'Fira Code',monospace;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--surface2);transition:all .2s;}
+.abox.hi{background:var(--java-light);border-color:var(--java-border);color:var(--java);}
+.abox.lo{background:var(--navy-light);border-color:var(--navy-border);color:var(--navy);}
+.abox.mid{background:var(--teal-light);border-color:var(--teal-border);color:var(--teal);}
+.abox.swap{background:var(--plum-light);border-color:var(--plum-border);color:var(--plum);}
+.algo-lbl{font-family:'Fira Code',monospace;font-size:11px;color:var(--muted);margin-bottom:4px;}
+.algo-arrow{font-size:14px;color:var(--muted2);}
+
+/* complexity badge */
+.cbadge{display:inline-flex;align-items:center;gap:5px;font-family:'Fira Code',monospace;font-size:11px;font-weight:600;padding:3px 9px;border-radius:4px;}
+.c-good{background:var(--forest-light);color:var(--forest);border:1px solid var(--forest-border);}
+.c-ok{background:var(--gold-light);color:var(--gold);border:1px solid var(--gold-border);}
+.c-bad{background:var(--java-light);color:var(--java);border:1px solid var(--java-border);}
+
+/* tag */
+.tags{display:flex;flex-wrap:wrap;gap:8px;}
+.tag{font-family:'Fira Code',monospace;font-size:11px;padding:4px 12px;border-radius:20px;font-weight:500;background:var(--java-light);color:var(--java);border:1px solid var(--java-border);}
+
+.gap{margin-bottom:22px;}
+.gap-sm{margin-bottom:12px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:640px){.row2{grid-template-columns:1fr;}.main,.nav,.prog-bar,.hdr{padding-left:20px;padding-right:20px;}.band,.content{padding-left:20px;padding-right:20px;}.stabs{margin:0 -20px 22px;padding:0 20px;}}
+
+.footer{text-align:center;padding:30px 52px;color:var(--muted2);font-family:'Fira Code',monospace;font-size:10px;letter-spacing:1px;border-top:1px solid var(--border);margin-top:40px;background:var(--surface);}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-grid"></div>
+  <div class="hdr-accent">10</div>
+  <div class="phase-tag">Phase 10 · Core Java &amp; CS Fundamentals</div>
+  <h1>DSA &amp; Java <em>Internals</em><br>Study Cards</h1>
+  <div class="hdr-sub">// Topics 51–60 · Senior Engineer Level · Interview-Ready</div>
+  <div class="hdr-chips">
+    <div class="chip">Topics <b>10</b></div>
+    <div class="chip">Priority <b>🔴 HIGH</b></div>
+    <div class="chip">Estimated <b>4–5 days</b></div>
+    <div class="chip">Covers <b>DSA · Algorithms · Java Internals</b></div>
+  </div>
+</div>
+
+<div class="kbhint">Navigate: <kbd>←</kbd> <kbd>→</kbd> arrow keys · Click tabs for sections</div>
+
+<div class="prog-bar">
+  <span class="prog-lbl">Progress</span>
+  <div class="seg active" onclick="show(0)"></div>
+  <div class="seg" onclick="show(1)"></div>
+  <div class="seg" onclick="show(2)"></div>
+  <div class="seg" onclick="show(3)"></div>
+  <div class="seg" onclick="show(4)"></div>
+  <div class="seg" onclick="show(5)"></div>
+  <div class="seg" onclick="show(6)"></div>
+  <div class="seg" onclick="show(7)"></div>
+  <div class="seg" onclick="show(8)"></div>
+  <div class="seg" onclick="show(9)"></div>
+</div>
+
+<div class="nav">
+  <button class="nbtn active" onclick="show(0)"><span class="n">51</span>Arrays</button>
+  <button class="nbtn" onclick="show(1)"><span class="n">52</span>Sorting</button>
+  <button class="nbtn" onclick="show(2)"><span class="n">53</span>DS &amp; Problems</button>
+  <button class="nbtn" onclick="show(3)"><span class="n">54</span>Multithreading</button>
+  <button class="nbtn" onclick="show(4)"><span class="n">55</span>SQL</button>
+  <button class="nbtn" onclick="show(5)"><span class="n">56</span>Collections</button>
+  <button class="nbtn" onclick="show(6)"><span class="n">57</span>Exceptions</button>
+  <button class="nbtn" onclick="show(7)"><span class="n">58</span>Design Patterns</button>
+  <button class="nbtn" onclick="show(8)"><span class="n">59</span>SOLID</button>
+  <button class="nbtn" onclick="show(9)"><span class="n">60</span>JVM Internals</button>
+</div>
+
+<div class="main">
+
+<!-- ═══ T51: ARRAYS ═══ -->
+<div class="card active" id="c0">
+  <div class="band">
+    <div class="band-l">
+      <div class="tnum">51</div>
+      <div>
+        <div class="ttag" style="background:var(--java-light);color:var(--java);border:1px solid var(--java-border)">DSA · Arrays</div>
+        <div class="btitle">Array Problem Solving</div>
+        <div class="bsub">The interview workhorse — master these patterns and half the DSA rounds are solved</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:#fff2eb;color:var(--java);border:1px solid var(--java-border)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb0">
+      <div class="stab on" onclick="tab(0,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(0,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(0,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(0,'m')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="c0-c">
+      <div class="stitle"><span>◆</span> Must-Know Patterns</div>
+      <div class="kps">
+        <div class="kp"><div class="ki">🪟</div><div class="kt"><strong class="r">Sliding Window</strong> — For subarray/substring problems with a constraint. Move right pointer to expand, left pointer to shrink when constraint violated. Time: O(n). Use when: "max subarray sum with constraint", "smallest window containing all chars", "longest substring without repeat".</div></div>
+        <div class="kp"><div class="ki">👆👆</div><div class="kt"><strong class="b">Two Pointers</strong> — Left + right pointers on sorted array, move toward each other. Use when: pair sum = target, remove duplicates in-place, container with most water. Time: O(n). Requires sorted or specific structure.</div></div>
+        <div class="kp"><div class="ki">🔍</div><div class="kt"><strong class="t">Binary Search on Answer</strong> — When answer is a range and you can verify it. "Find minimum X such that condition holds." <code>while(lo &lt; hi) { mid = lo+(hi-lo)/2; if valid(mid) hi=mid; else lo=mid+1; }</code> Pattern applies to: capacity allocation, kth smallest, search in rotated array.</div></div>
+        <div class="kp"><div class="ki">➕</div><div class="kt"><strong class="p">Prefix Sum</strong> — Precompute cumulative sums. Query any subarray sum in O(1). <code>prefix[i] = prefix[i-1] + arr[i]</code>. Subarray [l,r] = <code>prefix[r] - prefix[l-1]</code>. Extended: 2D prefix sums, prefix XOR for XOR range queries.</div></div>
+        <div class="kp"><div class="ki">🗺️</div><div class="kt"><strong class="g">HashMap Frequency</strong> — Count occurrences, find missing/duplicate, track first occurrence. Most "find the pair/triplet" problems reduce to: iterate + look up complement in map. Time: O(n), Space: O(n).</div></div>
+        <div class="kp"><div class="ki">🔄</div><div class="kt"><strong class="a">Kadane's Algorithm</strong> — Maximum subarray sum. <code>maxEndingHere = max(num, maxEndingHere + num)</code>. Track global max. O(n), O(1) space. Extend for: max product subarray (track min too), circular subarray.</div></div>
+      </div>
+      <div class="gap-sm"></div>
+      <div class="stitle"><span>◆</span> Complexity Quick Reference</div>
+      <table class="tbl">
+        <tr><th>Operation</th><th>Array</th><th>Note</th></tr>
+        <tr><td>Access by index</td><td><span class="cbadge c-good">O(1)</span></td><td>Direct memory address</td></tr>
+        <tr><td>Search (unsorted)</td><td><span class="cbadge c-bad">O(n)</span></td><td>Linear scan</td></tr>
+        <tr><td>Search (sorted)</td><td><span class="cbadge c-ok">O(log n)</span></td><td>Binary search</td></tr>
+        <tr><td>Insert at end</td><td><span class="cbadge c-good">O(1)</span></td><td>Amortized (ArrayList)</td></tr>
+        <tr><td>Insert at middle</td><td><span class="cbadge c-bad">O(n)</span></td><td>Shift elements right</td></tr>
+        <tr><td>Delete at middle</td><td><span class="cbadge c-bad">O(n)</span></td><td>Shift elements left</td></tr>
+        <tr><td>Sliding window</td><td><span class="cbadge c-good">O(n)</span></td><td>Each element visited max 2x</td></tr>
+      </table>
+    </div>
+    <div class="panel" id="c0-x">
+      <div class="stitle"><span>◆</span> Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Array Patterns — Sliding Window · Two Ptr · Prefix · Kadane</div></div>
+<pre><span class="cm">// ── Sliding Window: longest substr no repeat ──────</span>
+<span class="kw">int</span> <span class="fn">lengthOfLongestSubstring</span>(<span class="tp">String</span> s) {
+    <span class="tp">Map</span>&lt;<span class="tp">Character</span>, <span class="tp">Integer</span>&gt; map = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+    <span class="kw">int</span> max = <span class="nb">0</span>, left = <span class="nb">0</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> r = <span class="nb">0</span>; r &lt; s.<span class="fn">length</span>(); r++) {
+        <span class="kw">char</span> c = s.<span class="fn">charAt</span>(r);
+        <span class="kw">if</span> (map.<span class="fn">containsKey</span>(c)) left = <span class="tp">Math</span>.<span class="fn">max</span>(left, map.<span class="fn">get</span>(c) + <span class="nb">1</span>);
+        map.<span class="fn">put</span>(c, r);
+        max = <span class="tp">Math</span>.<span class="fn">max</span>(max, r - left + <span class="nb">1</span>);
+    }
+    <span class="kw">return</span> max;
+}
+
+<span class="cm">// ── Two Pointers: pair sum in sorted array ────────</span>
+<span class="kw">int</span>[] <span class="fn">twoSum</span>(<span class="kw">int</span>[] arr, <span class="kw">int</span> target) {
+    <span class="kw">int</span> l = <span class="nb">0</span>, r = arr.length - <span class="nb">1</span>;
+    <span class="kw">while</span> (l &lt; r) {
+        <span class="kw">int</span> sum = arr[l] + arr[r];
+        <span class="kw">if</span>      (sum == target) <span class="kw">return new int</span>[]{l, r};
+        <span class="kw">else if</span> (sum &lt; target)  l++;
+        <span class="kw">else</span>                    r--;
+    }
+    <span class="kw">return new int</span>[]{-<span class="nb">1</span>, -<span class="nb">1</span>};
+}
+
+<span class="cm">// ── Prefix Sum ────────────────────────────────────</span>
+<span class="kw">int</span>[] <span class="fn">buildPrefix</span>(<span class="kw">int</span>[] arr) {
+    <span class="kw">int</span>[] pre = <span class="kw">new int</span>[arr.length + <span class="nb">1</span>];
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nb">0</span>; i &lt; arr.length; i++) pre[i+<span class="nb">1</span>] = pre[i] + arr[i];
+    <span class="kw">return</span> pre;
+}
+<span class="kw">int</span> <span class="fn">rangeSum</span>(<span class="kw">int</span>[] pre, <span class="kw">int</span> l, <span class="kw">int</span> r) { <span class="kw">return</span> pre[r+<span class="nb">1</span>] - pre[l]; }
+
+<span class="cm">// ── Kadane's Algorithm: max subarray ─────────────</span>
+<span class="kw">int</span> <span class="fn">maxSubarray</span>(<span class="kw">int</span>[] nums) {
+    <span class="kw">int</span> cur = nums[<span class="nb">0</span>], best = nums[<span class="nb">0</span>];
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nb">1</span>; i &lt; nums.length; i++) {
+        cur  = <span class="tp">Math</span>.<span class="fn">max</span>(nums[i], cur + nums[i]);
+        best = <span class="tp">Math</span>.<span class="fn">max</span>(best, cur);
+    }
+    <span class="kw">return</span> best;
+}
+
+<span class="cm">// ── Binary Search template ────────────────────────</span>
+<span class="kw">int</span> <span class="fn">binarySearch</span>(<span class="kw">int</span>[] arr, <span class="kw">int</span> target) {
+    <span class="kw">int</span> lo = <span class="nb">0</span>, hi = arr.length - <span class="nb">1</span>;
+    <span class="kw">while</span> (lo &lt;= hi) {
+        <span class="kw">int</span> mid = lo + (hi - lo) / <span class="nb">2</span>; <span class="cm">// avoids overflow vs (lo+hi)/2</span>
+        <span class="kw">if</span>      (arr[mid] == target) <span class="kw">return</span> mid;
+        <span class="kw">else if</span> (arr[mid] &lt;  target) lo = mid + <span class="nb">1</span>;
+        <span class="kw">else</span>                          hi = mid - <span class="nb">1</span>;
+    }
+    <span class="kw">return</span> -<span class="nb">1</span>;
+}</pre></div>
+    </div>
+    <div class="panel" id="c0-q">
+      <div class="stitle"><span>◆</span> Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">Why use <code>mid = lo + (hi - lo) / 2</code> instead of <code>(lo + hi) / 2</code>?</div><div class="iqtgl">▾</div></div><div class="iqb"><code>(lo + hi)</code> can overflow a 32-bit integer when both are large (e.g., both near <code>Integer.MAX_VALUE</code>). <code>lo + (hi - lo) / 2</code> avoids this because <code>hi - lo</code> is always smaller than <code>hi</code>. This is a subtle but critical bug that caused a famous Java binary search bug that existed for nearly a decade in the JDK itself.<div class="trick"><strong>⚡ Always use the safe form in interviews</strong> — it signals you understand overflow.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">How do you find the duplicate in an array of n+1 integers where values are 1 to n, without modifying the array and O(1) space?</div><div class="iqtgl">▾</div></div><div class="iqb">Use <strong>Floyd's Cycle Detection (Tortoise & Hare)</strong> — treat the array as a linked list where each value points to its index. A duplicate creates a cycle. Two-phase: 1) find cycle intersection with slow/fast pointers. 2) Reset slow to start, move both at speed 1 — they meet at the duplicate. Time O(n), Space O(1).<div class="trick"><strong>⚡ Classic hard problem — but knowing Floyd's = instant senior signal.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is the sliding window pattern and when do you use it?</div><div class="iqtgl">▾</div></div><div class="iqb">Sliding window maintains a contiguous subarray/substring that satisfies a constraint. Expand window by moving right pointer; shrink by moving left pointer when constraint is violated. Two variants: <strong>Fixed window</strong> (size k — both pointers move together) and <strong>Variable window</strong> (size varies — shrink until valid). Use for: max/min subarray with constraint, longest/shortest substring patterns. Time O(n) — each element enters and exits window at most once.</div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">How to rotate an array by k positions in O(n) time and O(1) space?</div><div class="iqtgl">▾</div></div><div class="iqb">Three-reversal trick: <strong>1)</strong> Reverse entire array. <strong>2)</strong> Reverse first k elements. <strong>3)</strong> Reverse remaining n-k elements. Example: [1,2,3,4,5], k=2 → reverse all: [5,4,3,2,1] → reverse first 2: [4,5,3,2,1] → reverse last 3: [4,5,1,2,3]. This works because rotation = rearranging two halves.<div class="trick"><strong>⚡ Remember: k = k % n to handle k &gt; n edge case.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tc">Concept</span><div class="iqqt">Explain Kadane's algorithm and its extension to maximum product subarray.</div><div class="iqtgl">▾</div></div><div class="iqb">Kadane's max sum: at each index, either start fresh (<code>nums[i]</code>) or extend previous (<code>prev + nums[i]</code>). For <strong>max product</strong>, negatives flip sign — a minimum can become maximum. Track both <code>maxProd</code> and <code>minProd</code> at each step: <code>newMax = max(nums[i], nums[i]*maxProd, nums[i]*minProd)</code>. The triple max accounts for: start fresh, extend positive, flip negative minimum.</div></div>
+      </div>
+    </div>
+    <div class="panel" id="c0-m">
+      <div class="stitle"><span>◆</span> Memory Tip</div>
+      <div class="mtip"><div class="mico">💡</div><div>
+        <strong>5 Array Pattern Triggers:</strong><br>
+        • "Subarray with constraint" → <strong>Sliding Window</strong><br>
+        • "Pair sum / in-place modify" → <strong>Two Pointers</strong> (needs sorted or structure)<br>
+        • "Range sum query" → <strong>Prefix Sum</strong><br>
+        • "Max/Min subarray sum" → <strong>Kadane's</strong><br>
+        • "Find in sorted / monotonic" → <strong>Binary Search</strong><br><br>
+        <strong>Binary search overflow mnemonic: "mid = lo + HALF the gap"</strong>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ T52: SORTING ═══ -->
+<div class="card" id="c1">
+  <div class="band">
+    <div class="band-l">
+      <div class="tnum">52</div>
+      <div>
+        <div class="ttag" style="background:var(--teal-light);color:var(--teal);border:1px solid var(--teal-border)">DSA · Algorithms</div>
+        <div class="btitle">Sorting Algorithms</div>
+        <div class="bsub">Know the tradeoffs — not just the code, but when each algorithm wins</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:#fff2eb;color:var(--java);border:1px solid var(--java-border)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb1">
+      <div class="stab on" onclick="tab(1,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(1,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(1,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(1,'m')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="c1-c">
+      <div class="stitle"><span>◆</span> Algorithm Comparison</div>
+      <table class="tbl">
+        <tr><th>Algorithm</th><th>Best</th><th>Average</th><th>Worst</th><th>Space</th><th>Stable?</th><th>Use When</th></tr>
+        <tr><td><strong>Bubble Sort</strong></td><td><span class="cbadge c-good">O(n)</span></td><td><span class="cbadge c-bad">O(n²)</span></td><td><span class="cbadge c-bad">O(n²)</span></td><td>O(1)</td><td>✅</td><td>Never in prod; teaching only</td></tr>
+        <tr><td><strong>Selection Sort</strong></td><td><span class="cbadge c-bad">O(n²)</span></td><td><span class="cbadge c-bad">O(n²)</span></td><td><span class="cbadge c-bad">O(n²)</span></td><td>O(1)</td><td>❌</td><td>Min writes needed</td></tr>
+        <tr><td><strong>Insertion Sort</strong></td><td><span class="cbadge c-good">O(n)</span></td><td><span class="cbadge c-bad">O(n²)</span></td><td><span class="cbadge c-bad">O(n²)</span></td><td>O(1)</td><td>✅</td><td>Small/nearly-sorted arrays</td></tr>
+        <tr><td><strong>Merge Sort</strong></td><td><span class="cbadge c-ok">O(n log n)</span></td><td><span class="cbadge c-ok">O(n log n)</span></td><td><span class="cbadge c-ok">O(n log n)</span></td><td>O(n)</td><td>✅</td><td>Stable sort needed; linked lists</td></tr>
+        <tr><td><strong>Quick Sort</strong></td><td><span class="cbadge c-ok">O(n log n)</span></td><td><span class="cbadge c-ok">O(n log n)</span></td><td><span class="cbadge c-bad">O(n²)</span></td><td>O(log n)</td><td>❌</td><td>General purpose; in-place</td></tr>
+        <tr><td><strong>Heap Sort</strong></td><td><span class="cbadge c-ok">O(n log n)</span></td><td><span class="cbadge c-ok">O(n log n)</span></td><td><span class="cbadge c-ok">O(n log n)</span></td><td>O(1)</td><td>❌</td><td>Guaranteed O(n log n), O(1) space</td></tr>
+        <tr><td><strong>Counting Sort</strong></td><td><span class="cbadge c-good">O(n+k)</span></td><td><span class="cbadge c-good">O(n+k)</span></td><td><span class="cbadge c-good">O(n+k)</span></td><td>O(k)</td><td>✅</td><td>Small integer range (k is range)</td></tr>
+        <tr><td><strong>Radix Sort</strong></td><td><span class="cbadge c-good">O(nk)</span></td><td><span class="cbadge c-good">O(nk)</span></td><td><span class="cbadge c-good">O(nk)</span></td><td>O(n+k)</td><td>✅</td><td>Fixed-length integers/strings</td></tr>
+      </table>
+      <div class="gap-sm"></div>
+      <div class="kps">
+        <div class="kp"><div class="ki">🏆</div><div class="kt"><strong class="t">Java's Arrays.sort()</strong> — Uses <strong>Dual-Pivot Quicksort</strong> for primitives (faster in practice, not stable). Uses <strong>TimSort</strong> (merge sort + insertion sort hybrid) for objects — <strong>stable</strong>, O(n log n) worst case. Knowing this is a senior-level signal.</div></div>
+        <div class="kp"><div class="ki">⚡</div><div class="kt"><strong class="r">Quick Sort Pivot Strategies</strong> — Last element (simple, bad on sorted input), First element (same problem), Random (good avg), Median-of-three (best). Worst case O(n²) occurs on already-sorted arrays with bad pivot. Mitigate with randomized pivot.</div></div>
+        <div class="kp"><div class="ki">🔗</div><div class="kt"><strong class="b">Merge Sort on Linked Lists</strong> — Preferred over QuickSort for linked lists because: no random access needed, merging is O(1) extra space for lists (just relink nodes), and no worst-case O(n²) on sorted input.</div></div>
+      </div>
+    </div>
+    <div class="panel" id="c1-x">
+      <div class="stitle"><span>◆</span> Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Merge Sort · Quick Sort · Custom Comparator</div></div>
+<pre><span class="cm">// ── Merge Sort ────────────────────────────────────</span>
+<span class="kw">void</span> <span class="fn">mergeSort</span>(<span class="kw">int</span>[] arr, <span class="kw">int</span> l, <span class="kw">int</span> r) {
+    <span class="kw">if</span> (l &gt;= r) <span class="kw">return</span>;
+    <span class="kw">int</span> mid = l + (r - l) / <span class="nb">2</span>;
+    <span class="fn">mergeSort</span>(arr, l, mid);
+    <span class="fn">mergeSort</span>(arr, mid + <span class="nb">1</span>, r);
+    <span class="fn">merge</span>(arr, l, mid, r);
+}
+<span class="kw">void</span> <span class="fn">merge</span>(<span class="kw">int</span>[] arr, <span class="kw">int</span> l, <span class="kw">int</span> mid, <span class="kw">int</span> r) {
+    <span class="kw">int</span>[] left  = <span class="tp">Arrays</span>.<span class="fn">copyOfRange</span>(arr, l, mid+<span class="nb">1</span>);
+    <span class="kw">int</span>[] right = <span class="tp">Arrays</span>.<span class="fn">copyOfRange</span>(arr, mid+<span class="nb">1</span>, r+<span class="nb">1</span>);
+    <span class="kw">int</span> i = <span class="nb">0</span>, j = <span class="nb">0</span>, k = l;
+    <span class="kw">while</span> (i &lt; left.length &amp;&amp; j &lt; right.length)
+        arr[k++] = (left[i] &lt;= right[j]) ? left[i++] : right[j++];
+    <span class="kw">while</span> (i &lt; left.length)  arr[k++] = left[i++];
+    <span class="kw">while</span> (j &lt; right.length) arr[k++] = right[j++];
+}
+
+<span class="cm">// ── Quick Sort ────────────────────────────────────</span>
+<span class="kw">void</span> <span class="fn">quickSort</span>(<span class="kw">int</span>[] arr, <span class="kw">int</span> lo, <span class="kw">int</span> hi) {
+    <span class="kw">if</span> (lo &lt; hi) {
+        <span class="kw">int</span> pi = <span class="fn">partition</span>(arr, lo, hi);
+        <span class="fn">quickSort</span>(arr, lo, pi - <span class="nb">1</span>);
+        <span class="fn">quickSort</span>(arr, pi + <span class="nb">1</span>, hi);
+    }
+}
+<span class="kw">int</span> <span class="fn">partition</span>(<span class="kw">int</span>[] arr, <span class="kw">int</span> lo, <span class="kw">int</span> hi) {
+    <span class="kw">int</span> pivot = arr[hi], i = lo - <span class="nb">1</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> j = lo; j &lt; hi; j++)
+        <span class="kw">if</span> (arr[j] &lt;= pivot) { i++; <span class="kw">int</span> tmp=arr[i]; arr[i]=arr[j]; arr[j]=tmp; }
+    <span class="kw">int</span> tmp=arr[i+<span class="nb">1</span>]; arr[i+<span class="nb">1</span>]=arr[hi]; arr[hi]=tmp;
+    <span class="kw">return</span> i + <span class="nb">1</span>;
+}
+
+<span class="cm">// ── Custom sort with Comparator ───────────────────</span>
+<span class="tp">List</span>&lt;<span class="tp">String</span>&gt; words = <span class="tp">Arrays</span>.<span class="fn">asList</span>(<span class="st">"banana"</span>, <span class="st">"apple"</span>, <span class="st">"cherry"</span>);
+words.<span class="fn">sort</span>(<span class="tp">Comparator</span>.<span class="fn">comparingInt</span>(<span class="tp">String</span>::<span class="fn">length</span>)
+           .<span class="fn">thenComparing</span>(<span class="tp">Comparator</span>.<span class="fn">naturalOrder</span>()));
+
+<span class="cm">// ── Counting Sort (for small integer range) ───────</span>
+<span class="kw">int</span>[] <span class="fn">countingSort</span>(<span class="kw">int</span>[] arr, <span class="kw">int</span> max) {
+    <span class="kw">int</span>[] count = <span class="kw">new int</span>[max + <span class="nb">1</span>];
+    <span class="kw">for</span> (<span class="kw">int</span> n : arr) count[n]++;
+    <span class="kw">int</span> idx = <span class="nb">0</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nb">0</span>; i &lt;= max; i++)
+        <span class="kw">while</span> (count[i]-- &gt; <span class="nb">0</span>) arr[idx++] = i;
+    <span class="kw">return</span> arr;
+}</pre></div>
+    </div>
+    <div class="panel" id="c1-q">
+      <div class="stitle"><span>◆</span> Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What sorting algorithm does Java use internally and why?</div><div class="iqtgl">▾</div></div><div class="iqb"><code>Arrays.sort()</code> uses two different algorithms: <strong>Dual-Pivot Quicksort</strong> for primitive arrays (int[], long[], etc.) — faster in practice due to better cache behavior, not stable. <strong>TimSort</strong> for Object arrays — a hybrid of merge sort and insertion sort, stable, guaranteed O(n log n). TimSort exploits natural "runs" in real-world data for superior performance on partially-sorted data.<div class="trick"><strong>⚡ Why two? Primitives don't need stability (no identity distinction). Objects may need stable sort to preserve equal elements' relative order.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">Why is QuickSort generally faster than MergeSort despite the same O(n log n) average?</div><div class="iqtgl">▾</div></div><div class="iqb">QuickSort is typically faster in practice for three reasons: <strong>1. Cache locality</strong> — partitioning operates on contiguous memory; merge sort's auxiliary array causes cache misses. <strong>2. No extra space</strong> — in-place vs O(n) auxiliary for merge. <strong>3. Constant factor</strong> — partition is simpler per step. However, QuickSort has O(n²) worst case on bad pivots, while MergeSort guarantees O(n log n). For practical sorted/nearly-sorted data, MergeSort or TimSort wins.</div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">How would you find the kth largest element efficiently?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>Option 1 — QuickSelect:</strong> O(n) average, O(n²) worst. Like QuickSort partition, but recurse only on the side containing kth element. <strong>Option 2 — Min-Heap of size k:</strong> O(n log k). Maintain a heap of k elements; pop when size &gt; k. Final top = kth largest. <strong>Option 3 — Sort + index:</strong> O(n log n) — simple but slowest. For streaming data, the heap approach is best since you don't need all elements at once.<div class="trick"><strong>⚡ QuickSelect: pivot index == (n-k) means found. If higher, recurse left. If lower, recurse right.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tc">Concept</span><div class="iqqt">What makes a sorting algorithm "stable" and when does it matter?</div><div class="iqtgl">▾</div></div><div class="iqb">A stable sort preserves the <strong>relative order of equal elements</strong>. Stable: Merge Sort, TimSort, Insertion Sort, Counting Sort, Bubble Sort. Unstable: QuickSort, HeapSort, Selection Sort. Matters when: sorting objects by one field that have equal values in another field (e.g., sort employees by department, then by name — a stable sort preserves name order within each department). Also matters in multi-pass sorting (sort by secondary key first, then primary key with stable sort).</div></div>
+      </div>
+    </div>
+    <div class="panel" id="c1-m">
+      <div class="stitle"><span>◆</span> Memory Tip</div>
+      <div class="mtip"><div class="mico">💡</div><div>
+        <strong>Sorting choice cheat sheet:</strong><br>
+        • <strong>Default</strong> → <code>Arrays.sort()</code> / <code>Collections.sort()</code> (TimSort)<br>
+        • <strong>Need guaranteed O(n log n) + O(1) space</strong> → Heap Sort<br>
+        • <strong>Need stable + worst-case guarantee</strong> → Merge Sort<br>
+        • <strong>Small integer range</strong> → Counting Sort<br>
+        • <strong>Nearly sorted data</strong> → Insertion Sort (O(n) best case)<br><br>
+        <strong>Stable = "Marriage preserving order" (MICS): Merge, Insertion, Counting, (Bubble)</strong>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ T53: DS & PROBLEM SOLVING ═══ -->
+<div class="card" id="c2">
+  <div class="band">
+    <div class="band-l">
+      <div class="tnum">53</div>
+      <div>
+        <div class="ttag" style="background:var(--navy-light);color:var(--navy);border:1px solid var(--navy-border)">DSA · Data Structures</div>
+        <div class="btitle">Data Structures &amp; Problem Solving</div>
+        <div class="bsub">Stacks, Queues, Trees, Graphs, Heaps — know when to use each</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:#fff2eb;color:var(--java);border:1px solid var(--java-border)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb2">
+      <div class="stab on" onclick="tab(2,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(2,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(2,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(2,'m')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="c2-c">
+      <div class="stitle"><span>◆</span> When to Use Which Structure</div>
+      <table class="tbl">
+        <tr><th>Structure</th><th>Java Class</th><th>Key Operations</th><th>Use When</th></tr>
+        <tr><td><strong>Stack</strong></td><td><code>Deque/ArrayDeque</code></td><td>push O(1), pop O(1)</td><td>Undo, balanced brackets, DFS, monotonic stack</td></tr>
+        <tr><td><strong>Queue</strong></td><td><code>LinkedList/ArrayDeque</code></td><td>offer O(1), poll O(1)</td><td>BFS, task scheduling, sliding window max</td></tr>
+        <tr><td><strong>Min-Heap</strong></td><td><code>PriorityQueue</code></td><td>poll O(log n), peek O(1)</td><td>Kth smallest, Dijkstra, merge K sorted</td></tr>
+        <tr><td><strong>Max-Heap</strong></td><td><code>PriorityQueue(reverseOrder)</code></td><td>poll O(log n)</td><td>Kth largest, task scheduling</td></tr>
+        <tr><td><strong>HashMap</strong></td><td><code>HashMap</code></td><td>get/put O(1) avg</td><td>Frequency count, lookup, grouping</td></tr>
+        <tr><td><strong>TreeMap</strong></td><td><code>TreeMap</code></td><td>get/put O(log n)</td><td>Sorted keys, floor/ceiling, range queries</td></tr>
+        <tr><td><strong>LinkedList</strong></td><td><code>LinkedList</code></td><td>insert/delete O(1) at known node</td><td>LRU cache, frequent insertions/deletions</td></tr>
+        <tr><td><strong>Trie</strong></td><td>Custom</td><td>insert/search O(L)</td><td>Prefix search, autocomplete, word dict</td></tr>
+      </table>
+      <div class="gap-sm"></div>
+      <div class="kps">
+        <div class="kp"><div class="ki">🌲</div><div class="kt"><strong class="b">Binary Tree Traversals</strong> — Inorder (Left→Root→Right = sorted for BST), Preorder (Root→L→R = copy/serialize tree), Postorder (L→R→Root = delete/evaluate). Level-order = BFS with a queue. Know both recursive and iterative (stack-based) implementations.</div></div>
+        <div class="kp"><div class="ki">🗺️</div><div class="kt"><strong class="t">Graph BFS vs DFS</strong> — BFS: uses Queue, finds shortest path in unweighted graphs, level-by-level. DFS: uses Stack/recursion, finds connected components, detects cycles, topological sort. Both: O(V+E). For weighted shortest path → Dijkstra (min-heap).</div></div>
+        <div class="kp"><div class="ki">📈</div><div class="kt"><strong class="p">Monotonic Stack</strong> — Stack that maintains monotonically increasing/decreasing order. Pop when current element breaks the property. Use for: next greater element, largest rectangle in histogram, trapping rain water. O(n) — each element pushed/popped once.</div></div>
+        <div class="kp"><div class="ki">🔮</div><div class="kt"><strong class="g">Dynamic Programming Signals</strong> — "Count ways", "min/max path", "can you achieve X". DP = Recursion + Memoization. Identify: overlapping subproblems + optimal substructure. State: what uniquely defines a subproblem. Transition: how to build from smaller states.</div></div>
+      </div>
+    </div>
+    <div class="panel" id="c2-x">
+      <div class="stitle"><span>◆</span> Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">BFS · DFS · Monotonic Stack · PriorityQueue</div></div>
+<pre><span class="cm">// ── BFS — Level order / shortest path ────────────</span>
+<span class="kw">void</span> <span class="fn">bfs</span>(<span class="tp">Node</span> root) {
+    <span class="tp">Queue</span>&lt;<span class="tp">Node</span>&gt; q = <span class="kw">new</span> <span class="tp">LinkedList</span>&lt;&gt;();
+    q.<span class="fn">offer</span>(root);
+    <span class="kw">while</span> (!q.<span class="fn">isEmpty</span>()) {
+        <span class="tp">Node</span> n = q.<span class="fn">poll</span>();
+        <span class="fn">process</span>(n);
+        <span class="kw">if</span> (n.left  != <span class="kw">null</span>) q.<span class="fn">offer</span>(n.left);
+        <span class="kw">if</span> (n.right != <span class="kw">null</span>) q.<span class="fn">offer</span>(n.right);
+    }
+}
+
+<span class="cm">// ── DFS — inorder iterative ───────────────────────</span>
+<span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; <span class="fn">inorder</span>(<span class="tp">Node</span> root) {
+    <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; res = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="tp">Deque</span>&lt;<span class="tp">Node</span>&gt; stack = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
+    <span class="tp">Node</span> cur = root;
+    <span class="kw">while</span> (cur != <span class="kw">null</span> || !stack.<span class="fn">isEmpty</span>()) {
+        <span class="kw">while</span> (cur != <span class="kw">null</span>) { stack.<span class="fn">push</span>(cur); cur = cur.left; }
+        cur = stack.<span class="fn">pop</span>();
+        res.<span class="fn">add</span>(cur.val);
+        cur = cur.right;
+    }
+    <span class="kw">return</span> res;
+}
+
+<span class="cm">// ── Monotonic Stack: next greater element ─────────</span>
+<span class="kw">int</span>[] <span class="fn">nextGreater</span>(<span class="kw">int</span>[] nums) {
+    <span class="kw">int</span>[] res = <span class="kw">new int</span>[nums.length];
+    <span class="tp">Arrays</span>.<span class="fn">fill</span>(res, -<span class="nb">1</span>);
+    <span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; stack = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;(); <span class="cm">// stores indices</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nb">0</span>; i &lt; nums.length; i++) {
+        <span class="kw">while</span> (!stack.<span class="fn">isEmpty</span>() &amp;&amp; nums[i] &gt; nums[stack.<span class="fn">peek</span>()])
+            res[stack.<span class="fn">pop</span>()] = nums[i]; <span class="cm">// i is next greater for popped</span>
+        stack.<span class="fn">push</span>(i);
+    }
+    <span class="kw">return</span> res;
+}
+
+<span class="cm">// ── Min-Heap / Max-Heap ───────────────────────────</span>
+<span class="tp">PriorityQueue</span>&lt;<span class="tp">Integer</span>&gt; minHeap = <span class="kw">new</span> <span class="tp">PriorityQueue</span>&lt;&gt;();
+<span class="tp">PriorityQueue</span>&lt;<span class="tp">Integer</span>&gt; maxHeap = <span class="kw">new</span> <span class="tp">PriorityQueue</span>&lt;&gt;(<span class="tp">Collections</span>.<span class="fn">reverseOrder</span>());
+
+<span class="cm">// Kth largest with min-heap of size k</span>
+<span class="kw">int</span> <span class="fn">kthLargest</span>(<span class="kw">int</span>[] nums, <span class="kw">int</span> k) {
+    <span class="tp">PriorityQueue</span>&lt;<span class="tp">Integer</span>&gt; heap = <span class="kw">new</span> <span class="tp">PriorityQueue</span>&lt;&gt;();
+    <span class="kw">for</span> (<span class="kw">int</span> n : nums) {
+        heap.<span class="fn">offer</span>(n);
+        <span class="kw">if</span> (heap.<span class="fn">size</span>() &gt; k) heap.<span class="fn">poll</span>(); <span class="cm">// remove smallest</span>
+    }
+    <span class="kw">return</span> heap.<span class="fn">peek</span>();                   <span class="cm">// top of min-heap = kth largest</span>
+}
+
+<span class="cm">// ── LRU Cache (LinkedHashMap trick) ──────────────</span>
+<span class="kw">class</span> <span class="cl">LRUCache</span> <span class="kw">extends</span> <span class="tp">LinkedHashMap</span>&lt;<span class="tp">Integer</span>, <span class="tp">Integer</span>&gt; {
+    <span class="kw">private final int</span> cap;
+    <span class="kw">public</span> <span class="fn">LRUCache</span>(<span class="kw">int</span> cap) {
+        <span class="kw">super</span>(cap, <span class="nb">0.75f</span>, <span class="kw">true</span>); <span class="cm">// accessOrder=true</span>
+        <span class="kw">this</span>.cap = cap;
+    }
+    <span class="an">@Override</span>
+    <span class="kw">protected boolean</span> <span class="fn">removeEldestEntry</span>(<span class="tp">Map.Entry</span>&lt;<span class="tp">Integer</span>,<span class="tp">Integer</span>&gt; e) {
+        <span class="kw">return</span> <span class="fn">size</span>() &gt; cap; <span class="cm">// evict LRU automatically</span>
+    }
+}</pre></div>
+    </div>
+    <div class="panel" id="c2-q">
+      <div class="stitle"><span>◆</span> Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">How does a HashMap work internally in Java? What happens on hash collision?</div><div class="iqtgl">▾</div></div><div class="iqb">HashMap uses an array of <strong>buckets</strong>. Hash of key → bucket index (<code>hash % capacity</code>). <strong>Collision handling:</strong> Java uses <strong>Separate Chaining</strong> — each bucket holds a linked list. In Java 8+, when a bucket's chain length exceeds 8 AND table size ≥ 64, the chain is converted to a <strong>Red-Black Tree</strong> (O(log n) instead of O(n) per bucket). When tree shrinks below 6, it reverts to a list. Default load factor 0.75 — rehashes (doubles capacity) when 75% full.<div class="trick"><strong>⚡ Key: HashMap is O(1) average, O(n) worst case (all keys same bucket). Java 8's tree fix makes worst case O(log n) per bucket.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">Design an LRU Cache in O(1) get and put. What data structures are needed?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>HashMap + Doubly Linked List.</strong> HashMap for O(1) key lookup. Doubly linked list for O(1) insertion at head (most recent) and removal from tail (least recent). HashMap stores key → list node reference. On get: move node to head. On put: if exists, update + move to head; if new, add at head; if over capacity, remove tail node and its HashMap entry. In Java: use <code>LinkedHashMap(capacity, 0.75f, true)</code> with <code>removeEldestEntry</code> override — accessOrder=true maintains access order automatically.</div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">When should you use a TreeMap over a HashMap?</div><div class="iqtgl">▾</div></div><div class="iqb">Use <code>TreeMap</code> when you need: <strong>1.</strong> Keys in sorted order (NavigableMap). <strong>2.</strong> Range queries — <code>subMap(from, to)</code>, <code>headMap(key)</code>, <code>tailMap(key)</code>. <strong>3.</strong> Floor/ceiling keys — <code>floorKey(k)</code> (largest key ≤ k), <code>ceilingKey(k)</code> (smallest key ≥ k). <strong>4.</strong> First/last key. Cost: O(log n) vs HashMap's O(1). Keys must implement Comparable or you must provide a Comparator.</div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tc">Concept</span><div class="iqqt">Explain the difference between BFS and DFS with their application scenarios.</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>BFS (Breadth-First):</strong> Queue-based, explores level by level. Guarantees shortest path in unweighted graphs. Uses more memory (stores entire frontier). Best for: shortest path, level-order traversal, minimum steps, "nearest" problems.<br><strong>DFS (Depth-First):</strong> Stack/recursion, explores as far as possible before backtracking. Less memory (just the current path). Best for: connected components, cycle detection, topological sort, maze solving, all paths, tree serialization.<div class="trick"><strong>⚡ "Shortest" = BFS. "All paths / connected" = DFS. Always.</strong></div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="c2-m">
+      <div class="stitle"><span>◆</span> Memory Tip</div>
+      <div class="mtip"><div class="mico">💡</div><div>
+        <strong>Problem → Structure mapping:</strong><br>
+        • "Balanced brackets / undo" → Stack<br>
+        • "Shortest path / level order" → Queue (BFS)<br>
+        • "Kth smallest/largest" → PriorityQueue (heap)<br>
+        • "Sorted keys / range queries" → TreeMap<br>
+        • "LRU cache / O(1) ordered" → LinkedHashMap<br>
+        • "Prefix search / autocomplete" → Trie<br><br>
+        <strong>Monotonic Stack mnemonic: "Pop when violated, push always"</strong>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ T54: MULTITHREADING ═══ -->
+<div class="card" id="c3">
+  <div class="band">
+    <div class="band-l">
+      <div class="tnum">54</div>
+      <div>
+        <div class="ttag" style="background:var(--plum-light);color:var(--plum);border:1px solid var(--plum-border)">Java · Concurrency</div>
+        <div class="btitle">Multithreading &amp; ExecutorService</div>
+        <div class="bsub">Concurrency is hard — know the primitives, know the pitfalls, know the modern APIs</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:#fff2eb;color:var(--java);border:1px solid var(--java-border)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb3">
+      <div class="stab on" onclick="tab(3,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(3,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(3,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(3,'m')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="c3-c">
+      <div class="stitle"><span>◆</span> Core Concepts</div>
+      <div class="kps">
+        <div class="kp"><div class="ki">🔐</div><div class="kt"><strong class="p">synchronized</strong> — Mutual exclusion on a monitor lock. Method-level (lock = <code>this</code>) or block-level (lock = specified object). Prevents concurrent access. Causes: thread contention, deadlock if not careful. <strong>synchronized is re-entrant</strong> — same thread can acquire the same lock twice.</div></div>
+        <div class="kp"><div class="ki">👁️</div><div class="kt"><strong class="b">volatile</strong> — Guarantees <strong>visibility</strong> (writes flushed to main memory, reads from main memory — no CPU cache). Does NOT guarantee atomicity (i++ is not atomic even on volatile). Use for: flags, stop-signals, double-checked locking DCL. Think of volatile as "always read from RAM, not CPU cache".</div></div>
+        <div class="kp"><div class="ki">⚛️</div><div class="kt"><strong class="t">Atomic Classes</strong> — <code>AtomicInteger, AtomicLong, AtomicReference</code> in <code>java.util.concurrent.atomic</code>. Use CAS (Compare-And-Swap) CPU instruction — lock-free thread-safe operations. <code>incrementAndGet()</code>, <code>compareAndSet(expected, update)</code>. Faster than synchronized for single variables.</div></div>
+        <div class="kp"><div class="ki">🏊</div><div class="kt"><strong class="r">ExecutorService</strong> — Thread pool management. <code>Executors.newFixedThreadPool(n)</code>, <code>newCachedThreadPool()</code>, <code>newSingleThreadExecutor()</code>, <code>newScheduledThreadPool(n)</code>. Submit tasks via <code>submit()</code> (returns Future) or <code>execute()</code> (fire-and-forget). Always shutdown properly: <code>shutdown()</code> then <code>awaitTermination()</code>.</div></div>
+        <div class="kp"><div class="ki">🔮</div><div class="kt"><strong class="g">CompletableFuture</strong> — Async programming without blocking. Chain operations: <code>thenApply()</code> (transform), <code>thenAccept()</code> (consume), <code>thenCompose()</code> (flat-map), <code>thenCombine()</code> (combine two futures). Handle errors: <code>exceptionally()</code>, <code>handle()</code>.</div></div>
+        <div class="kp"><div class="ki">💀</div><div class="kt"><strong class="a">Deadlock Conditions</strong> — All 4 must hold: <strong>Mutual Exclusion</strong> (only one thread holds resource), <strong>Hold and Wait</strong> (holding one, waiting for another), <strong>No Preemption</strong> (can't force-release), <strong>Circular Wait</strong> (A waits for B, B waits for A). Prevention: always acquire locks in same order; use tryLock with timeout.</div></div>
+      </div>
+    </div>
+    <div class="panel" id="c3-x">
+      <div class="stitle"><span>◆</span> Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">ExecutorService · CompletableFuture · Locks · Atomic</div></div>
+<pre><span class="cm">// ── ExecutorService ────────────────────────────────</span>
+<span class="tp">ExecutorService</span> pool = <span class="tp">Executors</span>.<span class="fn">newFixedThreadPool</span>(<span class="nb">4</span>);
+
+<span class="tp">Future</span>&lt;<span class="tp">String</span>&gt; future = pool.<span class="fn">submit</span>(() -> {
+    <span class="kw">return</span> <span class="fn">fetchData</span>(); <span class="cm">// runs in thread pool</span>
+});
+
+<span class="tp">String</span> result = future.<span class="fn">get</span>(<span class="nb">5</span>, <span class="tp">TimeUnit</span>.<span class="cl">SECONDS</span>); <span class="cm">// blocking get with timeout</span>
+
+pool.<span class="fn">shutdown</span>();
+<span class="kw">if</span> (!pool.<span class="fn">awaitTermination</span>(<span class="nb">60</span>, <span class="tp">TimeUnit</span>.<span class="cl">SECONDS</span>)) pool.<span class="fn">shutdownNow</span>();
+
+<span class="cm">// ── CompletableFuture ─────────────────────────────</span>
+<span class="tp">CompletableFuture</span>&lt;<span class="tp">User</span>&gt; userFuture = <span class="tp">CompletableFuture</span>
+    .<span class="fn">supplyAsync</span>(() -> <span class="fn">fetchUser</span>(id))          <span class="cm">// async start</span>
+    .<span class="fn">thenApply</span>(<span class="tp">User</span>::<span class="fn">enrichWithDefaults</span>)         <span class="cm">// transform</span>
+    .<span class="fn">exceptionally</span>(ex -> <span class="tp">User</span>.<span class="fn">defaultUser</span>());    <span class="cm">// on error</span>
+
+<span class="cm">// Combine two async results</span>
+<span class="tp">CompletableFuture</span>&lt;<span class="tp">Dashboard</span>&gt; dash =
+    <span class="tp">CompletableFuture</span>.<span class="fn">supplyAsync</span>(() -> <span class="fn">fetchUser</span>(id))
+    .<span class="fn">thenCombine</span>(
+        <span class="tp">CompletableFuture</span>.<span class="fn">supplyAsync</span>(() -> <span class="fn">fetchOrders</span>(id)),
+        (<span class="var">user</span>, <span class="var">orders</span>) -> <span class="kw">new</span> <span class="tp">Dashboard</span>(user, orders)
+    );
+
+<span class="cm">// ── ReentrantLock (more flexible than synchronized) ─</span>
+<span class="tp">ReentrantLock</span> lock = <span class="kw">new</span> <span class="tp">ReentrantLock</span>();
+<span class="kw">try</span> {
+    <span class="kw">if</span> (lock.<span class="fn">tryLock</span>(<span class="nb">500</span>, <span class="tp">TimeUnit</span>.<span class="cl">MILLISECONDS</span>)) {
+        <span class="kw">try</span> { <span class="cm">/* critical section */</span> }
+        <span class="kw">finally</span> { lock.<span class="fn">unlock</span>(); }
+    }
+} <span class="kw">catch</span> (<span class="tp">InterruptedException</span> e) { <span class="tp">Thread</span>.<span class="fn">currentThread</span>().<span class="fn">interrupt</span>(); }
+
+<span class="cm">// ── AtomicInteger — lock-free counter ────────────</span>
+<span class="tp">AtomicInteger</span> counter = <span class="kw">new</span> <span class="tp">AtomicInteger</span>(<span class="nb">0</span>);
+counter.<span class="fn">incrementAndGet</span>();                    <span class="cm">// thread-safe ++</span>
+counter.<span class="fn">compareAndSet</span>(<span class="nb">5</span>, <span class="nb">10</span>);               <span class="cm">// CAS: if 5 → set to 10</span>
+
+<span class="cm">// ── Double-Checked Locking (Singleton) ───────────</span>
+<span class="kw">public class</span> <span class="cl">Singleton</span> {
+    <span class="kw">private static volatile</span> <span class="tp">Singleton</span> instance;  <span class="cm">// volatile required!</span>
+    <span class="kw">public static</span> <span class="tp">Singleton</span> <span class="fn">getInstance</span>() {
+        <span class="kw">if</span> (instance == <span class="kw">null</span>) {
+            <span class="kw">synchronized</span> (<span class="tp">Singleton</span>.<span class="kw">class</span>) {
+                <span class="kw">if</span> (instance == <span class="kw">null</span>)           <span class="cm">// double check!</span>
+                    instance = <span class="kw">new</span> <span class="tp">Singleton</span>();
+            }
+        }
+        <span class="kw">return</span> instance;
+    }
+}</pre></div>
+    </div>
+    <div class="panel" id="c3-q">
+      <div class="stitle"><span>◆</span> Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is the difference between volatile and synchronized?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>volatile</strong>: Guarantees <em>visibility</em> — changes are immediately visible to all threads (no CPU cache). Does NOT guarantee atomicity — compound operations like <code>i++</code> (read-modify-write) are still unsafe. No locking, no mutual exclusion. Fast.<br><strong>synchronized</strong>: Guarantees both <em>visibility</em> AND <em>atomicity</em> — only one thread in the block at a time. Creates happens-before relationship. Slower due to lock acquisition. Use volatile for simple flags; synchronized for compound operations on shared state.<div class="trick"><strong>⚡ volatile is NOT a lightweight synchronized. They solve different problems.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">Why must volatile be used in double-checked locking for Singleton?</div><div class="iqtgl">▾</div></div><div class="iqb">Without <code>volatile</code>, the JVM/CPU can <strong>reorder instructions</strong> (write to <code>instance</code> before the constructor finishes, due to Java Memory Model reordering). Another thread can see a non-null but <strong>partially initialized</strong> object. <code>volatile</code> prevents reordering — establishes a happens-before guarantee that all writes before the volatile write are visible after the volatile read. Alternative: use the <strong>Initialization-on-Demand Holder idiom</strong> which is simpler and correct without volatile.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is the difference between Thread, Runnable, and Callable?</div><div class="iqtgl">▾</div></div><div class="iqb"><code>Runnable</code>: functional interface with <code>run()</code> — no return value, no checked exception. <code>Callable&lt;T&gt;</code>: functional interface with <code>call()</code> — returns a value of type T, can throw checked exceptions. <code>Thread</code>: actual thread of execution; can be constructed with Runnable. In modern Java: prefer <code>Callable</code> + <code>ExecutorService.submit()</code> which returns <code>Future&lt;T&gt;</code> for async result retrieval. Never extend <code>Thread</code> directly — prefer composition over inheritance.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is a ThreadLocal and when would you use it in a Spring application?</div><div class="iqtgl">▾</div></div><div class="iqb"><code>ThreadLocal&lt;T&gt;</code> provides a per-thread variable — each thread gets its own isolated instance. Spring uses ThreadLocal heavily internally: <code>SecurityContextHolder</code> stores authentication per-request thread; <code>TransactionSynchronizationManager</code> tracks current transaction; <code>RequestContextHolder</code> holds HttpServletRequest. Use in Spring for: user context propagation, request-scoped data in non-Spring-managed components, database connection binding. <strong>Critical:</strong> always call <code>remove()</code> in a finally block — thread pool threads are reused and can carry stale values.<div class="trick"><strong>⚡ Memory leak risk: ThreadLocal in thread pools — always clean up in finally.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tc">Concept</span><div class="iqqt">What thread pool sizes should you choose for CPU-bound vs I/O-bound tasks?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>CPU-bound tasks:</strong> Pool size = <strong>number of CPU cores</strong> (or cores + 1 for occasional blocking). More threads = context-switching overhead. <code>Runtime.getRuntime().availableProcessors()</code>.<br><strong>I/O-bound tasks:</strong> Pool size can be <strong>much larger</strong> — threads spend most time waiting (network, DB, disk). Formula: <code>cores × (1 + wait_time/compute_time)</code>. If wait ratio is 9:1, pool size = 10× core count. Modern alternative: <strong>Virtual threads</strong> (Java 21) — create one per task regardless of count, JVM handles scheduling efficiently.</div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="c3-m">
+      <div class="stitle"><span>◆</span> Memory Tip</div>
+      <div class="mtip"><div class="mico">💡</div><div>
+        <strong>Concurrency primitives by guarantee:</strong><br>
+        • <strong>volatile</strong> = Visibility only (no atomicity)<br>
+        • <strong>synchronized</strong> = Visibility + Atomicity + Mutual Exclusion<br>
+        • <strong>AtomicXxx</strong> = Visibility + Atomicity (no mutex, CAS-based, lock-free)<br>
+        • <strong>ReentrantLock</strong> = All of synchronized + tryLock + fairness + interruptible<br><br>
+        <strong>Deadlock prevention: "Always lock in alphabetical order"</strong> — consistent lock ordering breaks circular wait.
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ T55: SQL ═══ -->
+<div class="card" id="c4">
+  <div class="band">
+    <div class="band-l">
+      <div class="tnum">55</div>
+      <div>
+        <div class="ttag" style="background:var(--gold-light);color:var(--gold);border:1px solid var(--gold-border)">Database · SQL</div>
+        <div class="btitle">SQL Queries, Joins, Indexes &amp; Optimization</div>
+        <div class="bsub">Write queries that scale — understand what the database actually does with your SQL</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:#fff2eb;color:var(--java);border:1px solid var(--java-border)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb4">
+      <div class="stab on" onclick="tab(4,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(4,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(4,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(4,'m')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="c4-c">
+      <div class="stitle"><span>◆</span> Join Types</div>
+      <table class="tbl">
+        <tr><th>Join Type</th><th>Returns</th><th>Use When</th></tr>
+        <tr><td><code>INNER JOIN</code></td><td>Rows matching in BOTH tables</td><td>Only want records with matches</td></tr>
+        <tr><td><code>LEFT JOIN</code></td><td>All left + matched right (NULL if no match)</td><td>All left records, even without match</td></tr>
+        <tr><td><code>RIGHT JOIN</code></td><td>All right + matched left</td><td>All right records (use LEFT JOIN + swap)</td></tr>
+        <tr><td><code>FULL OUTER JOIN</code></td><td>All rows from both, NULLs for no match</td><td>Complete picture of both tables</td></tr>
+        <tr><td><code>CROSS JOIN</code></td><td>Cartesian product (m × n rows)</td><td>Combinations; use carefully</td></tr>
+        <tr><td><code>SELF JOIN</code></td><td>Table joined with itself (alias)</td><td>Hierarchies, org charts, comparisons</td></tr>
+      </table>
+      <div class="gap-sm"></div>
+      <div class="kps">
+        <div class="kp"><div class="ki">📑</div><div class="kt"><strong class="g">Indexes</strong> — B-Tree index (default): O(log n) lookup, supports range queries, ORDER BY, LIKE 'prefix%'. Hash index: O(1) exact match, no ranges. <strong>When to index:</strong> WHERE clause columns, JOIN keys, ORDER BY columns, high-cardinality columns. <strong>When NOT to:</strong> small tables, frequently updated columns, low-cardinality (like boolean).</div></div>
+        <div class="kp"><div class="ki">🎭</div><div class="kt"><strong class="b">Window Functions</strong> — Perform calculations across rows <em>without collapsing</em> them (unlike GROUP BY). Syntax: <code>FUNC() OVER (PARTITION BY col ORDER BY col)</code>. Key functions: <code>ROW_NUMBER()</code>, <code>RANK()</code>, <code>DENSE_RANK()</code>, <code>LAG()</code>, <code>LEAD()</code>, <code>SUM() OVER()</code>, <code>NTILE(n)</code>.</div></div>
+        <div class="kp"><div class="ki">⚡</div><div class="kt"><strong class="r">EXPLAIN / Query Optimization</strong> — Use <code>EXPLAIN ANALYZE</code> to see query plan. Watch for: <strong>Seq Scan</strong> (full table scan — add index), <strong>Hash Join vs Nested Loop</strong> (nested loop OK for small inner tables), <strong>N+1 in ORM</strong> (use JOIN FETCH). Avoid: <code>SELECT *</code>, functions on indexed columns in WHERE (<code>WHERE YEAR(date) = 2024</code> breaks index — use range instead).</div></div>
+        <div class="kp"><div class="ki">🧩</div><div class="kt"><strong class="p">Composite Index Rule</strong> — Index on (A, B, C) is usable for queries on A, (A,B), (A,B,C) but NOT B alone or C alone. The <strong>leftmost prefix rule</strong>. Order matters: put high-cardinality, equality-filtered columns first; range-filtered columns last.</div></div>
+      </div>
+    </div>
+    <div class="panel" id="c4-x">
+      <div class="stitle"><span>◆</span> Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">SQL — Joins · Window Functions · CTEs · Aggregation</div></div>
+<pre><span class="cm">-- ── Window Functions (essential for senior interviews)</span>
+<span class="kw">SELECT</span>
+    name,
+    dept,
+    salary,
+    <span class="fn">RANK</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> dept <span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>) <span class="kw">AS</span> dept_rank,
+    <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>) <span class="kw">AS</span> overall_rank,
+    <span class="fn">LAG</span>(salary, <span class="nb">1</span>) <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> dept <span class="kw">ORDER BY</span> salary) <span class="kw">AS</span> prev_salary,
+    <span class="fn">SUM</span>(salary) <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> dept) <span class="kw">AS</span> dept_total
+<span class="kw">FROM</span> employees;
+
+<span class="cm">-- ── Top N per group (classic interview pattern) ───</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> (
+    <span class="kw">SELECT</span> *, <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> dept <span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>) rk
+    <span class="kw">FROM</span> employees
+) t <span class="kw">WHERE</span> rk &lt;= <span class="nb">3</span>;  <span class="cm">-- top 3 salaries per department</span>
+
+<span class="cm">-- ── CTE (Common Table Expression) ─────────────────</span>
+<span class="kw">WITH</span> dept_avg <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> dept, <span class="fn">AVG</span>(salary) avg_sal <span class="kw">FROM</span> employees <span class="kw">GROUP BY</span> dept
+)
+<span class="kw">SELECT</span> e.name, e.salary, d.avg_sal
+<span class="kw">FROM</span> employees e
+<span class="kw">JOIN</span> dept_avg d <span class="kw">ON</span> e.dept = d.dept
+<span class="kw">WHERE</span> e.salary &gt; d.avg_sal;  <span class="cm">-- employees earning above dept avg</span>
+
+<span class="cm">-- ── Self Join: employees and their manager ────────</span>
+<span class="kw">SELECT</span> e.name <span class="kw">AS</span> employee, m.name <span class="kw">AS</span> manager
+<span class="kw">FROM</span> employees e
+<span class="kw">LEFT JOIN</span> employees m <span class="kw">ON</span> e.manager_id = m.id;
+
+<span class="cm">-- ── Find duplicates ────────────────────────────────</span>
+<span class="kw">SELECT</span> email, <span class="fn">COUNT</span>(*) cnt
+<span class="kw">FROM</span> users
+<span class="kw">GROUP BY</span> email
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) &gt; <span class="nb">1</span>;
+
+<span class="cm">-- ── EXPLAIN ANALYZE (PostgreSQL) ─────────────────</span>
+<span class="kw">EXPLAIN ANALYZE</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> orders <span class="kw">WHERE</span> user_id = <span class="nb">42</span> <span class="kw">AND</span> status = <span class="st">'PENDING'</span>;
+<span class="cm">-- Look for: Index Scan vs Seq Scan, actual vs estimated rows</span>
+
+<span class="cm">-- ── Index that actually works ─────────────────────</span>
+<span class="kw">CREATE INDEX</span> idx_orders_user_status <span class="kw">ON</span> orders (user_id, status);
+<span class="cm">-- Composite: equality filter first (user_id), then status</span>
+
+<span class="cm">-- ❌ Breaks index (function on column)</span>
+<span class="kw">WHERE</span> <span class="fn">UPPER</span>(email) = <span class="st">'ALICE@X.COM'</span>  <span class="cm">-- use: WHERE email = 'alice@x.com'</span>
+<span class="kw">WHERE</span> <span class="fn">YEAR</span>(created_at) = <span class="nb">2024</span>        <span class="cm">-- use: WHERE created_at BETWEEN ...</span></pre></div>
+    </div>
+    <div class="panel" id="c4-q">
+      <div class="stitle"><span>◆</span> Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is the difference between WHERE and HAVING?</div><div class="iqtgl">▾</div></div><div class="iqb"><code>WHERE</code> filters <strong>individual rows before</strong> grouping — cannot use aggregate functions. <code>HAVING</code> filters <strong>groups after</strong> GROUP BY — can use aggregate functions. Order of SQL execution: FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT. Example: <code>WHERE salary &gt; 50000</code> (filter rows first), <code>HAVING AVG(salary) &gt; 60000</code> (filter groups by avg).</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is the difference between RANK(), DENSE_RANK(), and ROW_NUMBER()?</div><div class="iqtgl">▾</div></div><div class="iqb">For salaries [100, 90, 90, 80]:<br><code>ROW_NUMBER()</code>: 1, 2, 3, 4 — always unique, arbitrary order for ties<br><code>RANK()</code>: 1, 2, 2, 4 — ties get same rank, next rank skips (gap)<br><code>DENSE_RANK()</code>: 1, 2, 2, 3 — ties get same rank, next rank is consecutive (no gap)<br><div class="trick"><strong>⚡ Use ROW_NUMBER() to get exactly one row per group (e.g., latest order per user). DENSE_RANK() for "top 3 distinct salary levels".</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">Why can applying a function to an indexed column break index usage?</div><div class="iqtgl">▾</div></div><div class="iqb">The index stores raw column values. When you apply a function like <code>UPPER(email)</code> or <code>YEAR(created_at)</code> in the WHERE clause, the database can't use the index because the index values don't match the function output — it must compute the function for every row (full table scan). Fix: store data in the normalized form you'll query (lowercase emails), or use a <strong>functional index</strong> (<code>CREATE INDEX ON users (UPPER(email))</code>), or rewrite the query with a range: <code>created_at BETWEEN '2024-01-01' AND '2024-12-31'</code>.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tc">Concept</span><div class="iqqt">What is a covering index and why is it powerful?</div><div class="iqtgl">▾</div></div><div class="iqb">A <strong>covering index</strong> includes all columns needed by a query — the database can answer the query entirely from the index without touching the main table. Example: <code>SELECT name, email FROM users WHERE dept = 'Engineering'</code> — if the index is on <code>(dept, name, email)</code>, it's a covering index. No heap fetch needed. Often 10-100× faster for read-heavy queries. Trade-off: larger index size, slower writes. In PostgreSQL, this is an "index-only scan".</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is the N+1 query problem in SQL/ORM and how do you fix it at the SQL level?</div><div class="iqtgl">▾</div></div><div class="iqb">N+1 means 1 query to fetch N parents, then N separate queries for each parent's children — total N+1 queries. At SQL level: use a single <strong>JOIN</strong> to fetch all data together, then reconstruct in application. Or use <strong>IN clause</strong>: fetch all parent IDs, then one query <code>WHERE parent_id IN (...)</code> to fetch all children at once. At ORM level: <code>JOIN FETCH</code> in JPQL or <code>@EntityGraph</code>. At DB design level: denormalization or materialized views for frequently joined data.</div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="c4-m">
+      <div class="stitle"><span>◆</span> Memory Tip</div>
+      <div class="mtip"><div class="mico">💡</div><div>
+        <strong>SQL execution order (not writing order):</strong><br>
+        <code>FROM → JOIN → WHERE → GROUP BY → HAVING → SELECT → DISTINCT → ORDER BY → LIMIT</code><br><br>
+        <strong>Index killer checklist (things that break index usage):</strong><br>
+        • Function on column in WHERE: <code>UPPER(col)</code>, <code>YEAR(date)</code><br>
+        • Leading wildcard: <code>LIKE '%suffix'</code> (trailing OK: <code>LIKE 'prefix%'</code>)<br>
+        • Type mismatch: comparing varchar to integer<br>
+        • OR conditions (sometimes) — use UNION instead<br>
+        • NOT IN with NULLs
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ T56: JAVA COLLECTIONS ═══ -->
+<div class="card" id="c5">
+  <div class="band">
+    <div class="band-l">
+      <div class="tnum">56</div>
+      <div>
+        <div class="ttag" style="background:var(--forest-light);color:var(--forest);border:1px solid var(--forest-border)">Java · Collections</div>
+        <div class="btitle">Java Collections Framework</div>
+        <div class="bsub">Pick the right collection — every choice has a time/space tradeoff story</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:#fff2eb;color:var(--java);border:1px solid var(--java-border)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb5">
+      <div class="stab on" onclick="tab(5,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(5,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(5,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(5,'m')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="c5-c">
+      <div class="stitle"><span>◆</span> Collection Comparison</div>
+      <table class="tbl">
+        <tr><th>Class</th><th>Interface</th><th>Order</th><th>Null</th><th>Thread-Safe</th><th>Use When</th></tr>
+        <tr><td><code>ArrayList</code></td><td>List</td><td>Insertion</td><td>✅</td><td>❌</td><td>Default list; random access</td></tr>
+        <tr><td><code>LinkedList</code></td><td>List,Deque</td><td>Insertion</td><td>✅</td><td>❌</td><td>Frequent insert/delete at ends</td></tr>
+        <tr><td><code>HashMap</code></td><td>Map</td><td>None</td><td>1 null key</td><td>❌</td><td>Default map; fast lookup</td></tr>
+        <tr><td><code>LinkedHashMap</code></td><td>Map</td><td>Insertion/Access</td><td>1 null key</td><td>❌</td><td>LRU cache; predictable order</td></tr>
+        <tr><td><code>TreeMap</code></td><td>SortedMap</td><td>Natural/Comparator</td><td>❌</td><td>❌</td><td>Sorted keys; range queries</td></tr>
+        <tr><td><code>HashSet</code></td><td>Set</td><td>None</td><td>✅</td><td>❌</td><td>Uniqueness; fast lookup</td></tr>
+        <tr><td><code>LinkedHashSet</code></td><td>Set</td><td>Insertion</td><td>✅</td><td>❌</td><td>Unique + ordered</td></tr>
+        <tr><td><code>TreeSet</code></td><td>SortedSet</td><td>Natural</td><td>❌</td><td>❌</td><td>Sorted unique elements</td></tr>
+        <tr><td><code>PriorityQueue</code></td><td>Queue</td><td>Priority</td><td>❌</td><td>❌</td><td>Heap; min/max operations</td></tr>
+        <tr><td><code>ArrayDeque</code></td><td>Deque</td><td>Insertion</td><td>❌</td><td>❌</td><td>Stack or Queue (prefer over Stack class)</td></tr>
+        <tr><td><code>ConcurrentHashMap</code></td><td>Map</td><td>None</td><td>❌</td><td>✅</td><td>Thread-safe map (bucket-level lock)</td></tr>
+        <tr><td><code>CopyOnWriteArrayList</code></td><td>List</td><td>Insertion</td><td>✅</td><td>✅</td><td>Read-heavy; rare writes</td></tr>
+      </table>
+    </div>
+    <div class="panel" id="c5-x">
+      <div class="stitle"><span>◆</span> Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Collections — Key Patterns</div></div>
+<pre><span class="cm">// ── ArrayList vs LinkedList decision ─────────────</span>
+<span class="tp">List</span>&lt;<span class="tp">String</span>&gt; list = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();  <span class="cm">// O(1) get, O(n) insert middle</span>
+<span class="tp">Deque</span>&lt;<span class="tp">String</span>&gt; deque = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;(); <span class="cm">// O(1) both ends — use as Stack/Queue</span>
+
+<span class="cm">// ── Frequency count pattern ───────────────────────</span>
+<span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">Long</span>&gt; freq = words.<span class="fn">stream</span>()
+    .<span class="fn">collect</span>(<span class="tp">Collectors</span>.<span class="fn">groupingBy</span>(<span class="tp">Function</span>::<span class="fn">identity</span>, <span class="tp">Collectors</span>.<span class="fn">counting</span>()));
+
+<span class="cm">// ── getOrDefault + merge ──────────────────────────</span>
+<span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">Integer</span>&gt; map = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+map.<span class="fn">merge</span>(key, <span class="nb">1</span>, <span class="tp">Integer</span>::<span class="fn">sum</span>);          <span class="cm">// increment or init to 1</span>
+map.<span class="fn">computeIfAbsent</span>(key, k -> <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;()).<span class="fn">add</span>(value);
+
+<span class="cm">// ── Concurrent collections ────────────────────────</span>
+<span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">Integer</span>&gt; safe = <span class="kw">new</span> <span class="tp">ConcurrentHashMap</span>&lt;&gt;();
+safe.<span class="fn">compute</span>(key, (k, v) -> v == <span class="kw">null</span> ? <span class="nb">1</span> : v + <span class="nb">1</span>); <span class="cm">// atomic update</span>
+
+<span class="cm">// ── Unmodifiable collections (Java 9+) ───────────</span>
+<span class="tp">List</span>&lt;<span class="tp">String</span>&gt; immutable = <span class="tp">List</span>.<span class="fn">of</span>(<span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span>);  <span class="cm">// throws on modify</span>
+<span class="tp">Map</span>&lt;<span class="tp">String</span>,<span class="tp">Integer</span>&gt; imap = <span class="tp">Map</span>.<span class="fn">of</span>(<span class="st">"x"</span>, <span class="nb">1</span>, <span class="st">"y"</span>, <span class="nb">2</span>);
+
+<span class="cm">// ── TreeMap floor/ceiling ─────────────────────────</span>
+<span class="tp">TreeMap</span>&lt;<span class="tp">Integer</span>, <span class="tp">String</span>&gt; tm = <span class="kw">new</span> <span class="tp">TreeMap</span>&lt;&gt;();
+tm.<span class="fn">put</span>(<span class="nb">10</span>, <span class="st">"ten"</span>); tm.<span class="fn">put</span>(<span class="nb">20</span>, <span class="st">"twenty"</span>); tm.<span class="fn">put</span>(<span class="nb">30</span>, <span class="st">"thirty"</span>);
+tm.<span class="fn">floorKey</span>(<span class="nb">25</span>);   <span class="cm">// 20 — largest key ≤ 25</span>
+tm.<span class="fn">ceilingKey</span>(<span class="nb">15</span>); <span class="cm">// 20 — smallest key ≥ 15</span>
+tm.<span class="fn">subMap</span>(<span class="nb">10</span>, <span class="nb">25</span>);  <span class="cm">// keys 10 to 24 (exclusive upper)</span>
+
+<span class="cm">// ── Avoid: raw Stack class ────────────────────────</span>
+<span class="tp">Stack</span>&lt;<span class="tp">Integer</span>&gt; bad = <span class="kw">new</span> <span class="tp">Stack</span>&lt;&gt;();         <span class="cm">// ❌ extends Vector, synchronized</span>
+<span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; good = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();  <span class="cm">// ✅ use this instead</span>
+good.<span class="fn">push</span>(<span class="nb">1</span>); good.<span class="fn">pop</span>(); good.<span class="fn">peek</span>();</pre></div>
+    </div>
+    <div class="panel" id="c5-q">
+      <div class="stitle"><span>◆</span> Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What happens if you use a mutable object as a HashMap key and then mutate it?</div><div class="iqtgl">▾</div></div><div class="iqb">The key's <code>hashCode()</code> changes after mutation. The HashMap still stores the entry in the original bucket (based on old hash). When you try to get the value, the new hash maps to a different bucket — the entry is effectively <strong>lost</strong>. You won't find it with <code>get()</code> or <code>containsKey()</code>. This is why <strong>keys must be immutable</strong> (or at least their hash-relevant fields must not change). String and Integer are immutable — ideal keys.<div class="trick"><strong>⚡ Classic interview trap: "You have a key in the map but get() returns null."</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is the contract between equals() and hashCode()?</div><div class="iqtgl">▾</div></div><div class="iqb">The contract: <strong>1.</strong> If <code>a.equals(b)</code> is true, then <code>a.hashCode() == b.hashCode()</code> MUST be true. <strong>2.</strong> If <code>a.hashCode() == b.hashCode()</code>, <code>a.equals(b)</code> MAY be false (collision). Breaking rule 1 breaks HashMap/HashSet — equal objects map to different buckets and are treated as different entries. Always override both together. The IntelliJ/Lombok-generated implementations follow this contract. A common bug: override equals() without hashCode() — results in duplicate entries in HashSet for "equal" objects.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tc">Concept</span><div class="iqqt">What is the difference between fail-fast and fail-safe iterators?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>Fail-fast</strong> (ArrayList, HashMap, HashSet): throws <code>ConcurrentModificationException</code> if the collection is structurally modified during iteration (uses a modCount check). Detects bugs early. Do not modify the collection while iterating — use Iterator.remove() or a copy.<br><strong>Fail-safe</strong> (ConcurrentHashMap, CopyOnWriteArrayList): operates on a copy of the collection, so modifications during iteration don't cause exceptions. May not see the latest state. Trade-off: memory and freshness vs safety.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">Why should you avoid the Stack class and use ArrayDeque instead?</div><div class="iqtgl">▾</div></div><div class="iqb"><code>Stack</code> extends <code>Vector</code>, which is a legacy synchronized class. This means every Stack operation acquires a lock — performance overhead even in single-threaded code. Also, it exposes Vector methods (like <code>get(int)</code>) that violate the stack abstraction. <code>ArrayDeque</code> is unsynchronized, faster, and implements the <code>Deque</code> interface — use <code>push()/pop()/peek()</code> for stack semantics. If you need a thread-safe stack, use <code>ConcurrentLinkedDeque</code> or synchronize explicitly.</div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="c5-m">
+      <div class="stitle"><span>◆</span> Memory Tip</div>
+      <div class="mtip"><div class="mico">💡</div><div>
+        <strong>Collection cheat: "What matters most?"</strong><br>
+        • Order + fast access → <strong>ArrayList</strong><br>
+        • Fast ends (queue/stack) → <strong>ArrayDeque</strong><br>
+        • Key-value, fast lookup → <strong>HashMap</strong><br>
+        • Key-value, insertion order → <strong>LinkedHashMap</strong><br>
+        • Key-value, sorted → <strong>TreeMap</strong><br>
+        • Unique values → <strong>HashSet</strong><br>
+        • Unique + sorted → <strong>TreeSet</strong><br>
+        • Thread-safe map → <strong>ConcurrentHashMap</strong> (not Hashtable!)<br><br>
+        <strong>equals + hashCode rule: "Equal objects MUST have equal hashes. Equal hashes MAY have unequal objects."</strong>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ T57: EXCEPTIONS ═══ -->
+<div class="card" id="c6">
+  <div class="band">
+    <div class="band-l">
+      <div class="tnum">57</div>
+      <div>
+        <div class="ttag" style="background:var(--java-light);color:var(--java);border:1px solid var(--java-border)">Java · Exceptions</div>
+        <div class="btitle">Exception Handling</div>
+        <div class="bsub">Not just try-catch — exception design is an API decision that affects callers forever</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--gold-light);color:var(--gold);border:1px solid var(--gold-border)">🟡 Medium</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb6">
+      <div class="stab on" onclick="tab(6,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(6,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(6,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(6,'m')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="c6-c">
+      <div class="stitle"><span>◆</span> Exception Hierarchy</div>
+      <div class="kps">
+        <div class="kp"><div class="ki">🌳</div><div class="kt"><strong class="b">Throwable</strong> — Root. Two branches: <strong>Error</strong> (JVM-level, unrecoverable: OutOfMemoryError, StackOverflowError — never catch) and <strong>Exception</strong> (application-level). Exception splits into: <strong>Checked</strong> (must handle or declare: IOException, SQLException) and <strong>Unchecked/RuntimeException</strong> (optional handling: NullPointerException, IllegalArgumentException).</div></div>
+        <div class="kp"><div class="ki">✅</div><div class="kt"><strong class="g">Checked vs Unchecked Design Rule</strong> — Use <strong>checked</strong> when caller CAN reasonably recover (file not found → retry). Use <strong>unchecked</strong> for programming errors (null arg, illegal state — programmer should have prevented this). Spring/modern Java prefers unchecked — checked exceptions in APIs are "viral" and force callers to handle them.</div></div>
+        <div class="kp"><div class="ki">🔗</div><div class="kt"><strong class="r">Exception Chaining</strong> — Wrap low-level exceptions in meaningful higher-level ones. Pass original as <code>cause</code>: <code>throw new ServiceException("Failed to load user", e)</code>. Preserves the full stack trace. Never swallow exceptions silently — at minimum log them.</div></div>
+        <div class="kp"><div class="ki">🛡️</div><div class="kt"><strong class="p">try-with-resources</strong> — Auto-closes resources implementing <code>AutoCloseable</code>. Resources closed in <strong>reverse declaration order</strong>. Suppressed exceptions: if both try body AND close() throw, the body's exception is primary and close's is "suppressed" (accessible via <code>getSuppressed()</code>).</div></div>
+        <div class="kp"><div class="ki">⚠️</div><div class="kt"><strong class="a">Anti-patterns</strong> — <strong>Pokemon exception handling</strong> (catch Exception and do nothing), <strong>swallowing</strong> (empty catch block), <strong>returning null on exception</strong> (use Optional or throw), <strong>using exceptions for flow control</strong> (extremely slow — exceptions involve stack trace capture).</div></div>
+      </div>
+    </div>
+    <div class="panel" id="c6-x">
+      <div class="stitle"><span>◆</span> Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Exception Patterns</div></div>
+<pre><span class="cm">// ── try-with-resources (auto-close) ──────────────</span>
+<span class="kw">try</span> (<span class="tp">InputStream</span> in = <span class="kw">new</span> <span class="tp">FileInputStream</span>(<span class="st">"data.txt"</span>);
+     <span class="tp">BufferedReader</span> br = <span class="kw">new</span> <span class="tp">BufferedReader</span>(<span class="kw">new</span> <span class="tp">InputStreamReader</span>(in))) {
+    <span class="tp">String</span> line;
+    <span class="kw">while</span> ((line = br.<span class="fn">readLine</span>()) != <span class="kw">null</span>) <span class="fn">process</span>(line);
+} <span class="cm">// br and in closed automatically, in reverse order</span>
+
+<span class="cm">// ── Custom exception hierarchy ────────────────────</span>
+<span class="kw">public class</span> <span class="cl">AppException</span> <span class="kw">extends</span> <span class="tp">RuntimeException</span> {
+    <span class="kw">private final</span> <span class="tp">ErrorCode</span> code;
+    <span class="kw">public</span> <span class="fn">AppException</span>(<span class="tp">ErrorCode</span> code, <span class="tp">String</span> msg, <span class="tp">Throwable</span> cause) {
+        <span class="kw">super</span>(msg, cause);               <span class="cm">// preserve original stack trace</span>
+        <span class="kw">this</span>.code = code;
+    }
+}
+
+<span class="kw">public class</span> <span class="cl">UserNotFoundException</span> <span class="kw">extends</span> <span class="cl">AppException</span> {
+    <span class="kw">public</span> <span class="fn">UserNotFoundException</span>(<span class="kw">long</span> userId) {
+        <span class="kw">super</span>(<span class="tp">ErrorCode</span>.<span class="cl">USER_NOT_FOUND</span>, <span class="st">"User not found: "</span> + userId, <span class="kw">null</span>);
+    }
+}
+
+<span class="cm">// ── Exception chaining ────────────────────────────</span>
+<span class="kw">try</span> {
+    userRepository.<span class="fn">save</span>(user);
+} <span class="kw">catch</span> (<span class="tp">DataAccessException</span> e) {
+    <span class="kw">throw new</span> <span class="cl">UserCreationException</span>(<span class="st">"Failed to create user"</span>, e); <span class="cm">// wrap</span>
+}
+
+<span class="cm">// ── Multi-catch (Java 7+) ─────────────────────────</span>
+<span class="kw">try</span> { <span class="fn">riskyOperation</span>(); }
+<span class="kw">catch</span> (<span class="tp">IOException</span> | <span class="tp">SQLException</span> e) { <span class="cm">// both handled same way</span>
+    log.<span class="fn">error</span>(<span class="st">"Operation failed"</span>, e);    <span class="cm">// e is effectively final</span>
+    <span class="kw">throw new</span> <span class="cl">AppException</span>(<span class="tp">ErrorCode</span>.<span class="cl">IO_ERROR</span>, e.<span class="fn">getMessage</span>(), e);
+}
+
+<span class="cm">// ── finally guaranteed to run ─────────────────────</span>
+<span class="tp">Connection</span> conn = <span class="kw">null</span>;
+<span class="kw">try</span> {
+    conn = <span class="fn">getConnection</span>();
+    <span class="cm">// ... work ...</span>
+} <span class="kw">catch</span> (<span class="tp">SQLException</span> e) {
+    <span class="kw">throw new</span> <span class="cl">AppException</span>(<span class="tp">ErrorCode</span>.<span class="cl">DB_ERROR</span>, e.<span class="fn">getMessage</span>(), e);
+} <span class="kw">finally</span> {
+    <span class="kw">if</span> (conn != <span class="kw">null</span>) conn.<span class="fn">close</span>(); <span class="cm">// always runs (prefer try-with-resources)</span>
+}</pre></div>
+    </div>
+    <div class="panel" id="c6-q">
+      <div class="stitle"><span>◆</span> Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">Can a finally block prevent an exception from propagating? Can it override a return value?</div><div class="iqtgl">▾</div></div><div class="iqb">Yes to both — this is a dangerous anti-pattern. If the <code>finally</code> block contains a <code>return</code> statement, it <strong>swallows</strong> any exception thrown in the try block and returns the finally's value. Similarly, if finally throws its own exception, the original exception is lost. Example: try throws RuntimeException, finally returns 42 — caller sees 42, original exception is gone. This is why you should never put return or throw in finally.<div class="trick"><strong>⚡ Never put return or throw in a finally block — it silently swallows exceptions.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is the difference between throw and throws?</div><div class="iqtgl">▾</div></div><div class="iqb"><code>throw</code> is a <strong>statement</strong> — actually throws an exception instance: <code>throw new IllegalArgumentException("bad input")</code>. <code>throws</code> is a <strong>method declaration keyword</strong> — declares that a method might throw checked exceptions, forcing callers to handle or declare them: <code>void readFile() throws IOException</code>. Required for checked exceptions; optional (but good documentation) for unchecked ones. Spring/modern Java prefers unchecked exceptions to avoid the checked exception "tax" on API callers.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tc">Concept</span><div class="iqqt">Why are exceptions slow and when should you avoid using them for control flow?</div><div class="iqtgl">▾</div></div><div class="iqb">Exception creation involves <strong>capturing the full stack trace</strong> — walking the call stack and building a StackTraceElement array. This is expensive (microseconds to milliseconds). Using exceptions for normal flow (e.g., using NumberFormatException to detect non-numeric strings instead of <code>isNumeric()</code> check) can be 100-1000× slower than a regular conditional. Always validate before attempting, not catch-to-detect. If you must create exceptions without the overhead, override <code>fillInStackTrace()</code> to return <code>this</code>.</div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="c6-m">
+      <div class="stitle"><span>◆</span> Memory Tip</div>
+      <div class="mtip"><div class="mico">💡</div><div>
+        <strong>Exception design decision tree:</strong><br>
+        → Can caller reasonably recover? → <strong>Checked exception</strong><br>
+        → Programming bug (should not happen)? → <strong>Unchecked (RuntimeException)</strong><br>
+        → JVM-level catastrophe? → <strong>Error</strong> (don't catch)<br><br>
+        <strong>Exception best practices:</strong><br>
+        • Always pass the original cause in the constructor (chain!)<br>
+        • Never swallow silently — at least log<br>
+        • Don't use exceptions for flow control (performance)<br>
+        • prefer try-with-resources over try-finally for resources
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ T58: DESIGN PATTERNS ═══ -->
+<div class="card" id="c7">
+  <div class="band">
+    <div class="band-l">
+      <div class="tnum">58</div>
+      <div>
+        <div class="ttag" style="background:var(--plum-light);color:var(--plum);border:1px solid var(--plum-border)">CS · Design</div>
+        <div class="btitle">Design Patterns</div>
+        <div class="bsub">GoF patterns — recognise them in Spring, name them in interviews</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:#fff2eb;color:var(--java);border:1px solid var(--java-border)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb7">
+      <div class="stab on" onclick="tab(7,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(7,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(7,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(7,'m')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="c7-c">
+      <div class="stitle"><span>◆</span> Must-Know Patterns (with Spring connections)</div>
+      <table class="tbl">
+        <tr><th>Pattern</th><th>Category</th><th>Intent</th><th>Spring Example</th></tr>
+        <tr><td><strong>Singleton</strong></td><td>Creational</td><td>One instance per class</td><td>Default bean scope</td></tr>
+        <tr><td><strong>Factory Method</strong></td><td>Creational</td><td>Delegate creation to subclass</td><td>BeanFactory, FactoryBean</td></tr>
+        <tr><td><strong>Builder</strong></td><td>Creational</td><td>Step-by-step complex object creation</td><td>UriComponentsBuilder, HttpRequest.Builder</td></tr>
+        <tr><td><strong>Prototype</strong></td><td>Creational</td><td>Clone existing object</td><td>prototype scope</td></tr>
+        <tr><td><strong>Proxy</strong></td><td>Structural</td><td>Control access to another object</td><td>AOP proxies, @Transactional, @Cacheable</td></tr>
+        <tr><td><strong>Decorator</strong></td><td>Structural</td><td>Add behavior dynamically by wrapping</td><td>HttpServletRequestWrapper, Filter chain</td></tr>
+        <tr><td><strong>Adapter</strong></td><td>Structural</td><td>Convert interface to another</td><td>HandlerAdapter in Spring MVC</td></tr>
+        <tr><td><strong>Composite</strong></td><td>Structural</td><td>Treat tree of objects uniformly</td><td>UI component trees, composite validators</td></tr>
+        <tr><td><strong>Template Method</strong></td><td>Behavioral</td><td>Define skeleton, subclass fills steps</td><td>JdbcTemplate, RestTemplate</td></tr>
+        <tr><td><strong>Observer</strong></td><td>Behavioral</td><td>Notify dependents on state change</td><td>ApplicationEvent, @EventListener</td></tr>
+        <tr><td><strong>Strategy</strong></td><td>Behavioral</td><td>Family of algorithms, interchangeable</td><td>HandlerMapping, ResourceLoader</td></tr>
+        <tr><td><strong>Chain of Responsibility</strong></td><td>Behavioral</td><td>Pass request along handler chain</td><td>Spring Security Filter chain, MVC interceptors</td></tr>
+      </table>
+    </div>
+    <div class="panel" id="c7-x">
+      <div class="stitle"><span>◆</span> Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Design Patterns — Core Implementations</div></div>
+<pre><span class="cm">// ── Singleton (Thread-safe: Holder idiom) ─────────</span>
+<span class="kw">public class</span> <span class="cl">Config</span> {
+    <span class="kw">private</span> <span class="fn">Config</span>() {}
+    <span class="kw">private static class</span> <span class="cl">Holder</span> {
+        <span class="kw">static final</span> <span class="tp">Config</span> INSTANCE = <span class="kw">new</span> <span class="tp">Config</span>(); <span class="cm">// JVM guarantees thread-safe</span>
+    }
+    <span class="kw">public static</span> <span class="tp">Config</span> <span class="fn">getInstance</span>() { <span class="kw">return</span> <span class="cl">Holder</span>.INSTANCE; }
+}
+
+<span class="cm">// ── Builder ───────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="cl">Request</span> {
+    <span class="kw">private final</span> <span class="tp">String</span> url; <span class="kw">private final</span> <span class="tp">String</span> method;
+    <span class="kw">private final</span> <span class="tp">Map</span>&lt;<span class="tp">String</span>,<span class="tp">String</span>&gt; headers;
+
+    <span class="kw">private</span> <span class="fn">Request</span>(<span class="tp">Builder</span> b) { url=b.url; method=b.method; headers=b.headers; }
+
+    <span class="kw">public static class</span> <span class="cl">Builder</span> {
+        <span class="kw">private</span> <span class="tp">String</span> url, method = <span class="st">"GET"</span>;
+        <span class="kw">private</span> <span class="tp">Map</span>&lt;<span class="tp">String</span>,<span class="tp">String</span>&gt; headers = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+        <span class="kw">public</span> <span class="tp">Builder</span> <span class="fn">url</span>(<span class="tp">String</span> u) { url=u; <span class="kw">return this</span>; }
+        <span class="kw">public</span> <span class="tp">Builder</span> <span class="fn">method</span>(<span class="tp">String</span> m) { method=m; <span class="kw">return this</span>; }
+        <span class="kw">public</span> <span class="tp">Builder</span> <span class="fn">header</span>(<span class="tp">String</span> k, <span class="tp">String</span> v) { headers.<span class="fn">put</span>(k,v); <span class="kw">return this</span>; }
+        <span class="kw">public</span> <span class="tp">Request</span> <span class="fn">build</span>() { <span class="kw">return new</span> <span class="tp">Request</span>(<span class="kw">this</span>); }
+    }
+}
+<span class="kw">var</span> r = <span class="kw">new</span> <span class="tp">Request</span>.<span class="cl">Builder</span>().<span class="fn">url</span>(<span class="st">"http://api"</span>).<span class="fn">method</span>(<span class="st">"POST"</span>).<span class="fn">build</span>();
+
+<span class="cm">// ── Strategy ──────────────────────────────────────</span>
+<span class="kw">interface</span> <span class="cl">SortStrategy</span> { <span class="kw">void</span> <span class="fn">sort</span>(<span class="kw">int</span>[] arr); }
+
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">SortService</span> {
+    <span class="kw">private</span> <span class="tp">SortStrategy</span> strategy;
+    <span class="kw">public void</span> <span class="fn">setStrategy</span>(<span class="tp">SortStrategy</span> s) { strategy = s; }
+    <span class="kw">public void</span> <span class="fn">sort</span>(<span class="kw">int</span>[] arr) { strategy.<span class="fn">sort</span>(arr); }
+}
+
+<span class="cm">// ── Observer (Spring style) ───────────────────────</span>
+<span class="kw">public class</span> <span class="cl">OrderPlacedEvent</span> <span class="kw">extends</span> <span class="tp">ApplicationEvent</span> {
+    <span class="kw">private final</span> <span class="tp">Order</span> order;
+    <span class="kw">public</span> <span class="fn">OrderPlacedEvent</span>(<span class="tp">Object</span> src, <span class="tp">Order</span> o) { <span class="kw">super</span>(src); order=o; }
+    <span class="kw">public</span> <span class="tp">Order</span> <span class="fn">getOrder</span>() { <span class="kw">return</span> order; }
+}
+
+<span class="an">@Component</span>
+<span class="kw">public class</span> <span class="cl">EmailListener</span> {
+    <span class="an">@EventListener</span>
+    <span class="kw">public void</span> <span class="fn">onOrderPlaced</span>(<span class="tp">OrderPlacedEvent</span> event) {
+        <span class="fn">sendConfirmationEmail</span>(event.<span class="fn">getOrder</span>());
+    }
+}</pre></div>
+    </div>
+    <div class="panel" id="c7-q">
+      <div class="stitle"><span>◆</span> Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">Which design patterns does Spring Framework heavily use?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>Singleton</strong> — default bean scope. <strong>Factory Method</strong> — BeanFactory creates beans. <strong>Proxy</strong> — AOP, @Transactional, @Cacheable wrap beans in proxies. <strong>Template Method</strong> — JdbcTemplate, RestTemplate define skeleton with hooks. <strong>Observer</strong> — ApplicationEvent system. <strong>Strategy</strong> — HandlerMapping, ResourceLoader, SortStrategy. <strong>Chain of Responsibility</strong> — Spring Security filter chain, MVC HandlerInterceptor chain. <strong>Decorator</strong> — HttpServletRequestWrapper. Knowing these connections signals deep Spring understanding.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is the difference between Strategy and Template Method patterns?</div><div class="iqtgl">▾</div></div><div class="iqb">Both define an algorithm with interchangeable parts. <strong>Template Method</strong>: uses <em>inheritance</em> — base class defines skeleton algorithm with abstract/hook methods; subclasses override specific steps. The algorithm structure is fixed. Hard to change at runtime. <strong>Strategy</strong>: uses <em>composition</em> — algorithm is encapsulated in an interface; implementations are plugged in at runtime. More flexible, easier to test, follows "favor composition over inheritance". Spring Boot auto-configuration uses Strategy — you swap implementations by providing different beans.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is the difference between Decorator and Proxy patterns?</div><div class="iqtgl">▾</div></div><div class="iqb">Both wrap another object and delegate to it, but their intent differs: <strong>Proxy</strong> controls <em>access</em> — same interface, adds access control, caching, logging, lazy initialization (client doesn't know it's a proxy). <strong>Decorator</strong> adds <em>behavior/features</em> — same interface, wraps to enhance functionality dynamically (you know you're decorating). Proxy: Spring AOP, JDK Proxy. Decorator: BufferedReader wrapping FileReader, HttpServletRequestWrapper. Key: Proxy hides its existence; Decorator is explicitly composed by the client.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tc">Concept</span><div class="iqqt">When should you use the Builder pattern vs a constructor with many parameters?</div><div class="iqtgl">▾</div></div><div class="iqb">Use Builder when: <strong>4+ constructor parameters</strong> (readability drops), <strong>optional parameters</strong> (avoid telescoping constructors), <strong>immutable object needed</strong> with complex construction. Constructor pitfall: <code>new User("Alice", null, null, true, false, 30)</code> — what do the booleans mean? Builder self-documents: <code>new User.Builder().name("Alice").active(true).age(30).build()</code>. Lombok's <code>@Builder</code> generates this for free. Also use when the object needs to be validated before construction — validate in <code>build()</code>.</div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="c7-m">
+      <div class="stitle"><span>◆</span> Memory Tip</div>
+      <div class="mtip"><div class="mico">💡</div><div>
+        <strong>Pattern categories with one-liner each:</strong><br>
+        <strong>Creational</strong> (HOW to create): Singleton=one, Builder=step-by-step, Factory=delegate creation, Prototype=clone<br>
+        <strong>Structural</strong> (HOW to compose): Proxy=access control, Decorator=add behavior, Adapter=convert interface, Composite=tree<br>
+        <strong>Behavioral</strong> (HOW to communicate): Strategy=plug algorithm, Template=define skeleton, Observer=notify, Chain=pass request<br><br>
+        <strong>Spring = patterns everywhere. Proxy + Template + Factory + Observer are the Big 4 in Spring.</strong>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ T59: SOLID ═══ -->
+<div class="card" id="c8">
+  <div class="band">
+    <div class="band-l">
+      <div class="tnum">59</div>
+      <div>
+        <div class="ttag" style="background:var(--teal-light);color:var(--teal);border:1px solid var(--teal-border)">CS · Principles</div>
+        <div class="btitle">SOLID Principles</div>
+        <div class="bsub">The 5 commandments of object-oriented design — know them, recognize violations, propose fixes</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:#fff2eb;color:var(--java);border:1px solid var(--java-border)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb8">
+      <div class="stab on" onclick="tab(8,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(8,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(8,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(8,'m')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="c8-c">
+      <div class="stitle"><span>◆</span> The 5 Principles</div>
+      <div class="kps">
+        <div class="kp"><div class="ki">1️⃣</div><div class="kt"><strong class="t">S — Single Responsibility Principle</strong> — A class should have only one reason to change. One class = one job. Violation: a <code>User</code> class that handles validation, DB persistence, AND email sending. Fix: split into <code>UserValidator</code>, <code>UserRepository</code>, <code>UserNotificationService</code>. "Reason to change" means different stakeholders — business logic changes shouldn't force DB code to change.</div></div>
+        <div class="kp"><div class="ki">2️⃣</div><div class="kt"><strong class="b">O — Open/Closed Principle</strong> — Open for extension, closed for modification. Add new behavior by adding new code, not changing existing. Violation: adding a new payment type requires modifying <code>PaymentService</code> with a new <code>if/else</code> branch. Fix: <code>PaymentStrategy</code> interface — add new types by creating new classes, not editing old ones.</div></div>
+        <div class="kp"><div class="ki">3️⃣</div><div class="kt"><strong class="g">L — Liskov Substitution Principle</strong> — Subtypes must be substitutable for their base types without altering correctness. Violation: <code>Square extends Rectangle</code> where setting width also changes height — breaks the rectangle invariant. Fix: don't force IS-A when behavior differs; prefer composition or a common interface.</div></div>
+        <div class="kp"><div class="ki">4️⃣</div><div class="kt"><strong class="p">I — Interface Segregation Principle</strong> — Clients should not be forced to depend on interfaces they don't use. Violation: a <code>Worker</code> interface with <code>work()</code>, <code>eat()</code>, <code>sleep()</code> — robots implement it but <code>eat()</code> makes no sense. Fix: split into <code>Workable</code>, <code>Eatable</code>, <code>Sleepable</code> — implement only what applies.</div></div>
+        <div class="kp"><div class="ki">5️⃣</div><div class="kt"><strong class="r">D — Dependency Inversion Principle</strong> — High-level modules should not depend on low-level modules. Both should depend on abstractions. Violation: <code>OrderService</code> directly creates <code>new MySQLOrderRepository()</code>. Fix: <code>OrderService</code> depends on <code>OrderRepository</code> interface; the implementation is injected (Spring DI). This is what Spring IoC/DI implements.</div></div>
+      </div>
+    </div>
+    <div class="panel" id="c8-x">
+      <div class="stitle"><span>◆</span> Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">SOLID — Violations vs Fixes</div></div>
+<pre><span class="cm">// ── S: Single Responsibility ──────────────────────</span>
+<span class="cm">// ❌ BAD: One class does too much</span>
+<span class="kw">class</span> <span class="cl">UserService</span> {
+    <span class="kw">public void</span> <span class="fn">createUser</span>(<span class="tp">User</span> u) { <span class="fn">validate</span>(u); <span class="fn">saveToDb</span>(u); <span class="fn">sendEmail</span>(u); }
+}
+<span class="cm">// ✅ GOOD: Split responsibilities</span>
+<span class="kw">class</span> <span class="cl">UserService</span> {
+    <span class="kw">public void</span> <span class="fn">createUser</span>(<span class="tp">User</span> u) {
+        validator.<span class="fn">validate</span>(u);     <span class="cm">// delegated</span>
+        repository.<span class="fn">save</span>(u);
+        notifier.<span class="fn">sendWelcome</span>(u);
+    }
+}
+
+<span class="cm">// ── O: Open/Closed ────────────────────────────────</span>
+<span class="cm">// ❌ BAD: Must modify to add new payment type</span>
+<span class="kw">void</span> <span class="fn">process</span>(<span class="tp">String</span> type) {
+    <span class="kw">if</span>(type.<span class="fn">equals</span>(<span class="st">"card"</span>)) <span class="fn">chargeCard</span>();
+    <span class="kw">else if</span>(type.<span class="fn">equals</span>(<span class="st">"paypal"</span>)) <span class="fn">chargePaypal</span>();
+}
+<span class="cm">// ✅ GOOD: Add new type = new class, no edits</span>
+<span class="kw">interface</span> <span class="cl">PaymentProcessor</span> { <span class="kw">void</span> <span class="fn">charge</span>(<span class="tp">Order</span> o); }
+<span class="kw">class</span> <span class="cl">CardProcessor</span>   <span class="kw">implements</span> <span class="cl">PaymentProcessor</span> { <span class="kw">public void</span> <span class="fn">charge</span>(<span class="tp">Order</span> o){} }
+<span class="kw">class</span> <span class="cl">PaypalProcessor</span> <span class="kw">implements</span> <span class="cl">PaymentProcessor</span> { <span class="kw">public void</span> <span class="fn">charge</span>(<span class="tp">Order</span> o){} }
+
+<span class="cm">// ── L: Liskov Substitution ────────────────────────</span>
+<span class="cm">// ❌ BAD: Square breaks Rectangle contract</span>
+<span class="kw">class</span> <span class="cl">Rectangle</span> { <span class="kw">int</span> w, h; <span class="kw">void</span> <span class="fn">setW</span>(<span class="kw">int</span> w){<span class="kw">this</span>.w=w;} <span class="kw">void</span> <span class="fn">setH</span>(<span class="kw">int</span> h){<span class="kw">this</span>.h=h;} }
+<span class="kw">class</span> <span class="cl">Square</span> <span class="kw">extends</span> <span class="cl">Rectangle</span> {
+    <span class="kw">void</span> <span class="fn">setW</span>(<span class="kw">int</span> w){ <span class="kw">this</span>.w=<span class="kw">this</span>.h=w; } <span class="cm">// breaks rectangle invariant</span>
+}
+
+<span class="cm">// ── D: Dependency Inversion ───────────────────────</span>
+<span class="cm">// ❌ BAD: depends on concrete class</span>
+<span class="kw">class</span> <span class="cl">OrderService</span> {
+    <span class="kw">private</span> <span class="tp">MySQLOrderRepo</span> repo = <span class="kw">new</span> <span class="tp">MySQLOrderRepo</span>(); <span class="cm">// tight coupling!</span>
+}
+<span class="cm">// ✅ GOOD: depends on abstraction, injected</span>
+<span class="kw">interface</span> <span class="cl">OrderRepository</span> { <span class="kw">void</span> <span class="fn">save</span>(<span class="tp">Order</span> o); }
+
+<span class="an">@Service</span>
+<span class="kw">class</span> <span class="cl">OrderService</span> {
+    <span class="kw">private final</span> <span class="tp">OrderRepository</span> repo;          <span class="cm">// interface, not impl</span>
+    <span class="kw">public</span> <span class="fn">OrderService</span>(<span class="tp">OrderRepository</span> repo) { <span class="kw">this</span>.repo = repo; }
+    <span class="cm">// Spring injects MySQLOrderRepo, PostgresRepo, or MockRepo</span>
+}</pre></div>
+    </div>
+    <div class="panel" id="c8-q">
+      <div class="stitle"><span>◆</span> Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">How does Spring's DI implement the Dependency Inversion Principle?</div><div class="iqtgl">▾</div></div><div class="iqb">Perfectly — Spring is DIP in action. Instead of <code>OrderService</code> creating <code>new MySQLOrderRepository()</code> (depending on concrete class), it depends on <code>OrderRepository</code> interface. Spring's IoC container provides the concrete implementation at runtime (injection). You can swap <code>MySQLOrderRepository</code> for <code>PostgreSQLOrderRepository</code> or a mock in tests without changing <code>OrderService</code>. High-level module (OrderService) doesn't know or care about the low-level module (MySQLOrderRepository).</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">Can you give a real-world example of an LSP violation?</div><div class="iqtgl">▾</div></div><div class="iqb">Classic: Square extending Rectangle. A Rectangle allows independent width/height setting. A Square must keep them equal. Code expecting a Rectangle — <code>setWidth(5); setHeight(10); assert area() == 50</code> — fails with Square (area = 100 because setHeight also set width to 10). The subtype changes behavior the parent promised. Another: <code>ReadOnlyList extends ArrayList</code> but throws UnsupportedOperationException on <code>add()</code> — violates ArrayList's contract. Fix: don't extend if behavior changes; use composition or a different interface hierarchy.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tc">Concept</span><div class="iqqt">How do SOLID principles relate to each other in practice?</div><div class="iqtgl">▾</div></div><div class="iqb">They reinforce each other: <strong>SRP</strong> keeps classes small and focused. <strong>OCP</strong> encourages interfaces — which enables <strong>DIP</strong> (depend on abstractions). <strong>LSP</strong> enforces that those abstractions are honest. <strong>ISP</strong> keeps interfaces lean so <strong>LSP</strong> violations are less likely. Violating one often violates others — a God class (SRP violation) usually also violates OCP (every new feature requires modifying it) and DIP (hardcoded dependencies). SOLID principles collectively push toward: small classes, abstraction-based design, and high testability.</div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="c8-m">
+      <div class="stitle"><span>◆</span> Memory Tip</div>
+      <div class="mtip"><div class="mico">💡</div><div>
+        <strong>SOLID one-liners:</strong><br>
+        <strong>S</strong> — One class, one job ("one reason to change")<br>
+        <strong>O</strong> — Add features by adding code, not editing old code<br>
+        <strong>L</strong> — Subclass must behave like parent (no surprise behavior)<br>
+        <strong>I</strong> — Don't force classes to implement what they don't need<br>
+        <strong>D</strong> — Depend on abstractions (interfaces), not concretions<br><br>
+        <strong>Spring implements D. Strategy implements O. LSP = "no surprises from subclasses".</strong>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ T60: JVM INTERNALS ═══ -->
+<div class="card" id="c9">
+  <div class="band">
+    <div class="band-l">
+      <div class="tnum">60</div>
+      <div>
+        <div class="ttag" style="background:var(--java-light);color:var(--java);border:1px solid var(--java-border)">Java · JVM</div>
+        <div class="btitle">JVM Internals</div>
+        <div class="bsub">What happens after you hit Run — memory model, GC, class loading, JIT</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:#fff2eb;color:var(--java);border:1px solid var(--java-border)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb9">
+      <div class="stab on" onclick="tab(9,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(9,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(9,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(9,'m')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="c9-c">
+      <div class="stitle"><span>◆</span> JVM Memory Areas</div>
+      <div class="kps">
+        <div class="kp"><div class="ki">🏗️</div><div class="kt"><strong class="r">Heap</strong> — Where all <strong>objects</strong> live. Shared across all threads. Managed by GC. Divided into: <strong>Young Generation</strong> (Eden + Survivor S0/S1 — most objects die young), <strong>Old Generation/Tenured</strong> (long-lived objects — promoted from Young after multiple GC cycles). Where OutOfMemoryError occurs when full.</div></div>
+        <div class="kp"><div class="ki">📦</div><div class="kt"><strong class="b">Stack</strong> — Each thread has its own stack. Stores <strong>stack frames</strong> (local variables, operand stack, method return address). Created per method call, destroyed on return. StackOverflowError when too deep (infinite recursion). Primitive variables and object references (not objects themselves) live here.</div></div>
+        <div class="kp"><div class="ki">📚</div><div class="kt"><strong class="p">Metaspace</strong> (Java 8+, replaced PermGen) — Stores <strong>class metadata</strong> (class structure, method bytecode, static variables). Grows dynamically in native memory (no fixed size — less likely to cause OOM than PermGen). <code>OutOfMemoryError: Metaspace</code> if too many classes loaded (e.g., dynamic class generation).</div></div>
+        <div class="kp"><div class="ki">⚡</div><div class="kt"><strong class="g">JIT Compiler</strong> — Hotspot JVM identifies <strong>hot methods</strong> (frequently called) and compiles bytecode to native machine code at runtime. Two tiers: <strong>C1</strong> (client, quick compile, less optimized) and <strong>C2</strong> (server, slower compile, heavily optimized). JIT enables Java to approach C++ performance for long-running apps. JVM warm-up period = JIT doing its work.</div></div>
+        <div class="kp"><div class="ki">🗑️</div><div class="kt"><strong class="t">Garbage Collectors</strong> — <strong>Serial GC</strong> (single-threaded, small apps), <strong>Parallel GC</strong> (throughput, multiple threads), <strong>G1 GC</strong> (default in Java 9+, balanced — divides heap into regions, aims for predictable pause times), <strong>ZGC/Shenandoah</strong> (low latency — &lt;10ms pauses, concurrent collection). Choose GC based on throughput vs latency needs.</div></div>
+        <div class="kp"><div class="ki">🔍</div><div class="kt"><strong class="a">GC Roots &amp; Reachability</strong> — GC collects objects NOT reachable from GC roots. Roots: active thread stacks, static variables, JNI references. Objects reachable = alive; unreachable = eligible for GC. <strong>Memory leaks in Java</strong>: objects are kept alive unintentionally (in static collections, listeners not deregistered, ThreadLocal not cleared).</div></div>
+      </div>
+      <div class="gap-sm"></div>
+      <table class="tbl">
+        <tr><th>GC</th><th>Pause</th><th>Throughput</th><th>Use When</th></tr>
+        <tr><td>Serial</td><td>High</td><td>Low</td><td>Single-core, embedded</td></tr>
+        <tr><td>Parallel</td><td>Medium</td><td>High</td><td>Batch processing, throughput priority</td></tr>
+        <tr><td>G1 (default)</td><td>Balanced</td><td>High</td><td>General purpose, &gt;4GB heap</td></tr>
+        <tr><td>ZGC</td><td>Very Low (&lt;10ms)</td><td>Good</td><td>Large heap, low latency (Java 15+)</td></tr>
+        <tr><td>Shenandoah</td><td>Very Low</td><td>Good</td><td>Low latency alternative to ZGC</td></tr>
+      </table>
+    </div>
+    <div class="panel" id="c9-x">
+      <div class="stitle"><span>◆</span> Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">JVM — Memory · Class Loading · String Pool · GC Tuning</div></div>
+<pre><span class="cm">// ── String Pool (Heap vs String constant pool) ────</span>
+<span class="tp">String</span> s1 = <span class="st">"hello"</span>;           <span class="cm">// String pool (method area)</span>
+<span class="tp">String</span> s2 = <span class="st">"hello"</span>;           <span class="cm">// same reference as s1</span>
+<span class="tp">String</span> s3 = <span class="kw">new</span> <span class="tp">String</span>(<span class="st">"hello"</span>); <span class="cm">// new object on Heap!</span>
+
+s1 == s2;         <span class="cm">// true  (same pool reference)</span>
+s1 == s3;         <span class="cm">// false (different objects)</span>
+s1.<span class="fn">equals</span>(s3);   <span class="cm">// true  (same content)</span>
+s3.<span class="fn">intern</span>() == s1; <span class="cm">// true (intern adds to pool)</span>
+
+<span class="cm">// ── Class Loading Hierarchy ───────────────────────</span>
+<span class="cm">// Bootstrap ClassLoader (rt.jar, java.*) </span>
+<span class="cm">//   └─ Extension ClassLoader (ext/*.jar)</span>
+<span class="cm">//       └─ Application ClassLoader (classpath)</span>
+<span class="cm">//           └─ Custom ClassLoaders (OSGi, Spring Boot)</span>
+<span class="cm">// Parent delegation: check parent first → load only if parent fails</span>
+
+<span class="tp">ClassLoader</span> cl = <span class="tp">Thread</span>.<span class="fn">currentThread</span>().<span class="fn">getContextClassLoader</span>();
+<span class="tp">Class</span>&lt;?&gt; clazz = cl.<span class="fn">loadClass</span>(<span class="st">"com.example.MyClass"</span>);
+
+<span class="cm">// ── Memory flags ──────────────────────────────────</span>
+<span class="cm">// -Xms512m    → initial heap size</span>
+<span class="cm">// -Xmx2g      → max heap size  </span>
+<span class="cm">// -Xss512k    → thread stack size</span>
+<span class="cm">// -XX:+UseG1GC → use G1 GC</span>
+<span class="cm">// -XX:+UseZGC  → use ZGC (Java 15+)</span>
+<span class="cm">// -XX:MaxMetaspaceSize=256m → limit Metaspace</span>
+<span class="cm">// -XX:+HeapDumpOnOutOfMemoryError → dump on OOM</span>
+
+<span class="cm">// ── Weak / Soft References ────────────────────────</span>
+<span class="tp">WeakReference</span>&lt;<span class="tp">Object</span>&gt; weak = <span class="kw">new</span> <span class="tp">WeakReference</span>&lt;&gt;(<span class="kw">new</span> <span class="tp">Object</span>());
+<span class="cm">// Collected at next GC if no strong references — use for caches</span>
+
+<span class="tp">SoftReference</span>&lt;<span class="tp">byte</span>[]&gt; soft = <span class="kw">new</span> <span class="tp">SoftReference</span>&lt;&gt;(<span class="kw">new byte</span>[<span class="nb">1024</span>]);
+<span class="cm">// Collected only when JVM needs memory — ideal for memory-sensitive caches</span>
+
+<span class="cm">// ── Memory leak example (static collection) ───────</span>
+<span class="kw">public class</span> <span class="cl">LeakyCache</span> {
+    <span class="kw">private static final</span> <span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">Object</span>&gt; cache = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+    <span class="cm">// Objects added but never removed → static map prevents GC → OOM over time</span>
+    <span class="cm">// Fix: use WeakHashMap, or bounded cache (Guava Cache / Caffeine)</span>
+}
+
+<span class="cm">// ── finalize() — avoid, use Cleaner instead ───────</span>
+<span class="cm">// Java 9+ deprecated finalize(). Use java.lang.ref.Cleaner:</span>
+<span class="tp">Cleaner</span> cleaner = <span class="tp">Cleaner</span>.<span class="fn">create</span>();
+cleaner.<span class="fn">register</span>(resource, () -> <span class="fn">releaseNativeResource</span>());</pre></div>
+    </div>
+    <div class="panel" id="c9-q">
+      <div class="stitle"><span>◆</span> Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is the difference between Stack and Heap memory in Java?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>Heap</strong>: All objects (instances of classes). Shared across threads. Managed by GC. Larger. Where OutOfMemoryError happens. <br><strong>Stack</strong>: Per-thread. Stores method call frames — local primitive variables AND object references (but NOT the objects themselves, those are on heap). Automatically freed when method returns. Where StackOverflowError happens. Each thread has its own stack (thread-safe by default). Accessing heap objects across threads requires synchronization; stack variables are inherently thread-safe (private to each thread).</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">Why does <code>new String("hello") == "hello"</code> return false?</div><div class="iqtgl">▾</div></div><div class="iqb">String literals (<code>"hello"</code>) are interned in the <strong>String constant pool</strong> (part of Metaspace/heap). <code>new String("hello")</code> creates a <strong>new object on the heap</strong> — a different reference. <code>==</code> compares references, not values. Even though both contain "hello", they're different objects. Solution: <strong>always use <code>.equals()</code></strong> for string comparison. <code>s.intern()</code> adds a string to the pool and returns the pool reference — then <code>==</code> works, but this is rarely needed in modern Java.<div class="trick"><strong>⚡ Senior insight: String pool is why you should never use == for Strings — it works for literals by accident (same pool reference), but breaks for runtime strings.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What causes memory leaks in Java and how do you detect them?</div><div class="iqtgl">▾</div></div><div class="iqb">Java GC collects objects not reachable from GC roots. Memory "leaks" when objects remain reachable but are logically unused. Common causes: <strong>1.</strong> Static collections (<code>static Map cache</code>) that grow forever. <strong>2.</strong> Event listeners not deregistered. <strong>3.</strong> ThreadLocal not removed (especially in thread pools). <strong>4.</strong> Inner class holding reference to outer class. <strong>5.</strong> Interned strings or class metadata in Metaspace (dynamic class generation). Detection: <code>-XX:+HeapDumpOnOutOfMemoryError</code> + analyze with Eclipse MAT or VisualVM. Look for large retained sets.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is the parent delegation model in class loading and why does it exist?</div><div class="iqtgl">▾</div></div><div class="iqb">When a ClassLoader needs to load a class, it first <strong>delegates to its parent</strong>. Only if the parent fails does it try itself. Order: Bootstrap → Extension → Application → Custom. <strong>Why:</strong> Security (ensures core Java classes like <code>java.lang.String</code> are always loaded from trusted bootstrap loader — can't be replaced with malicious versions), consistency (same class loaded by different custom loaders = different Class objects — causes ClassCastException across ClassLoader boundaries), and avoid duplicate loading. Spring Boot's executable JAR uses a custom ClassLoader (LaunchedURLClassLoader) on top of this hierarchy.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tc">Concept</span><div class="iqqt">What is JIT compilation and what is JVM warmup?</div><div class="iqtgl">▾</div></div><div class="iqb">The JVM starts executing bytecode in interpreted mode (slow but immediate). The <strong>JIT (Just-In-Time) compiler</strong> monitors method invocations — when a method becomes "hot" (called frequently, typically 10,000+ times), it compiles it to optimized native machine code. Two-tier: <strong>C1</strong> compiles quickly with basic optimization; <strong>C2</strong> compiles slowly with aggressive inlining, loop unrolling, and escape analysis (can eliminate heap allocations). <strong>Warmup period</strong>: the initial phase where JIT is profiling and compiling — performance improves over time. This is why Java microservices may respond slowly initially (cold start), and why GraalVM native-image (ahead-of-time compilation) is appealing for short-lived processes — no warmup needed.</div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="c9-m">
+      <div class="stitle"><span>◆</span> Memory Tip</div>
+      <div class="mtip"><div class="mico">💡</div><div>
+        <strong>JVM memory in one visual:</strong><br>
+        <code>Thread 1 Stack | Thread 2 Stack | ... → private per thread</code><br>
+        <code>────────────────── HEAP ──────────────────────── → shared</code><br>
+        <code> Young Gen (Eden + S0 + S1) | Old Gen (Tenured)</code><br>
+        <code>─────────── METASPACE (native memory) ──────────</code><br>
+        <code> Class metadata, static fields, method bytecode</code><br><br>
+        <strong>OOM types: </strong><br>
+        • <code>java.lang.OutOfMemoryError: Java heap space</code> → heap full<br>
+        • <code>java.lang.OutOfMemoryError: Metaspace</code> → too many classes<br>
+        • <code>java.lang.StackOverflowError</code> → infinite recursion
+      </div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<div class="footer">PHASE 10 · CORE JAVA DSA & CS FUNDAMENTALS · TOPICS 51–60 · Senior Engineer Interview Prep</div>
+
+<script>
+let cur = 0;
+function show(i) {
+  document.querySelectorAll('.card').forEach((c,j) => c.classList.toggle('active', j===i));
+  document.querySelectorAll('.nbtn').forEach((b,j) => b.classList.toggle('active', j===i));
+  document.querySelectorAll('.seg').forEach((s,j) => {
+    s.classList.remove('active','done');
+    if (j < i) s.classList.add('done');
+    if (j === i) s.classList.add('active');
+  });
+  cur = i;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function tab(ti, panel) {
+  const tabEls = document.querySelectorAll(`#tb${ti} .stab`);
+  const panels = ['c','x','q','m'];
+  tabEls.forEach((t,i) => t.classList.toggle('on', panels[i] === panel));
+  const card = document.getElementById(`c${ti}`);
+  card.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  const t = document.getElementById(`c${ti}-${panel}`);
+  if (t) t.classList.add('on');
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' && cur < 9) show(cur+1);
+  if (e.key === 'ArrowLeft'  && cur > 0) show(cur-1);
+});
+</script>
+</body>
+</html>
