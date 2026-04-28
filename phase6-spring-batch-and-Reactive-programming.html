@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Phase 6 — Batch & Reactive Programming</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Barlow:wght@300;400;500;600;700;800&family=Barlow+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f5f0e8;--surf:#fff;--surf2:#faf6ee;--surf3:#f0ebe0;
+  --bdr:#e0d8c8;--bdr2:#c8bea8;
+  --ink:#1a1408;--ink2:#2e2818;--muted:#786848;--muted2:#a89878;
+  --or:#b84818;--or-l:#fff4ee;--or-b:#e8a878;--or-d:#782808;
+  --am:#907000;--am-l:#fdf8e0;--am-b:#d4b840;
+  --tl:#186858;--tl-l:#e8f8f0;--tl-b:#70c8a8;
+  --bl:#184888;--bl-l:#eaf0fb;--bl-b:#88b4e0;
+  --pl:#581878;--pl-l:#f8eefb;--pl-b:#c088d8;
+  --code:#0e0c08;--csurf:#1a1610;
+  --kw:#e8a840;--tp:#68c880;--fn:#58b8d8;--st:#e08868;--cm:#705848;--nb:#c89050;--an:#b888d0;--cl:#68c880;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;min-height:100vh;}
+
+/* HEADER */
+.hdr{background:var(--ink2);overflow:hidden;position:relative;}
+.hdr-rule{height:5px;background:linear-gradient(90deg,var(--or) 0%,var(--or-b) 50%,var(--am-b) 100%);}
+.hdr-inner{padding:42px 56px 38px;position:relative;z-index:2;}
+.hdr-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 80% 50%,rgba(184,72,24,0.12) 0%,transparent 65%);pointer-events:none;}
+.hdr-wm{position:absolute;right:40px;bottom:-10px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:180px;font-weight:700;color:rgba(255,255,255,0.03);line-height:1;pointer-events:none;user-select:none;}
+.eyebrow{font-family:'Barlow Mono',monospace;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--or-b);margin-bottom:12px;display:flex;align-items:center;gap:9px;}
+.eyebrow::before{content:'';width:22px;height:1px;background:var(--or-b);}
+h1{font-family:'Cormorant Garamond',serif;font-size:clamp(30px,4.5vw,52px);font-weight:700;line-height:1.06;color:#fff;font-style:italic;}
+h1 em{font-style:normal;color:var(--or-b);}
+.sub{margin-top:9px;font-family:'Barlow Mono',monospace;font-size:11px;color:rgba(255,255,255,0.3);}
+.meta{display:flex;gap:20px;margin-top:16px;flex-wrap:wrap;}
+.mc{font-family:'Barlow Mono',monospace;font-size:10px;color:rgba(255,255,255,0.35);}
+.mc b{color:rgba(255,255,255,0.65);}
+
+/* NAV */
+.nav{background:var(--surf);border-bottom:2px solid var(--bdr);padding:0 56px;display:flex;overflow-x:auto;scrollbar-width:none;}
+.nav::-webkit-scrollbar{display:none;}
+.nb{flex-shrink:0;padding:12px 18px;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:6px;}
+.nb:hover{color:var(--ink2);background:var(--surf2);}
+.nb.on{color:var(--or);border-bottom-color:var(--or);}
+.nn{font-family:'Barlow Mono',monospace;font-size:9px;padding:2px 5px;border-radius:2px;}
+.nb.on .nn{background:var(--or-l);color:var(--or);}
+.nn{background:var(--surf3);color:var(--muted);}
+
+/* PROGRESS */
+.prog{background:var(--surf);border-bottom:1px solid var(--bdr);padding:10px 56px;display:flex;align-items:center;gap:5px;}
+.plbl{font-family:'Barlow Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-right:8px;white-space:nowrap;}
+.ps{flex:1;height:3px;border-radius:2px;background:var(--bdr);cursor:pointer;transition:background .25s;}
+.ps.done{background:rgba(184,72,24,0.35);}
+.ps.active{background:var(--or);}
+.kbh{text-align:center;padding:6px;font-family:'Barlow Mono',monospace;font-size:10px;color:var(--muted2);background:var(--surf2);border-bottom:1px solid var(--bdr);}
+kbd{background:var(--bdr);padding:1px 5px;border-radius:2px;font-size:10px;}
+
+/* MAIN */
+.main{max-width:1080px;margin:0 auto;padding:30px 56px 64px;}
+.card{display:none;animation:fi .28s ease;}
+.card.on{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* CARD */
+.band{background:var(--surf);border:1px solid var(--bdr);border-bottom:none;border-radius:12px 12px 0 0;padding:24px 32px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;position:relative;overflow:hidden;}
+.bar{position:absolute;top:0;left:0;right:0;height:4px;}
+.bl2{display:flex;align-items:flex-start;gap:14px;}
+.tn{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:50px;font-weight:700;line-height:1;flex-shrink:0;width:58px;text-align:right;color:var(--bdr);margin-top:1px;}
+.ttag{display:inline-flex;font-family:'Barlow Mono',monospace;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:3px 9px;border-radius:2px;margin-bottom:7px;}
+.btitle{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--ink);line-height:1.2;}
+.bsub{margin-top:4px;font-size:13px;color:var(--muted);line-height:1.55;}
+.pbadge{flex-shrink:0;font-family:'Barlow Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;padding:4px 11px;border-radius:20px;margin-top:4px;text-transform:uppercase;}
+.content{background:var(--surf);border:1px solid var(--bdr);border-top:none;border-radius:0 0 12px 12px;padding:0 32px 32px;box-shadow:0 3px 14px rgba(0,0,0,0.05);}
+
+/* TABS */
+.stabs{display:flex;border-bottom:1px solid var(--bdr);margin:0 -32px 24px;padding:0 32px;overflow-x:auto;scrollbar-width:none;}
+.stabs::-webkit-scrollbar{display:none;}
+.stab{flex-shrink:0;padding:11px 14px;font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;font-family:'Barlow Mono',monospace;letter-spacing:.5px;text-transform:uppercase;display:flex;align-items:center;gap:5px;}
+.stab:hover{color:var(--ink2);}
+.stab.on{color:var(--or);border-bottom-color:var(--or);}
+.panel{display:none;}.panel.on{display:block;}
+
+/* SECTION TITLE */
+.st{font-family:'Barlow Mono',monospace;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding-bottom:7px;border-bottom:1px solid var(--bdr);}
+
+/* SIMPLE BOX */
+.sbox{background:var(--or-l);border:1px solid var(--or-b);border-radius:8px;padding:13px 16px;margin-bottom:16px;font-size:13px;line-height:1.72;display:flex;gap:11px;}
+.sico{font-size:17px;flex-shrink:0;}
+.stxt strong{color:var(--ink);}
+
+/* KEY POINTS */
+.kps{display:flex;flex-direction:column;gap:9px;}
+.kp{display:flex;gap:12px;padding:12px 15px;border-radius:8px;border:1px solid var(--bdr);background:var(--surf2);font-size:13px;line-height:1.68;transition:border-color .2s;}
+.kp:hover{border-color:var(--bdr2);}
+.ki{font-size:15px;flex-shrink:0;margin-top:2px;}
+.kt{flex:1;}
+.kt strong{color:var(--ink);}
+.kt code{background:var(--or-l);border:1px solid var(--or-b);color:var(--or);padding:1px 5px;border-radius:3px;font-family:'Barlow Mono',monospace;font-size:11px;}
+.go{color:var(--tl);font-weight:700;}.am{color:var(--am);font-weight:700;}.re{color:var(--or);font-weight:700;}.bl{color:var(--bl);font-weight:700;}.pl{color:var(--pl);font-weight:700;}
+
+/* CODE */
+.cblock{background:var(--code);border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);}
+.chdr{display:flex;align-items:center;justify-content:space-between;padding:9px 15px;background:var(--csurf);border-bottom:1px solid rgba(255,255,255,0.07);}
+.cdots{display:flex;gap:5px;}
+.dot{width:10px;height:10px;border-radius:50%;}
+.dr{background:#ff5f57;}.dy{background:#febc2e;}.dg{background:#28c840;}
+.clang{font-family:'Barlow Mono',monospace;font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,0.2);text-transform:uppercase;}
+pre{padding:20px;overflow-x:auto;font-family:'Barlow Mono',monospace;font-size:12px;line-height:1.8;color:#a09080;}
+.kw{color:var(--kw);}.tp{color:var(--tp);}.fn{color:var(--fn);}.st2{color:var(--st);}.cm{color:var(--cm);font-style:italic;}.nb2{color:var(--nb);}.an{color:var(--an);}.cl{color:var(--cl);}
+
+/* IQ */
+.iqs{display:flex;flex-direction:column;gap:9px;}
+.iq{border:1px solid var(--bdr);border-radius:8px;overflow:hidden;transition:border-color .2s,box-shadow .2s;}
+.iq:hover{border-color:var(--bdr2);box-shadow:0 2px 10px rgba(0,0,0,0.05);}
+.iqh{padding:12px 15px;cursor:pointer;display:flex;align-items:flex-start;gap:10px;background:var(--surf2);user-select:none;}
+.iqtag{font-family:'Barlow Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;padding:3px 7px;border-radius:2px;white-space:nowrap;flex-shrink:0;margin-top:2px;text-transform:uppercase;}
+.tm{background:var(--or-l);color:var(--or-d);border:1px solid var(--or-b);}
+.tt{background:var(--am-l);color:var(--am);border:1px solid var(--am-b);}
+.tc{background:var(--bl-l);color:var(--bl);border:1px solid var(--bl-b);}
+.tsr{background:var(--pl-l);color:var(--pl);border:1px solid var(--pl-b);}
+.iqqt{font-size:13px;font-weight:700;color:var(--ink);flex:1;line-height:1.5;}
+.iqtgl{color:var(--muted);font-size:14px;flex-shrink:0;margin-top:3px;transition:transform .25s;}
+.iq.open .iqtgl{transform:rotate(180deg);}
+.iqb{display:none;padding:15px;font-size:13px;line-height:1.78;color:var(--ink2);border-top:1px solid var(--bdr);background:#fff;}
+.iq.open .iqb{display:block;}
+.iqb strong{color:var(--ink);}
+.iqb code{background:var(--or-l);border:1px solid var(--or-b);color:var(--or);padding:1px 5px;border-radius:3px;font-family:'Barlow Mono',monospace;font-size:11px;}
+.trick{margin-top:10px;padding:10px 13px;background:var(--am-l);border-left:3px solid var(--am);border-radius:0 6px 6px 0;font-size:12px;color:var(--am);}
+.warn{margin-top:10px;padding:10px 13px;background:var(--or-l);border-left:3px solid var(--or);border-radius:0 6px 6px 0;font-size:12px;color:var(--or-d);}
+.info{margin-top:10px;padding:10px 13px;background:var(--tl-l);border-left:3px solid var(--tl);border-radius:0 6px 6px 0;font-size:12px;color:var(--tl);}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;border-radius:8px;overflow:hidden;border:1px solid var(--bdr);}
+.tbl th{background:var(--or);color:rgba(255,255,255,0.9);padding:9px 13px;text-align:left;font-family:'Barlow Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;font-weight:700;}
+.tbl td{padding:9px 13px;border-bottom:1px solid rgba(224,216,200,.5);color:var(--ink2);vertical-align:top;line-height:1.5;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--surf2);}
+.tbl td code{background:var(--or-l);color:var(--or);padding:1px 5px;border-radius:3px;font-family:'Barlow Mono',monospace;font-size:10.5px;border:1px solid var(--or-b);}
+
+/* FLOW */
+.flow{background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;padding:15px 18px;overflow-x:auto;margin-bottom:14px;}
+.fr{display:flex;align-items:center;flex-wrap:nowrap;gap:0;}
+.fn2{flex-shrink:0;background:var(--surf);border:1.5px solid var(--bdr2);border-radius:6px;padding:7px 12px;font-family:'Barlow Mono',monospace;font-size:10px;font-weight:600;color:var(--ink2);white-space:nowrap;text-align:center;}
+.fn-or{background:var(--or-l);border-color:var(--or-b);color:var(--or);}
+.fn-tl{background:var(--tl-l);border-color:var(--tl-b);color:var(--tl);}
+.fn-am{background:var(--am-l);border-color:var(--am-b);color:var(--am);}
+.fn-bl{background:var(--bl-l);border-color:var(--bl-b);color:var(--bl);}
+.fa{color:var(--muted2);font-size:14px;padding:0 5px;flex-shrink:0;}
+.fsub{font-family:'Barlow Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px;text-align:center;}
+
+/* MEMORY */
+.mtip{background:linear-gradient(135deg,var(--or-l),#fff);border:1px solid var(--or-b);border-radius:10px;padding:16px 18px;font-size:13px;line-height:1.72;display:flex;gap:12px;}
+.mtip strong{color:var(--or);}
+.mico{font-size:22px;flex-shrink:0;}
+
+.gap{margin-bottom:20px;}.gap-sm{margin-bottom:12px;}
+@media(max-width:640px){.main,.nav,.prog,.hdr-inner{padding-left:20px;padding-right:20px;}.band,.content{padding-left:20px;padding-right:20px;}.stabs{margin:0 -20px 20px;padding:0 20px;}}
+.footer{text-align:center;padding:24px;color:rgba(255,255,255,0.2);font-family:'Barlow Mono',monospace;font-size:9px;letter-spacing:1px;background:var(--ink2);margin-top:48px;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-rule"></div>
+  <div class="hdr-bg"></div>
+  <div class="hdr-inner">
+    <div class="hdr-wm">Batch</div>
+    <div class="eyebrow">Phase 6 · Spring Batch &amp; Reactive</div>
+    <h1>Batch Processing<br>&amp; <em>Reactive Programming</em></h1>
+    <div class="sub">// Topics 31–36 · Senior Engineer Level · Spring Batch · WebFlux · Project Reactor</div>
+    <div class="meta">
+      <div class="mc">Topics <b>6 (31–36)</b></div>
+      <div class="mc">Priority <b>🟡 Medium</b></div>
+      <div class="mc">Est. <b>2 days</b></div>
+    </div>
+  </div>
+</div>
+
+<div class="nav" id="tnav">
+  <button class="nb on" onclick="go(0)" id="nb0"><span class="nn">31</span>Batch Essentials</button>
+  <button class="nb" onclick="go(1)" id="nb1"><span class="nn">32</span>Chunk Processing</button>
+  <button class="nb" onclick="go(2)" id="nb2"><span class="nn">33</span>Job Params &amp; Scheduling</button>
+  <button class="nb" onclick="go(3)" id="nb3"><span class="nn">34</span>Reactive Concepts</button>
+  <button class="nb" onclick="go(4)" id="nb4"><span class="nn">35</span>Mono &amp; Flux</button>
+  <button class="nb" onclick="go(5)" id="nb5"><span class="nn">36</span>Reactive REST</button>
+</div>
+<div class="prog">
+  <span class="plbl">Progress</span>
+  <div class="ps active" id="ps0" onclick="go(0)"></div>
+  <div class="ps" id="ps1" onclick="go(1)"></div>
+  <div class="ps" id="ps2" onclick="go(2)"></div>
+  <div class="ps" id="ps3" onclick="go(3)"></div>
+  <div class="ps" id="ps4" onclick="go(4)"></div>
+  <div class="ps" id="ps5" onclick="go(5)"></div>
+</div>
+<div class="kbh">Navigate: <kbd>←</kbd> <kbd>→</kbd> arrow keys · Click tabs to switch sections</div>
+
+<div class="main">
+
+<!-- ═══ T31 BATCH ESSENTIALS ═══ -->
+<div class="card on" id="c0">
+  <div class="band">
+    <div class="bar" style="background:linear-gradient(90deg,var(--or),var(--or-b))"></div>
+    <div class="bl2">
+      <div class="tn">31</div>
+      <div>
+        <div class="ttag" style="background:var(--or-l);color:var(--or);border:1px solid var(--or-b)">Spring Batch</div>
+        <div class="btitle">Batch Processing Essentials</div>
+        <div class="bsub">Processing millions of records reliably — with restart, retry, skip, and audit built-in</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--am-l);color:var(--am);border:1px solid var(--am-b)">🟡 Medium</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb0">
+      <div class="stab on" onclick="tab(0,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(0,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(0,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(0,'m')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="t0c">
+      <div class="sbox"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> Spring Batch is for processing huge volumes of data reliably — importing 5 million CSV records, generating monthly invoices, migrating database records nightly. It adds restart-from-failure, retry, skip-bad-records, and audit trail — so a crash at record 4,823,001 doesn't mean starting from scratch.</div></div>
+      <div class="st">◆ Core Architecture</div>
+      <div class="flow">
+        <div class="fr">
+          <div><div class="fn-or">Job</div><div class="fsub">top-level unit</div></div>
+          <div class="fa">→</div>
+          <div><div class="fn2">Step 1<br><small>tasklet or chunk</small></div></div>
+          <div class="fa">→</div>
+          <div><div class="fn2">Step 2</div></div>
+          <div class="fa">→</div>
+          <div><div class="fn2">Step N</div></div>
+          <div class="fa">→</div>
+          <div><div class="fn-tl">JobRepository<br><small>audit + restart</small></div></div>
+        </div>
+      </div>
+      <div class="kps">
+        <div class="kp"><div class="ki">🏗️</div><div class="kt"><strong class="re">Job</strong> — The top-level batch unit composed of one or more ordered Steps. Launched via <code>JobLauncher</code>. Each run creates a unique <code>JobExecution</code>. The same job can run multiple times with different <code>JobParameters</code> — the parameters define uniqueness of each logical run.</div></div>
+        <div class="kp"><div class="ki">🪜</div><div class="kt"><strong class="re">Step</strong> — A single phase of a Job. Two types: <strong>Tasklet</strong> (executes once — file cleanup, table truncation, single notifications) and <strong>Chunk-oriented</strong> (read→process→write in batches — for bulk record processing). Steps can branch conditionally based on the exit status of the previous step.</div></div>
+        <div class="kp"><div class="ki">💾</div><div class="kt"><strong class="bl">JobRepository</strong> — Persists all execution state (JobExecution, StepExecution, ExecutionContext) to a database. Enables: restart from failure, monitoring, preventing duplicate runs. Spring Batch provides DDL scripts for all major databases. Required for production use.</div></div>
+        <div class="kp"><div class="ki">🔄</div><div class="kt"><strong class="go">ExecutionContext</strong> — A key-value store persisted per job/step execution. Stores checkpoints: "last processed record ID = 4823000". On restart, batch resumes from there. Job-scoped context shared across steps; Step-scoped context is private to one step.</div></div>
+        <div class="kp"><div class="ki">↩️</div><div class="kt"><strong class="am">Skip &amp; Retry</strong> — <strong>Skip</strong>: configure which exception types can be silently skipped up to a max count (bad records go to SkipListener). <strong>Retry</strong>: automatically retry on transient errors (DB deadlock, network timeout) with configurable attempts and backoff. Always set <code>skipLimit</code> — without a cap, all records could silently disappear.</div></div>
+      </div>
+      <div class="gap-sm"></div>
+      <table class="tbl">
+        <tr><th>Concept</th><th>Scope</th><th>Purpose</th></tr>
+        <tr><td><code>Job</code></td><td>Application</td><td>Top-level batch unit, collection of Steps</td></tr>
+        <tr><td><code>Step</code></td><td>Job</td><td>Single phase (tasklet or chunk-oriented)</td></tr>
+        <tr><td><code>JobExecution</code></td><td>Single run</td><td>Tracks one attempt to run a Job</td></tr>
+        <tr><td><code>StepExecution</code></td><td>Step run</td><td>Tracks one attempt to run a Step</td></tr>
+        <tr><td><code>JobRepository</code></td><td>Infra</td><td>Persists all execution metadata to DB</td></tr>
+        <tr><td><code>ExecutionContext</code></td><td>Job/Step</td><td>Checkpoint data for restartability</td></tr>
+        <tr><td><code>JobLauncher</code></td><td>Infra</td><td>Triggers job execution (sync or async)</td></tr>
+      </table>
+    </div>
+    <div class="panel" id="t0x">
+      <div class="st">◆ Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Spring Batch — Job + Tasklet + Chunk + Skip/Retry</div></div>
+<pre><span class="cm">// ── Spring Batch Job Configuration ───────────────</span>
+<span class="an">@Configuration</span>
+<span class="kw">public class</span> <span class="cl">InvoiceJobConfig</span> {
+
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="tp">Job</span> <span class="fn">invoiceJob</span>(<span class="tp">JobRepository</span> repo,
+                          <span class="tp">Step</span> cleanupStep, <span class="tp">Step</span> generateStep) {
+        <span class="kw">return new</span> <span class="tp">JobBuilder</span>(<span class="st2">"invoiceJob"</span>, repo)
+            .<span class="fn">start</span>(cleanupStep)
+            .<span class="fn">next</span>(generateStep)
+            .<span class="fn">build</span>();
+    }
+
+    <span class="cm">// ── Tasklet Step (single operation) ──────────────</span>
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="tp">Step</span> <span class="fn">cleanupStep</span>(<span class="tp">JobRepository</span> repo, <span class="tp">PlatformTransactionManager</span> tx) {
+        <span class="kw">return new</span> <span class="tp">StepBuilder</span>(<span class="st2">"cleanup"</span>, repo)
+            .<span class="fn">tasklet</span>((contribution, ctx) -> {
+                <span class="fn">deleteOldTempFiles</span>();
+                <span class="kw">return</span> <span class="tp">RepeatStatus</span>.<span class="cl">FINISHED</span>;
+            }, tx)
+            .<span class="fn">build</span>();
+    }
+
+    <span class="cm">// ── Chunk Step with Skip &amp; Retry ──────────────────</span>
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="tp">Step</span> <span class="fn">generateStep</span>(<span class="tp">JobRepository</span> repo,
+                              <span class="tp">PlatformTransactionManager</span> tx,
+                              <span class="tp">ItemReader</span>&lt;<span class="tp">Order</span>&gt; reader,
+                              <span class="tp">ItemProcessor</span>&lt;<span class="tp">Order</span>, <span class="tp">Invoice</span>&gt; processor,
+                              <span class="tp">ItemWriter</span>&lt;<span class="tp">Invoice</span>&gt; writer) {
+        <span class="kw">return new</span> <span class="tp">StepBuilder</span>(<span class="st2">"generate"</span>, repo)
+            .&lt;<span class="tp">Order</span>, <span class="tp">Invoice</span>&gt;<span class="fn">chunk</span>(<span class="nb2">100</span>, tx)   <span class="cm">// 100 records per TX</span>
+            .<span class="fn">reader</span>(reader)
+            .<span class="fn">processor</span>(processor)
+            .<span class="fn">writer</span>(writer)
+            .<span class="fn">faultTolerant</span>()
+            .<span class="fn">skip</span>(<span class="tp">DataIntegrityViolationException</span>.<span class="kw">class</span>)
+            .<span class="fn">skipLimit</span>(<span class="nb2">50</span>)               <span class="cm">// skip up to 50 bad records</span>
+            .<span class="fn">retry</span>(<span class="tp">TransientDataAccessException</span>.<span class="kw">class</span>)
+            .<span class="fn">retryLimit</span>(<span class="nb2">3</span>)              <span class="cm">// retry transient errors 3x</span>
+            .<span class="fn">listener</span>(skipListener)
+            .<span class="fn">build</span>();
+    }
+}
+
+<span class="cm">// ── Launch Job with parameters ────────────────────</span>
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">BatchService</span> {
+    <span class="an">@Autowired</span> <span class="kw">private</span> <span class="tp">JobLauncher</span> launcher;
+    <span class="an">@Autowired</span> <span class="kw">private</span> <span class="tp">Job</span> invoiceJob;
+
+    <span class="kw">public void</span> <span class="fn">run</span>(<span class="tp">YearMonth</span> month) <span class="kw">throws</span> <span class="tp">Exception</span> {
+        <span class="tp">JobParameters</span> params = <span class="kw">new</span> <span class="tp">JobParametersBuilder</span>()
+            .<span class="fn">addString</span>(<span class="st2">"month"</span>, month.<span class="fn">toString</span>())         <span class="cm">// identifying</span>
+            .<span class="fn">addLong</span>(<span class="st2">"runAt"</span>, <span class="tp">System</span>.<span class="fn">currentTimeMillis</span>(),
+                      <span class="kw">false</span>)                             <span class="cm">// non-identifying</span>
+            .<span class="fn">toJobParameters</span>();
+        launcher.<span class="fn">run</span>(invoiceJob, params);
+    }
+}</pre>
+      </div>
+    </div>
+    <div class="panel" id="t0q">
+      <div class="st">◆ Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is the difference between a Tasklet step and a Chunk-oriented step?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>Tasklet Step</strong>: runs a single operation once. The <code>Tasklet</code> interface has one method: <code>execute()</code> returning <code>RepeatStatus.FINISHED</code> or <code>CONTINUABLE</code>. Use for: file cleanup, table truncation, single API calls, sending one notification. Simple — no reader/writer needed.<br><br><strong>Chunk-Oriented Step</strong>: reads N items → processes each → writes the batch → commits → repeats until reader returns null. The chunk size controls transaction boundaries. Use for: bulk record processing where read-process-write makes sense. Provides retry, skip, and restart semantics per item.<div class="trick"><strong>⚡ Rule: processing records one-by-one in bulk → Chunk. A single action (cleanup, notification) → Tasklet.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">How does Spring Batch support restart after failure?</div><div class="iqtgl">▾</div></div><div class="iqb">Spring Batch persists all execution state to the <strong>JobRepository</strong> database tables. When a job fails at step 3, restarting with the <em>same</em> <code>JobParameters</code> causes Spring Batch to skip steps 1 and 2 (status = COMPLETED in DB) and resume from step 3. Within a chunk step, the <code>ExecutionContext</code> stores the last committed chunk position — restart begins from the next unprocessed chunk, not record 1.<div class="trick"><strong>⚡ Add a timestamp to JobParameters to force a fresh run instead of restarting a failed one. Same params = same logical run = restart.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is the difference between skip and retry?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>Retry</strong>: for <em>transient</em> failures — network timeout, DB deadlock. Spring retries the same chunk N times with optional backoff. Assumes: it might succeed on the next attempt.<br><br><strong>Skip</strong>: for <em>permanent</em> bad records — malformed data, constraint violations. The item is marked as skipped (logged via SkipListener) and processing continues with the next record. Item is never processed again.<br><br>Use both: retry first (transient), then skip if retry limit exceeded (permanent). Always set <code>skipLimit</code> — without a cap, all records could silently skip.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is the purpose of JobParameters and when would you use non-identifying parameters?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>Identifying parameters</strong> (default): included in the JobInstance key. Same identifying params = same logical run = Spring Batch tries to restart it. Use for: the business key of what's being processed (report month, file path, date range).<br><br><strong>Non-identifying parameters</strong> (addLong("runAt", timestamp, false)): passed to the job but excluded from the identity calculation. Use for: run timestamp, user who triggered it, debug flags — metadata that shouldn't affect whether it's a new or restarted run.<div class="trick"><strong>⚡ To always create a fresh run (not restart): add a unique non-identifying timestamp as a non-identifying parameter or add a unique run ID as identifying.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tsr">Senior</span><div class="iqqt">How would you implement parallel processing in Spring Batch?</div><div class="iqtgl">▾</div></div><div class="iqb">Three approaches: <br><strong>1. Multi-threaded Step</strong>: add a <code>TaskExecutor</code> to a chunk step — multiple threads process chunks from the same reader simultaneously. Simple but the reader must be thread-safe (use <code>SynchronizedItemStreamReader</code> wrapper).<br><br><strong>2. Parallel Steps</strong>: use <code>split()</code> in the Job builder to run independent steps concurrently — e.g., process users and orders simultaneously if they don't depend on each other.<br><br><strong>3. Partitioning</strong>: most powerful — a <code>Partitioner</code> splits work into N partitions (e.g., user IDs 1-10000, 10001-20000 etc.). A <code>PartitionHandler</code> runs each partition as a separate step execution, possibly on different threads or even different machines. Best for very large datasets.</div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="t0m">
+      <div class="st">◆ Memory Tip</div>
+      <div class="mtip"><div class="mico">💡</div><div><strong>Spring Batch = assembly line with memory.</strong> If the line breaks at station 47, you don't restart from station 1 — you restart from station 48. That's JobRepository + ExecutionContext.<br><br><strong>Step selector:</strong> Bulk records → Chunk. Single action → Tasklet.<br><strong>Error selector:</strong> Transient (network, deadlock) → Retry. Bad data record → Skip.<br><strong>Run uniqueness:</strong> Same JobParameters = restart. Different params = new run.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ T32 CHUNK PROCESSING ═══ -->
+<div class="card" id="c1">
+  <div class="band">
+    <div class="bar" style="background:linear-gradient(90deg,var(--or),var(--or-b))"></div>
+    <div class="bl2">
+      <div class="tn">32</div>
+      <div>
+        <div class="ttag" style="background:var(--or-l);color:var(--or);border:1px solid var(--or-b)">Spring Batch</div>
+        <div class="btitle">Chunk-Oriented Processing</div>
+        <div class="bsub">Read → Process → Write in configurable chunks — the heart of enterprise batch</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--am-l);color:var(--am);border:1px solid var(--am-b)">🟡 Medium</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb1">
+      <div class="stab on" onclick="tab(1,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(1,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(1,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(1,'m')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="t1c">
+      <div class="sbox"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> Instead of reading 10 million records into memory at once, chunk processing reads 100 at a time, processes those 100, writes them, commits the transaction, then reads the next 100. Each chunk = one DB transaction. If a chunk write fails, only 100 records need reprocessing — not 10 million.</div></div>
+      <div class="st">◆ Chunk Flow</div>
+      <div class="flow">
+        <div class="fr" style="flex-wrap:wrap;gap:4px">
+          <div><div class="fn-or">ItemReader</div><div class="fsub">reads 1 item<br>null = done</div></div>
+          <div class="fa">→</div>
+          <div><div class="fn2">Buffer N items<br><small>(chunk size)</small></div></div>
+          <div class="fa">→</div>
+          <div><div class="fn2">ItemProcessor<br><small>per item, optional</small></div></div>
+          <div class="fa">→</div>
+          <div><div class="fn-or">ItemWriter</div><div class="fsub">receives List&lt;T&gt;<br>write all at once</div></div>
+          <div class="fa">→</div>
+          <div><div class="fn-tl">COMMIT<br><small>one TX per chunk</small></div></div>
+        </div>
+      </div>
+      <div class="kps">
+        <div class="kp"><div class="ki">📖</div><div class="kt"><strong class="re">ItemReader&lt;T&gt;</strong> — Reads one item at a time, returns <code>null</code> to signal end. Built-in: <code>FlatFileItemReader</code> (CSV, delimited), <code>JdbcCursorItemReader</code> (DB cursor — streams efficiently), <code>JpaPagingItemReader</code> (JPA pages — thread-safe), <code>JsonItemReader</code>, <code>StaxEventItemReader</code> (XML). Must be thread-safe for multi-threaded steps.</div></div>
+        <div class="kp"><div class="ki">⚙️</div><div class="kt"><strong class="bl">ItemProcessor&lt;I, O&gt;</strong> — Transforms one input to one output. <strong>Return null to filter the item</strong> (silently dropped, not counted as skip). Can apply business rules, validation, enrichment. Chainable with <code>CompositeItemProcessor</code>. Optional — omit to pass input directly to writer.</div></div>
+        <div class="kp"><div class="ki">✍️</div><div class="kt"><strong class="re">ItemWriter&lt;T&gt;</strong> — Receives a <code>Chunk&lt;T&gt;</code> (list) and writes all at once. Built-in: <code>JdbcBatchItemWriter</code> (JDBC batch INSERT/UPDATE — much faster than individual inserts), <code>JpaItemWriter</code>, <code>FlatFileItemWriter</code>, <code>CompositeItemWriter</code> (write to multiple outputs).</div></div>
+        <div class="kp"><div class="ki">📏</div><div class="kt"><strong class="am">Chunk Size Trade-off</strong> — Small (10): frequent commits, more DB overhead, smaller failure scope. Large (10,000): fewer commits, higher throughput, more memory, larger failure scope. Rule of thumb: 50–500 for DB operations, 1000–5000 for file operations. Profile and tune.</div></div>
+        <div class="kp"><div class="ki">🔧</div><div class="kt"><strong class="go">@StepScope</strong> — Creates a new bean instance per step execution. Enables late binding: <code>@Value("#{jobParameters['filePath']}")</code> — evaluated at step runtime, not application startup. Critical for partitioned jobs where each worker gets different parameters. Without @StepScope, all workers share one bean instance (state conflicts).</div></div>
+        <div class="kp"><div class="ki">⚠️</div><div class="kt"><strong class="am">JdbcCursor vs JpaPaging Reader</strong> — <strong>JdbcCursorItemReader</strong>: streams via a single open DB cursor. Efficient for sequential single-threaded reads. Not thread-safe. <strong>JpaPagingItemReader</strong>: paginated JPA queries. Thread-safe. More memory per page. Better for multi-threaded steps but can be slow at high page offsets.</div></div>
+      </div>
+    </div>
+    <div class="panel" id="t1x">
+      <div class="st">◆ Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Chunk Processing — Reader + Processor + Writer + @StepScope</div></div>
+<pre><span class="cm">// ── FlatFileItemReader (CSV) ──────────────────────</span>
+<span class="an">@Bean</span>
+<span class="an">@StepScope</span>
+<span class="kw">public</span> <span class="tp">FlatFileItemReader</span>&lt;<span class="tp">OrderRow</span>&gt; <span class="fn">csvReader</span>(
+        <span class="an">@Value</span>(<span class="st2">"#{jobParameters['filePath']}"</span>) <span class="tp">String</span> path) {
+    <span class="kw">return new</span> <span class="tp">FlatFileItemReaderBuilder</span>&lt;<span class="tp">OrderRow</span>&gt;()
+        .<span class="fn">name</span>(<span class="st2">"orderReader"</span>)
+        .<span class="fn">resource</span>(<span class="kw">new</span> <span class="tp">FileSystemResource</span>(path))
+        .<span class="fn">linesToSkip</span>(<span class="nb2">1</span>)                     <span class="cm">// skip header</span>
+        .<span class="fn">delimited</span>().<span class="fn">delimiter</span>(<span class="st2">","</span>)
+        .<span class="fn">names</span>(<span class="st2">"id"</span>, <span class="st2">"customerId"</span>, <span class="st2">"amount"</span>)
+        .<span class="fn">targetType</span>(<span class="tp">OrderRow</span>.<span class="kw">class</span>)
+        .<span class="fn">build</span>();
+}
+
+<span class="cm">// ── JdbcCursorItemReader (streams from DB) ────────</span>
+<span class="an">@Bean</span>
+<span class="kw">public</span> <span class="tp">JdbcCursorItemReader</span>&lt;<span class="tp">Order</span>&gt; <span class="fn">dbReader</span>(<span class="tp">DataSource</span> ds) {
+    <span class="kw">return new</span> <span class="tp">JdbcCursorItemReaderBuilder</span>&lt;<span class="tp">Order</span>&gt;()
+        .<span class="fn">name</span>(<span class="st2">"orderDbReader"</span>)
+        .<span class="fn">dataSource</span>(ds)
+        .<span class="fn">sql</span>(<span class="st2">"SELECT * FROM orders WHERE status='PENDING' ORDER BY id"</span>)
+        .<span class="fn">rowMapper</span>(<span class="kw">new</span> <span class="tp">BeanPropertyRowMapper</span>&lt;&gt;(<span class="tp">Order</span>.<span class="kw">class</span>))
+        .<span class="fn">fetchSize</span>(<span class="nb2">1000</span>)
+        .<span class="fn">build</span>();
+}
+
+<span class="cm">// ── ItemProcessor: transform + filter null ────────</span>
+<span class="an">@Component</span>
+<span class="kw">public class</span> <span class="cl">InvoiceProcessor</span> <span class="kw">implements</span> <span class="tp">ItemProcessor</span>&lt;<span class="tp">Order</span>, <span class="tp">Invoice</span>&gt; {
+    <span class="an">@Override</span>
+    <span class="kw">public</span> <span class="tp">Invoice</span> <span class="fn">process</span>(<span class="tp">Order</span> order) {
+        <span class="kw">if</span> (order.<span class="fn">getAmount</span>().<span class="fn">signum</span>() &lt;= <span class="nb2">0</span>)
+            <span class="kw">return null</span>;           <span class="cm">// null = filter out (not a skip!)</span>
+        <span class="kw">return</span> <span class="tp">Invoice</span>.<span class="fn">builder</span>()
+            .<span class="fn">orderId</span>(order.<span class="fn">getId</span>())
+            .<span class="fn">amount</span>(order.<span class="fn">getAmount</span>().<span class="fn">multiply</span>(<span class="kw">new</span> <span class="tp">BigDecimal</span>(<span class="st2">"1.2"</span>)))
+            .<span class="fn">build</span>();
+    }
+}
+
+<span class="cm">// ── JdbcBatchItemWriter ───────────────────────────</span>
+<span class="an">@Bean</span>
+<span class="kw">public</span> <span class="tp">JdbcBatchItemWriter</span>&lt;<span class="tp">Invoice</span>&gt; <span class="fn">invoiceWriter</span>(<span class="tp">DataSource</span> ds) {
+    <span class="kw">return new</span> <span class="tp">JdbcBatchItemWriterBuilder</span>&lt;<span class="tp">Invoice</span>&gt;()
+        .<span class="fn">dataSource</span>(ds)
+        .<span class="fn">sql</span>(<span class="st2">"INSERT INTO invoices (order_id, amount) VALUES (:orderId, :amount)"</span>)
+        .<span class="fn">beanMapped</span>()     <span class="cm">// maps bean fields to :named params</span>
+        .<span class="fn">build</span>();          <span class="cm">// uses JDBC batch — far faster than N inserts</span>
+}</pre>
+      </div>
+    </div>
+    <div class="panel" id="t1q">
+      <div class="st">◆ Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What does returning null from ItemProcessor.process() do? How is it different from a skip?</div><div class="iqtgl">▾</div></div><div class="iqb">Returning <code>null</code> from <code>process()</code> tells Spring Batch to <strong>filter out that item</strong> — it won't be passed to the writer. It's silently dropped, NOT counted as a skip, and no exception is required. Use for intentional business filtering: "only generate invoices for orders above $10." The <code>StepExecution.filterCount</code> tracks how many items were filtered.<br><br><strong>Skip</strong> is for unexpected errors — an exception is thrown/caught, and the item is logged as a problem. Filter (null return) is for expected business logic exclusion.<div class="trick"><strong>⚡ Null return = intentional drop. Skip = error handling. Never throw an exception just to skip — return null instead for business filtering.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">Why is @StepScope important? What goes wrong without it?</div><div class="iqtgl">▾</div></div><div class="iqb">Without <code>@StepScope</code>, the reader bean is a singleton — created once at application startup. Problems: <br><br><strong>1. Late binding failure:</strong> <code>@Value("#{jobParameters['filePath']}")</code> is evaluated at startup before any job runs — throws a SpEL error because no step execution context exists yet.<br><br><strong>2. State conflicts in parallel jobs:</strong> Readers are stateful (track current position). Without @StepScope, all worker threads in a partitioned job share one reader instance — data duplication or skipped items.<br><br>With @StepScope, a fresh instance is created per step execution with the correct parameter values injected at runtime.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">When would you use JdbcCursorItemReader vs JpaPagingItemReader?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>JdbcCursorItemReader</strong>: opens a single DB cursor, streams results one-by-one. Single open connection held for the step duration. Very efficient for large sequential reads. Thread-UNSAFE — one thread only.<br><br><strong>JpaPagingItemReader</strong>: executes paginated JPA queries (LIMIT/OFFSET). Opens/closes EntityManager per page. Thread-SAFE — can be used in multi-threaded steps. More overhead per page. Can be slow at very high page numbers (OFFSET 100000 is expensive on large tables).<br><br><strong>Rule:</strong> Single-threaded large scans → JdbcCursor. Multi-threaded → JpaPaging. Need JPA entity features (lazy loading etc.) → JpaPaging.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tsr">Senior</span><div class="iqqt">What is the optimal chunk size strategy? How do you choose it?</div><div class="iqtgl">▾</div></div><div class="iqb">There is no single right answer — it depends on record size, processing complexity, and DB performance. Starting points: <br>• DB operations (inserts/updates): 50–500 records per chunk<br>• File operations: 1000–5000 records per chunk<br>• Very fast writes (simple inserts): up to 10,000<br><br>Trade-offs: Smaller chunk = more TX overhead but smaller failure blast radius. Larger chunk = higher throughput but more memory and more reprocessing on failure.<br><br>Method: start with 100, measure throughput (records/sec), double and measure again, stop when throughput plateaus or memory becomes a constraint. Monitor: DB commit rate, heap usage, step execution time in Batch metadata.</div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="t1m">
+      <div class="mtip"><div class="mico">💡</div><div><strong>Chunk = one database transaction.</strong><br>Read N → Process N → Write N → COMMIT. Crash = reprocess only last uncommitted chunk.<br><br><strong>The three operators:</strong><br>• Reader: returns one item or null (done)<br>• Processor: returns transformed item or null (filter out)<br>• Writer: receives the whole chunk as a List — write in one batch<br><br><strong>@StepScope = fresh instance per step run.</strong> Required for any bean using jobParameters or used in parallel steps.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ T33 JOB PARAMS & SCHEDULING ═══ -->
+<div class="card" id="c2">
+  <div class="band">
+    <div class="bar" style="background:linear-gradient(90deg,var(--or),var(--or-b))"></div>
+    <div class="bl2">
+      <div class="tn">33</div>
+      <div>
+        <div class="ttag" style="background:var(--or-l);color:var(--or);border:1px solid var(--or-b)">Spring Batch</div>
+        <div class="btitle">Job Parameters &amp; Scheduling</div>
+        <div class="bsub">Controlling when and how batch jobs run — cron, parameters, and preventing duplicate runs</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--tl-l);color:var(--tl);border:1px solid var(--tl-b)">🟢 Essential</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb2">
+      <div class="stab on" onclick="tab(2,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(2,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(2,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(2,'m')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="t2c">
+      <div class="sbox"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> Job Parameters are like function arguments for your batch job — they make each run configurable and uniquely identifiable. Scheduling is how you trigger jobs automatically (every night at 2am). @Scheduled handles simple cases; Quartz or Kubernetes CronJobs handle production clustered deployments.</div></div>
+      <div class="kps">
+        <div class="kp"><div class="ki">🎛️</div><div class="kt"><strong class="re">JobParameters</strong> — Key-value pairs passed when launching a job. Types: String, Long, Double, Date, LocalDate, LocalDateTime. <strong>Identifying</strong> (default): included in JobInstance key — same identifying params = same logical run = restart attempt. <strong>Non-identifying</strong>: passed to job but excluded from identity check (e.g., run timestamp, triggering user).</div></div>
+        <div class="kp"><div class="ki">⏰</div><div class="kt"><strong class="bl">@Scheduled</strong> — Simple scheduling. <code>cron = "0 0 2 * * ?"</code> (2am daily). <code>fixedRate = 5000</code> (every 5s from START of last run). <code>fixedDelay = 5000</code> (5s after COMPLETION). <code>initialDelay</code> (wait before first run). Requires <code>@EnableScheduling</code>. Single-threaded by default — configure a <code>TaskExecutor</code> bean for concurrent scheduling.</div></div>
+        <div class="kp"><div class="ki">📅</div><div class="kt"><strong class="am">Cron Expression</strong> — Spring cron: 6 fields: <code>second minute hour day-of-month month day-of-week</code>. Examples: <code>0 0 2 * * ?</code> (2am daily), <code>0 */15 * * * *</code> (every 15 minutes), <code>0 0 9-17 * * MON-FRI</code> (every hour 9-5 weekdays). <code>?</code> = don't care. <code>*</code> = every value.</div></div>
+        <div class="kp"><div class="ki">🏢</div><div class="kt"><strong class="go">Quartz vs @Scheduled</strong> — <code>@Scheduled</code>: simple, in-process, no persistence, works on one node. <strong>Quartz</strong>: persistent (schedule survives restarts), clustered (one node fires at a time), rich API. Use Quartz when: multiple app instances, schedule must survive restarts, complex trigger logic.</div></div>
+        <div class="kp"><div class="ki">🚫</div><div class="kt"><strong class="re">Preventing Duplicate Cluster Runs</strong> — All app instances execute @Scheduled → job runs N times. Solutions: <strong>ShedLock</strong> (acquires DB/Redis distributed lock before running), <strong>Quartz clustered</strong> (built-in leader election), <strong>Kubernetes CronJob</strong> (one pod per run — cleanest for containers), <strong>Spring Integration LockRegistry</strong>.</div></div>
+      </div>
+    </div>
+    <div class="panel" id="t2x">
+      <div class="st">◆ Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Scheduling + Job Parameters + ShedLock</div></div>
+<pre><span class="cm">// ── @EnableScheduling + @Scheduled ───────────────</span>
+<span class="an">@Configuration</span>
+<span class="an">@EnableScheduling</span>
+<span class="kw">public class</span> <span class="cl">SchedulingConfig</span> { }
+
+<span class="an">@Component</span>
+<span class="kw">public class</span> <span class="cl">BatchScheduler</span> {
+    <span class="an">@Autowired</span> <span class="kw">private</span> <span class="tp">BatchService</span> batchService;
+
+    <span class="an">@Scheduled</span>(cron = <span class="st2">"0 0 2 * * ?"</span>)     <span class="cm">// 2am every day</span>
+    <span class="kw">public void</span> <span class="fn">runNightlyBatch</span>() {
+        batchService.<span class="fn">runMonthlyBatch</span>(<span class="tp">YearMonth</span>.<span class="fn">now</span>());
+    }
+
+    <span class="cm">// fixedDelay: 60s AFTER completion (no overlap)</span>
+    <span class="an">@Scheduled</span>(fixedDelay = <span class="nb2">60_000</span>, initialDelay = <span class="nb2">5_000</span>)
+    <span class="kw">public void</span> <span class="fn">pollPendingOrders</span>() { <span class="fn">processPending</span>(); }
+
+    <span class="cm">// fixedRate: every 30s from START (may overlap if slow)</span>
+    <span class="an">@Scheduled</span>(fixedRate = <span class="nb2">30_000</span>)
+    <span class="kw">public void</span> <span class="fn">heartbeat</span>() { <span class="fn">ping</span>(); }
+}
+
+<span class="cm">// ── Identifying vs Non-Identifying params ─────────</span>
+<span class="tp">JobParameters</span> params = <span class="kw">new</span> <span class="tp">JobParametersBuilder</span>()
+    .<span class="fn">addLocalDate</span>(<span class="st2">"reportDate"</span>, <span class="tp">LocalDate</span>.<span class="fn">now</span>())        <span class="cm">// identifying</span>
+    .<span class="fn">addString</span>(<span class="st2">"env"</span>, <span class="st2">"prod"</span>)                              <span class="cm">// identifying</span>
+    .<span class="fn">addLong</span>(<span class="st2">"runAt"</span>, <span class="tp">System</span>.<span class="fn">currentTimeMillis</span>(), <span class="kw">false</span>) <span class="cm">// NON-identifying</span>
+    .<span class="fn">toJobParameters</span>();
+
+<span class="cm">// ── Access params in @StepScope bean ──────────────</span>
+<span class="an">@Bean</span>
+<span class="an">@StepScope</span>
+<span class="kw">public</span> <span class="tp">ItemReader</span>&lt;<span class="tp">Order</span>&gt; <span class="fn">readerForDate</span>(
+        <span class="an">@Value</span>(<span class="st2">"#{jobParameters['reportDate']}"</span>) <span class="tp">LocalDate</span> date) {
+    <span class="kw">return</span> <span class="fn">buildReaderForDate</span>(date);
+}
+
+<span class="cm">// ── ShedLock: prevent duplicate cluster runs ──────</span>
+<span class="cm">// Dependency: net.javacrumbs.shedlock:shedlock-spring</span>
+<span class="an">@Configuration</span>
+<span class="an">@EnableSchedulerLock</span>(defaultLockAtMostFor = <span class="st2">"PT30M"</span>)
+<span class="kw">public class</span> <span class="cl">ShedLockConfig</span> { }
+
+<span class="an">@Scheduled</span>(cron = <span class="st2">"0 0 2 * * ?"</span>)
+<span class="an">@SchedulerLock</span>(name = <span class="st2">"nightlyJob"</span>,
+    lockAtLeastFor = <span class="st2">"PT5M"</span>,    <span class="cm">// hold lock min 5min (prevent quick re-run)</span>
+    lockAtMostFor  = <span class="st2">"PT60M"</span>)  <span class="cm">// release after 60min (node crash safety)</span>
+<span class="kw">public void</span> <span class="fn">runNightlyWithLock</span>() {
+    batchService.<span class="fn">run</span>();  <span class="cm">// only ONE node executes this at a time</span>
+}</pre>
+      </div>
+    </div>
+    <div class="panel" id="t2q">
+      <div class="st">◆ Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is the difference between fixedRate and fixedDelay in @Scheduled?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>fixedRate</strong>: triggers every N ms measured from the <em>start</em> of the previous invocation. If task takes longer than N, executions can queue up (overlap if using a thread pool). Example: fixedRate=5000 fires at T+0, T+5s, T+10s regardless of execution time.<br><br><strong>fixedDelay</strong>: waits N ms after <em>completion</em> of the previous invocation. Guarantees no overlap. Example: fixedDelay=5000, task runs 3s → next starts at T+8s (3s task + 5s delay).<div class="trick"><strong>⚡ Use fixedDelay when tasks must not overlap. Use fixedRate for periodic polling where small overlaps are acceptable.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">Why do you get duplicate batch runs in a clustered environment? How do you prevent it?</div><div class="iqtgl">▾</div></div><div class="iqb">When multiple app instances run, all instances execute @Scheduled simultaneously — the job runs N times in parallel. Spring Batch's JobRepository helps (same identifying JobParameters = already-running/completed detection) but doesn't prevent multiple launch attempts at the exact same moment.<br><br>Solutions: <strong>ShedLock</strong> (acquires a DB or Redis lock before executing — simplest), <strong>Quartz clustered mode</strong> (persistent scheduler with built-in leader election for trigger firing), <strong>Kubernetes CronJob</strong> (K8s runs exactly one pod per scheduled time — cleanest for containerized apps), <strong>Leader election</strong> (Spring Cloud Zookeeper/Consul).</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">How do you trigger a batch job via REST API for on-demand execution?</div><div class="iqtgl">▾</div></div><div class="iqb">Inject <code>JobLauncher</code> and <code>Job</code> into a <code>@RestController</code>. Build <code>JobParameters</code> from request params. Call <code>jobLauncher.run(job, params)</code>.<br><br><strong>Async launcher</strong> is critical for HTTP: default <code>JobLauncher</code> is synchronous — it blocks the HTTP thread until the job completes (minutes or hours). Configure an async launcher: set <code>setTaskExecutor(new SimpleAsyncTaskExecutor())</code> on the launcher bean — returns immediately with a <code>JobExecution</code> object (status: STARTING). The client receives the jobExecutionId and can poll for status later via <code>JobExplorer.getJobExecution(id)</code>.<div class="info"><strong>💡 Always use async JobLauncher for HTTP-triggered jobs. Sync launcher = blocked HTTP thread = timeouts.</strong></div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="t2m">
+      <div class="mtip"><div class="mico">💡</div><div><strong>Cron mnemonic: "Seconds Minutes Hours Day Month Weekday"</strong><br><code>0 0 2 * * ?</code> = second 0, minute 0, hour 2, any day, any month = 2am daily<br><br><strong>fixedRate vs fixedDelay:</strong><br>Rate = "fire every 5s from START" → may overlap<br>Delay = "wait 5s after FINISH" → never overlaps<br><br><strong>Cluster safety rule:</strong> @Scheduled in multi-instance = multiple runs. Use ShedLock (simplest) or K8s CronJob (cleanest) for guaranteed single execution.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ T34 REACTIVE CONCEPTS ═══ -->
+<div class="card" id="c3">
+  <div class="band">
+    <div class="bar" style="background:linear-gradient(90deg,#c06018,#e08840)"></div>
+    <div class="bl2">
+      <div class="tn">34</div>
+      <div>
+        <div class="ttag" style="background:#fff5e8;color:#905000;border:1px solid #d0a048">Project Reactor</div>
+        <div class="btitle">Reactive Programming Concepts</div>
+        <div class="bsub">Non-blocking, backpressure-aware streams — the paradigm that enables massive concurrency</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--or-l);color:var(--or);border:1px solid var(--or-b)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb3">
+      <div class="stab on" onclick="tab(3,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(3,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(3,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(3,'m')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="t3c">
+      <div class="sbox"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> Traditional code blocks a thread while waiting for DB/HTTP responses (sleeping, wasting CPU). Reactive code registers a callback and moves on — one thread handles thousands of concurrent requests by never sleeping. Like a waiter taking 50 orders vs standing at the kitchen waiting for each one.</div></div>
+      <div class="kps">
+        <div class="kp"><div class="ki">🌊</div><div class="kt"><strong class="re">Reactive Streams Spec</strong> — 4 interfaces: <code>Publisher</code> (produces data), <code>Subscriber</code> (consumes data), <code>Subscription</code> (connection between them, handles backpressure), <code>Processor</code> (both). Project Reactor implements this spec with <code>Mono</code> and <code>Flux</code>.</div></div>
+        <div class="kp"><div class="ki">⚡</div><div class="kt"><strong class="bl">Non-Blocking I/O</strong> — Traditional: thread blocks while waiting for DB/HTTP response (sleeping, wasting CPU). Reactive: thread registers a callback, continues doing other work, processes result when ready. One event loop thread handles thousands of concurrent I/O operations. Requires non-blocking drivers: R2DBC (DB), WebClient (HTTP), reactive MongoDB.</div></div>
+        <div class="kp"><div class="ki">🔄</div><div class="kt"><strong class="am">Backpressure</strong> — Flow control mechanism. Consumer signals how much data it can handle via <code>request(n)</code>. Publisher sends at most N items. Consumer requests more when ready. Prevents fast producer from overwhelming slow consumer (buffer overflow/OOM). Key advantage over simple callbacks (CompletableFuture has NO backpressure).</div></div>
+        <div class="kp"><div class="ki">🧵</div><div class="kt"><strong class="go">Schedulers</strong> — Control which thread executes pipeline stages. <code>Schedulers.boundedElastic()</code>: for blocking calls (DB, file I/O) — elastic thread pool. <code>Schedulers.parallel()</code>: for CPU work — fixed pool = core count. <code>Schedulers.single()</code>: single reusable thread. Switch with <code>subscribeOn()</code> (source thread) or <code>publishOn()</code> (downstream thread).</div></div>
+        <div class="kp"><div class="ki">🚫</div><div class="kt"><strong class="re">Never Block in Reactive</strong> — Calling <code>block()</code>, <code>Thread.sleep()</code>, or any blocking operation on the event loop thread starves all concurrent requests. Use <code>Mono.fromCallable(() → blockingCall()).subscribeOn(Schedulers.boundedElastic())</code> to offload. Or use virtual threads (Java 21 + Tomcat) if your codebase is mostly blocking.</div></div>
+        <div class="kp"><div class="ki">⚠️</div><div class="kt"><strong class="re">Nothing Executes Until Subscribed</strong> — Reactive pipelines are lazy — they're just a description of work. A Mono/Flux runs only when subscribed to. In WebFlux, the framework subscribes automatically. In tests or manual code — don't forget to subscribe or call <code>.block()</code>.</div></div>
+      </div>
+    </div>
+    <div class="panel" id="t3x">
+      <div class="st">◆ Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Reactive Concepts — Schedulers + Safe Blocking + Error Handling</div></div>
+<pre><span class="cm">// ── subscribeOn: affects the SOURCE thread ────────</span>
+<span class="tp">Mono</span>&lt;<span class="tp">String</span>&gt; result = <span class="tp">Mono</span>.<span class="fn">fromCallable</span>(() -> <span class="fn">readFileBlocking</span>()) <span class="cm">// blocking!</span>
+    .<span class="fn">subscribeOn</span>(<span class="tp">Schedulers</span>.<span class="fn">boundedElastic</span>()) <span class="cm">// run on elastic pool</span>
+    .<span class="fn">map</span>(<span class="tp">String</span>::<span class="fn">toUpperCase</span>)                 <span class="cm">// still on elastic</span>
+    .<span class="fn">publishOn</span>(<span class="tp">Schedulers</span>.<span class="fn">parallel</span>())          <span class="cm">// switch to parallel pool</span>
+    .<span class="fn">map</span>(s -> s + <span class="st2">" processed"</span>);              <span class="cm">// runs on parallel thread</span>
+
+<span class="cm">// ── Wrapping a blocking legacy call safely ────────</span>
+<span class="tp">Mono</span>&lt;<span class="tp">User</span>&gt; <span class="fn">safeCall</span>(<span class="tp">Long</span> id) {
+    <span class="kw">return</span> <span class="tp">Mono</span>.<span class="fn">fromCallable</span>(() -> legacyRepo.<span class="fn">findUser</span>(id))  <span class="cm">// blocking JPA</span>
+               .<span class="fn">subscribeOn</span>(<span class="tp">Schedulers</span>.<span class="fn">boundedElastic</span>());
+}
+
+<span class="cm">// ── Error handling strategies ─────────────────────</span>
+<span class="tp">Mono</span>&lt;<span class="tp">User</span>&gt; user = <span class="fn">fetchUser</span>(id)
+    .<span class="fn">onErrorReturn</span>(<span class="tp">User</span>.<span class="fn">anonymous</span>())           <span class="cm">// default value on error</span>
+    .<span class="fn">onErrorResume</span>(e -> <span class="fn">fetchFromCache</span>(id))      <span class="cm">// fallback Mono</span>
+    .<span class="fn">onErrorMap</span>(<span class="tp">Exception</span>.<span class="kw">class</span>,                 <span class="cm">// wrap as different type</span>
+        e -> <span class="kw">new</span> <span class="tp">ServiceException</span>(id, e))
+    .<span class="fn">retryWhen</span>(<span class="tp">Retry</span>.<span class="fn">backoff</span>(<span class="nb2">3</span>, <span class="tp">Duration</span>.<span class="fn">ofMillis</span>(<span class="nb2">200</span>))); <span class="cm">// exp backoff</span>
+
+<span class="cm">// ── Backpressure: subscriber controls rate ────────</span>
+<span class="tp">Flux</span>.<span class="fn">range</span>(<span class="nb2">1</span>, <span class="nb2">1_000_000</span>)
+    .<span class="fn">onBackpressureBuffer</span>(<span class="nb2">1000</span>)   <span class="cm">// buffer max 1000 items</span>
+    .<span class="fn">subscribe</span>(<span class="kw">new</span> <span class="tp">BaseSubscriber</span>&lt;<span class="tp">Integer</span>&gt;() {
+        <span class="an">@Override</span>
+        <span class="kw">protected void</span> <span class="fn">hookOnSubscribe</span>(<span class="tp">Subscription</span> s) {
+            request(<span class="nb2">10</span>);               <span class="cm">// request 10 items initially</span>
+        }
+        <span class="an">@Override</span>
+        <span class="kw">protected void</span> <span class="fn">hookOnNext</span>(<span class="tp">Integer</span> v) {
+            <span class="fn">process</span>(v);
+            request(<span class="nb2">10</span>);               <span class="cm">// request 10 more after processing</span>
+        }
+    });</pre>
+      </div>
+    </div>
+    <div class="panel" id="t3q">
+      <div class="st">◆ Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is backpressure and why does it matter in reactive programming?</div><div class="iqtgl">▾</div></div><div class="iqb">Backpressure is a <strong>flow control mechanism</strong> where the consumer tells the producer how much data it can handle. Without it: a fast producer (reading file at 1M records/sec) overwhelms a slow consumer (writing to DB at 100/sec) — causing buffer overflow or OOM. Reactive Streams' <code>Subscription.request(n)</code> protocol: subscriber requests N items, publisher sends at most N, subscriber requests more when ready — demand-driven cooperative flow.<br><br>This is the key advantage of Reactive Streams over plain callbacks (CompletableFuture, RxJava1) — no flow control means no backpressure protection.<div class="trick"><strong>⚡ "Backpressure = the consumer holds the remote control." Publisher can only send as fast as the consumer says it can handle.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is the difference between subscribeOn() and publishOn()?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>subscribeOn(scheduler)</strong>: affects the thread where the <em>subscription happens and data is produced</em> (the source). No matter where in the chain you put it, it affects the source. Only the first <code>subscribeOn</code> matters. Use for: blocking producers (file reads, legacy blocking code).<br><br><strong>publishOn(scheduler)</strong>: switches the thread for all <em>downstream operations from that point</em>. Multiple <code>publishOn</code> calls progressively switch threads. Use for: switching from a blocking pool back to a reactive pool after a blocking call, or moving CPU-intensive work to the parallel scheduler.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">When should you use WebFlux vs Tomcat? Is reactive always better?</div><div class="iqtgl">▾</div></div><div class="iqb">WebFlux is better when: high concurrency with I/O-heavy work (many downstream API calls), streaming data (SSE, WebSocket), all dependencies support reactive (R2DBC, reactive MongoDB, WebClient).<br><br>Stick with Tomcat when: team unfamiliar with reactive (steep learning curve, difficult debugging), any blocking dependency exists (JPA/JDBC in WebFlux blocks the event loop), Java 21 virtual threads available (Tomcat + virtual threads gives near-reactive throughput with synchronous code simplicity).<div class="warn"><strong>⚠️ Using JPA in WebFlux = blocking the event loop = worse than Tomcat. Either use R2DBC or switch to Tomcat + virtual threads.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tsr">Senior</span><div class="iqqt">What does "nothing executes until subscribed" mean in practice?</div><div class="iqtgl">▾</div></div><div class="iqb">A Mono/Flux is a <strong>lazy description of a computation</strong> — no code runs when you build the pipeline. The actual execution (HTTP call, DB query, file read) only happens when a subscriber subscribes. In Spring WebFlux, the framework subscribes when writing the HTTP response — so your controller code is never actually executed until WebFlux subscribes to it.<br><br>Practical implications: (1) Building a Mono in a test without subscribing = nothing happened. (2) A Mono returned from a method is not "in progress" — no execution until subscribed. (3) <code>mono.cache()</code> re-triggers execution on first subscriber then caches — without subscription, even cache doesn't help. (4) Side effects should be in <code>doOnNext()</code>/<code>doOnSubscribe()</code> — not outside the pipeline.</div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="t3m">
+      <div class="mtip"><div class="mico">💡</div><div><strong>Reactive = never block, never waste a thread.</strong> The event loop thread is precious — one blocked call stops all concurrent work on that thread.<br><br><strong>subscribeOn = "where to START the pipeline" (affects source).<br>publishOn = "where to CONTINUE from here" (switches downstream).</strong><br><br><strong>Reactive decision tree:</strong><br>• All deps are reactive + high concurrency → WebFlux<br>• Have JPA/JDBC + Java 21 → Tomcat + virtual threads<br>• Mixed blocking + reactive → wrap blocking in boundedElastic</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ T35 MONO & FLUX ═══ -->
+<div class="card" id="c4">
+  <div class="band">
+    <div class="bar" style="background:linear-gradient(90deg,#c06828,#e09040)"></div>
+    <div class="bl2">
+      <div class="tn">35</div>
+      <div>
+        <div class="ttag" style="background:#fff5e8;color:#905000;border:1px solid #d0a048">Project Reactor</div>
+        <div class="btitle">Mono &amp; Flux</div>
+        <div class="bsub">The two reactive types — 0-or-1 vs 0-to-N, and all the operators you must know</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--or-l);color:var(--or);border:1px solid var(--or-b)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb4">
+      <div class="stab on" onclick="tab(4,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(4,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(4,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(4,'m')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="t4c">
+      <div class="sbox"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> <code>Mono&lt;T&gt;</code> is like <code>Optional</code> or a single async result — 0 or 1 item. <code>Flux&lt;T&gt;</code> is like a <code>List</code> or stream — 0 to N items. Both are lazy, composable with operators, and propagate errors through the pipeline.</div></div>
+      <div class="st">◆ Mono vs Flux</div>
+      <table class="tbl">
+        <tr><th>Type</th><th>Items</th><th>Analogy</th><th>Use When</th></tr>
+        <tr><td><code>Mono&lt;T&gt;</code></td><td>0 or 1</td><td>Optional / CompletableFuture</td><td>findById, save, single API call</td></tr>
+        <tr><td><code>Flux&lt;T&gt;</code></td><td>0 to ∞</td><td>Stream / List</td><td>findAll, SSE, event streaming</td></tr>
+        <tr><td><code>Mono&lt;Void&gt;</code></td><td>0</td><td>CompletableFuture&lt;Void&gt;</td><td>delete, fire-and-forget</td></tr>
+        <tr><td><code>Flux.collectList()</code></td><td>0 to N → 1</td><td>Stream.collect(toList())</td><td>accumulate all items into List</td></tr>
+      </table>
+      <div class="gap-sm"></div>
+      <div class="kps">
+        <div class="kp"><div class="ki">🔗</div><div class="kt"><strong class="re">Key Mono Operators</strong><br><code>map(fn)</code>: sync transform (T→R). <code>flatMap(fn→Mono)</code>: async transform (chains another async call). <code>filter(pred)</code>: empty if false. <code>switchIfEmpty(Mono)</code>: fallback on empty. <code>defaultIfEmpty(val)</code>: default value. <code>zipWith(other)</code>: combine two Monos. <code>cache()</code>: cache result for multiple subscribers.</div></div>
+        <div class="kp"><div class="ki">🌊</div><div class="kt"><strong class="bl">Key Flux Operators</strong><br><code>map/filter/flatMap</code>: same semantics as Mono but per item. <code>take(n)</code>: first N. <code>skip(n)</code>: skip first N. <code>collectList()</code>: Mono&lt;List&lt;T&gt;&gt;. <code>groupBy(fn)</code>: group items. <code>buffer(n)</code>: batch N items into List. <code>merge/concat/zip</code>: combine multiple Fluxes.</div></div>
+        <div class="kp"><div class="ki">⚠️</div><div class="kt"><strong class="am">flatMap vs concatMap</strong> — <code>flatMap</code>: subscribes to inner publishers eagerly (parallel) — results may arrive out of order, better throughput. <code>concatMap</code>: subscribes sequentially — preserves order, one at a time. <code>flatMapSequential</code>: subscribes eagerly but merges results in order. Use flatMap when order doesn't matter (parallel calls), concatMap when order matters.</div></div>
+        <div class="kp"><div class="ki">🛠️</div><div class="kt"><strong class="go">Creating Mono/Flux</strong><br><code>Mono.just(val)</code>, <code>Mono.empty()</code>, <code>Mono.error(ex)</code>, <code>Mono.fromCallable(()→val)</code> (blocking wrap). <code>Flux.just(a,b,c)</code>, <code>Flux.fromIterable(list)</code>, <code>Flux.range(1,10)</code>, <code>Flux.interval(Duration.ofSeconds(1))</code> (periodic), <code>Flux.create(sink→...)</code> (bridge from callbacks).</div></div>
+      </div>
+    </div>
+    <div class="panel" id="t4x">
+      <div class="st">◆ Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Mono & Flux — Operators + Combining + Error Handling</div></div>
+<pre><span class="cm">// ── Mono operators ────────────────────────────────</span>
+<span class="tp">Mono</span>&lt;<span class="tp">User</span>&gt; user = <span class="fn">findUser</span>(id)
+    .<span class="fn">map</span>(u -> u.<span class="fn">withName</span>(u.<span class="fn">getName</span>().<span class="fn">toUpperCase</span>()))  <span class="cm">// sync</span>
+    .<span class="fn">flatMap</span>(u -> <span class="fn">enrichWithOrders</span>(u))                  <span class="cm">// async (→ Mono)</span>
+    .<span class="fn">filter</span>(<span class="tp">User</span>::<span class="fn">isActive</span>)                             <span class="cm">// empty if false</span>
+    .<span class="fn">switchIfEmpty</span>(<span class="tp">Mono</span>.<span class="fn">error</span>(<span class="kw">new</span> <span class="tp">NotFoundException</span>(id)))
+    .<span class="fn">doOnNext</span>(u -> log.<span class="fn">info</span>(<span class="st2">"User: {}"</span>, u))              <span class="cm">// side effect only</span>
+    .<span class="fn">cache</span>();  <span class="cm">// cache result — replay to multiple subscribers</span>
+
+<span class="cm">// ── Combining two Monos (parallel) ───────────────</span>
+<span class="tp">Mono</span>&lt;<span class="tp">User</span>&gt; u = <span class="fn">fetchUser</span>(id);
+<span class="tp">Mono</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Order</span>&gt;&gt; o = <span class="fn">fetchOrders</span>(id);
+
+<span class="tp">Mono</span>.<span class="fn">zip</span>(u, o)                          <span class="cm">// runs both in parallel!</span>
+    .<span class="fn">map</span>(t -> <span class="kw">new</span> <span class="tp">Dashboard</span>(t.<span class="fn">getT1</span>(), t.<span class="fn">getT2</span>()));
+
+<span class="cm">// ── Flux operators ────────────────────────────────</span>
+<span class="tp">Flux</span>&lt;<span class="tp">String</span>&gt; words = <span class="tp">Flux</span>.<span class="fn">just</span>(<span class="st2">"hello"</span>, <span class="st2">"reactive"</span>, <span class="st2">"world"</span>);
+words.<span class="fn">map</span>(<span class="tp">String</span>::<span class="fn">toUpperCase</span>)
+     .<span class="fn">filter</span>(s -> s.<span class="fn">length</span>() > <span class="nb2">5</span>)
+     .<span class="fn">take</span>(<span class="nb2">2</span>)
+     .<span class="fn">collectList</span>()           <span class="cm">// → Mono&lt;List&lt;String&gt;&gt;</span>
+     .<span class="fn">subscribe</span>(list -> log.<span class="fn">info</span>(<span class="st2">"{}"</span>, list));
+
+<span class="cm">// ── flatMap vs concatMap ──────────────────────────</span>
+<span class="tp">Flux</span>.<span class="fn">just</span>(<span class="nb2">1</span>, <span class="nb2">2</span>, <span class="nb2">3</span>)
+    .<span class="fn">flatMap</span>(id -> <span class="fn">fetchUser</span>(id))    <span class="cm">// parallel — order NOT guaranteed</span>
+    .<span class="fn">subscribe</span>(<span class="tp">System</span>.out::println);
+
+<span class="tp">Flux</span>.<span class="fn">just</span>(<span class="nb2">1</span>, <span class="nb2">2</span>, <span class="nb2">3</span>)
+    .<span class="fn">concatMap</span>(id -> <span class="fn">fetchUser</span>(id))  <span class="cm">// sequential — order preserved</span>
+    .<span class="fn">subscribe</span>(<span class="tp">System</span>.out::println);
+
+<span class="cm">// ── Combining multiple Fluxes ─────────────────────</span>
+<span class="tp">Flux</span>&lt;<span class="tp">Integer</span>&gt; a = <span class="tp">Flux</span>.<span class="fn">just</span>(<span class="nb2">1</span>,<span class="nb2">2</span>,<span class="nb2">3</span>);
+<span class="tp">Flux</span>&lt;<span class="tp">Integer</span>&gt; b = <span class="tp">Flux</span>.<span class="fn">just</span>(<span class="nb2">10</span>,<span class="nb2">20</span>,<span class="nb2">30</span>);
+<span class="tp">Flux</span>.<span class="fn">merge</span>(a, b);      <span class="cm">// interleave — fast, unordered</span>
+<span class="tp">Flux</span>.<span class="fn">concat</span>(a, b);     <span class="cm">// a completes first, then b — ordered</span>
+<span class="tp">Flux</span>.<span class="fn">zip</span>(a, b, (x,y) -> x+y);  <span class="cm">// pair elements: 11, 22, 33</span>
+
+<span class="cm">// ── Bridging from callback API ────────────────────</span>
+<span class="tp">Flux</span>&lt;<span class="tp">Event</span>&gt; events = <span class="tp">Flux</span>.<span class="fn">create</span>(sink -> {
+    bus.<span class="fn">onEvent</span>(e -> sink.<span class="fn">next</span>(e));
+    bus.<span class="fn">onClose</span>(() -> sink.<span class="fn">complete</span>());
+    bus.<span class="fn">onError</span>(ex -> sink.<span class="fn">error</span>(ex));
+});</pre>
+      </div>
+    </div>
+    <div class="panel" id="t4q">
+      <div class="st">◆ Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is the difference between map() and flatMap() in Reactor?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>map(T → R)</strong>: synchronous transformation. Returns a plain value which gets wrapped back in Mono/Flux. Use when the transform is a direct calculation (no async call). Example: <code>mono.map(u → u.getName())</code> → Mono&lt;String&gt;.<br><br><strong>flatMap(T → Mono&lt;R&gt;)</strong>: asynchronous transformation. The function returns another Publisher. flatMap subscribes to the inner Publisher and flattens the result. Use when the transform needs another async call. Example: <code>mono.flatMap(u → fetchOrders(u.getId()))</code> → Mono&lt;List&lt;Order&gt;&gt;.<div class="trick"><strong>⚡ Rule: transform → map. Another async call → flatMap. Wrapping in Mono.just() inside flatMap is always a sign you should use map instead.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is the difference between Flux.merge(), concat(), and zip()?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>merge(a, b)</strong>: subscribes to both simultaneously, emits items as they arrive — order not guaranteed. Fastest throughput. Use when order doesn't matter.<br><br><strong>concat(a, b)</strong>: subscribes to a first, waits for completion, then subscribes to b. Preserves source order. Use when results must be ordered.<br><br><strong>zip(a, b)</strong>: pairs elements by position (first from a + first from b → tuple). Stops when any source completes. Use for: combining related parallel data (price + quantity → total).<div class="info"><strong>💡 merge = fast, unordered. concat = ordered, sequential. zip = paired, like a zipper.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What does Mono.cache() do and when is it useful?</div><div class="iqtgl">▾</div></div><div class="iqb">By default, each subscriber to a Mono triggers a fresh execution — two subscribers = two DB queries, two HTTP calls. <code>cache()</code> executes the Mono on first subscription, stores the result, and replays it to subsequent subscribers immediately.<br><br>Use for: frequently accessed slow-to-compute data that doesn't change often (config lookups, reference data, feature flags). Optional TTL: <code>cache(Duration.ofMinutes(5))</code>. Without cache: a service that's called by 100 concurrent users would trigger 100 DB queries for the same config data.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tsr">Senior</span><div class="iqqt">How do you handle errors differently with onErrorReturn, onErrorResume, and onErrorMap?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>onErrorReturn(T)</strong>: when any error occurs, emit a fallback value and complete normally. Terminal — stops error propagation. Use for: "if DB fails, return an empty/default response".<br><br><strong>onErrorResume(fn → Publisher)</strong>: when error occurs, switch to a different Publisher (Mono/Flux). More flexible — can return cached data, trigger a fallback service call. Use for: "if primary DB fails, try read replica".<br><br><strong>onErrorMap(fn → Throwable)</strong>: transform one error type into another. Doesn't recover — error still propagates but with a different type. Use for: wrapping low-level infrastructure exceptions in meaningful business exceptions before they reach the caller.</div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="t4m">
+      <div class="mtip"><div class="mico">💡</div><div><strong>Mono = one async result. Flux = many async results.</strong><br><br><strong>Operator cheat sheet:</strong><br>• Sync transform → <code>map()</code><br>• Async call → <code>flatMap()</code><br>• On empty → <code>switchIfEmpty()</code> or <code>defaultIfEmpty()</code><br>• Side effect → <code>doOnNext()</code><br>• Combine two Monos parallel → <code>Mono.zip()</code><br>• All items into list → <code>flux.collectList()</code><br>• Parallel Flux merge → <code>Flux.merge()</code><br>• Ordered Flux → <code>Flux.concat()</code></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ T36 REACTIVE REST ═══ -->
+<div class="card" id="c5">
+  <div class="band">
+    <div class="bar" style="background:linear-gradient(90deg,#c07028,#d09048)"></div>
+    <div class="bl2">
+      <div class="tn">36</div>
+      <div>
+        <div class="ttag" style="background:#fff5e8;color:#905000;border:1px solid #d0a048">Spring WebFlux</div>
+        <div class="btitle">Reactive REST APIs</div>
+        <div class="bsub">Building non-blocking HTTP APIs with Spring WebFlux and WebClient</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--am-l);color:var(--am);border:1px solid var(--am-b)">🟡 Medium</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb5">
+      <div class="stab on" onclick="tab(5,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(5,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(5,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(5,'m')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="t5c">
+      <div class="sbox"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> Spring WebFlux looks almost identical to Spring MVC but your controller returns <code>Mono&lt;T&gt;</code> instead of <code>T</code>. The server is Netty (event loop) instead of Tomcat (thread pool). WebClient replaces RestTemplate for making non-blocking HTTP calls to other services.</div></div>
+      <div class="kps">
+        <div class="kp"><div class="ki">🎮</div><div class="kt"><strong class="re">@RestController in WebFlux</strong> — Nearly identical to MVC! Return <code>Mono&lt;T&gt;</code> for single responses, <code>Flux&lt;T&gt;</code> for streaming. Same annotations: <code>@GetMapping</code>, <code>@PostMapping</code>, <code>@RequestBody</code>, etc. Key difference: the embedded server is <strong>Netty</strong> (non-blocking event loop) instead of Tomcat (thread pool). Add <code>spring-boot-starter-webflux</code> instead of <code>starter-web</code>.</div></div>
+        <div class="kp"><div class="ki">🌐</div><div class="kt"><strong class="bl">WebClient</strong> — Replaces RestTemplate for non-blocking HTTP calls. Builder pattern: <code>WebClient.builder().baseUrl("http://service").build()</code>. Supports: timeouts, retry, filters (auth headers), streaming responses. RestTemplate is deprecated in Spring 5 — use WebClient for all new code (works in both reactive and non-reactive apps).</div></div>
+        <div class="kp"><div class="ki">📡</div><div class="kt"><strong class="am">Server-Sent Events (SSE)</strong> — Stream data to the browser over a single HTTP connection. Return <code>Flux&lt;ServerSentEvent&lt;T&gt;&gt;</code> with content type <code>text/event-stream</code>. Browser uses EventSource API. Perfect for: live dashboards, real-time notifications, progress updates — without WebSocket complexity.</div></div>
+        <div class="kp"><div class="ki">🗄️</div><div class="kt"><strong class="re">R2DBC — Reactive DB</strong> — JPA/Hibernate use blocking JDBC — incompatible with WebFlux event loop. Use <code>R2DBC</code> (Reactive Relational Database Connectivity) with Spring Data R2DBC repositories that return Mono/Flux. Supports: PostgreSQL, MySQL, H2, MSSQL. Simpler than JPA (no lazy loading, no EntityManager) but fully non-blocking.</div></div>
+        <div class="kp"><div class="ki">🔀</div><div class="kt"><strong class="go">Functional Routing</strong> — Alternative to annotations. <code>RouterFunctions.route(GET("/users"), handler::list)</code>. More explicit, purely functional. Can coexist with annotation-based controllers. Preferred in some teams for its clarity and testability without mocking annotations.</div></div>
+      </div>
+    </div>
+    <div class="panel" id="t5x">
+      <div class="st">◆ Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">WebFlux Controller + WebClient + SSE Streaming</div></div>
+<pre><span class="cm">// ── WebFlux @RestController ───────────────────────</span>
+<span class="an">@RestController</span>
+<span class="an">@RequestMapping</span>(<span class="st2">"/api/users"</span>)
+<span class="kw">public class</span> <span class="cl">UserController</span> {
+
+    <span class="an">@GetMapping</span>(<span class="st2">"/{id}"</span>)
+    <span class="kw">public</span> <span class="tp">Mono</span>&lt;<span class="tp">ResponseEntity</span>&lt;<span class="tp">UserDto</span>&gt;&gt; <span class="fn">get</span>(<span class="an">@PathVariable</span> <span class="tp">Long</span> id) {
+        <span class="kw">return</span> userService.<span class="fn">findById</span>(id)
+            .<span class="fn">map</span>(<span class="tp">ResponseEntity</span>::<span class="fn">ok</span>)
+            .<span class="fn">defaultIfEmpty</span>(<span class="tp">ResponseEntity</span>.<span class="fn">notFound</span>().<span class="fn">build</span>());
+    }
+
+    <span class="an">@GetMapping</span>
+    <span class="kw">public</span> <span class="tp">Flux</span>&lt;<span class="tp">UserDto</span>&gt; <span class="fn">list</span>() {
+        <span class="kw">return</span> userService.<span class="fn">findAll</span>();  <span class="cm">// items stream as they arrive</span>
+    }
+
+    <span class="an">@PostMapping</span>
+    <span class="an">@ResponseStatus</span>(<span class="tp">HttpStatus</span>.<span class="cl">CREATED</span>)
+    <span class="kw">public</span> <span class="tp">Mono</span>&lt;<span class="tp">UserDto</span>&gt; <span class="fn">create</span>(<span class="an">@Valid</span> <span class="an">@RequestBody</span> <span class="tp">Mono</span>&lt;<span class="tp">CreateReq</span>&gt; req) {
+        <span class="kw">return</span> req.<span class="fn">flatMap</span>(userService::create);
+    }
+
+    <span class="cm">// ── SSE: stream events to browser ────────────────</span>
+    <span class="an">@GetMapping</span>(value = <span class="st2">"/events"</span>, produces = <span class="tp">MediaType</span>.<span class="cl">TEXT_EVENT_STREAM_VALUE</span>)
+    <span class="kw">public</span> <span class="tp">Flux</span>&lt;<span class="tp">ServerSentEvent</span>&lt;<span class="tp">String</span>&gt;&gt; <span class="fn">stream</span>() {
+        <span class="kw">return</span> <span class="tp">Flux</span>.<span class="fn">interval</span>(<span class="tp">Duration</span>.<span class="fn">ofSeconds</span>(<span class="nb2">1</span>))
+            .<span class="fn">map</span>(i -> <span class="tp">ServerSentEvent</span>.&lt;<span class="tp">String</span>&gt;<span class="fn">builder</span>()
+                .<span class="fn">id</span>(<span class="tp">String</span>.<span class="fn">valueOf</span>(i))
+                .<span class="fn">event</span>(<span class="st2">"tick"</span>)
+                .<span class="fn">data</span>(<span class="st2">"ping at "</span> + <span class="tp">Instant</span>.<span class="fn">now</span>())
+                .<span class="fn">build</span>());
+    }
+}
+
+<span class="cm">// ── WebClient ─────────────────────────────────────</span>
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">WeatherService</span> {
+    <span class="kw">private final</span> <span class="tp">WebClient</span> client = <span class="tp">WebClient</span>.<span class="fn">builder</span>()
+        .<span class="fn">baseUrl</span>(<span class="st2">"https://api.weather.com"</span>)
+        .<span class="fn">defaultHeader</span>(<span class="st2">"Accept"</span>, <span class="st2">"application/json"</span>)
+        .<span class="fn">build</span>();
+
+    <span class="kw">public</span> <span class="tp">Mono</span>&lt;<span class="tp">WeatherDto</span>&gt; <span class="fn">get</span>(<span class="tp">String</span> city) {
+        <span class="kw">return</span> client.<span class="fn">get</span>()
+            .<span class="fn">uri</span>(<span class="st2">"/weather/{city}"</span>, city)
+            .<span class="fn">retrieve</span>()
+            .<span class="fn">onStatus</span>(<span class="tp">HttpStatus</span>::<span class="fn">is4xxClientError</span>,
+                r -> <span class="tp">Mono</span>.<span class="fn">error</span>(<span class="kw">new</span> <span class="tp">NotFoundException</span>(city)))
+            .<span class="fn">bodyToMono</span>(<span class="tp">WeatherDto</span>.<span class="kw">class</span>)
+            .<span class="fn">timeout</span>(<span class="tp">Duration</span>.<span class="fn">ofSeconds</span>(<span class="nb2">5</span>))
+            .<span class="fn">retryWhen</span>(<span class="tp">Retry</span>.<span class="fn">backoff</span>(<span class="nb2">3</span>, <span class="tp">Duration</span>.<span class="fn">ofMillis</span>(<span class="nb2">500</span>)));
+    }
+
+    <span class="cm">// Parallel calls with zip</span>
+    <span class="kw">public</span> <span class="tp">Mono</span>&lt;<span class="tp">Dashboard</span>&gt; <span class="fn">getDashboard</span>(<span class="tp">String</span> userId) {
+        <span class="kw">return</span> <span class="tp">Mono</span>.<span class="fn">zip</span>(<span class="fn">getProfile</span>(userId), <span class="fn">getOrders</span>(userId))
+                  .<span class="fn">map</span>(t -> <span class="kw">new</span> <span class="tp">Dashboard</span>(t.<span class="fn">getT1</span>(), t.<span class="fn">getT2</span>()));
+    }
+}</pre>
+      </div>
+    </div>
+    <div class="panel" id="t5q">
+      <div class="st">◆ Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">Why is RestTemplate deprecated? What should you use instead?</div><div class="iqtgl">▾</div></div><div class="iqb">Spring deprecated RestTemplate in Spring 5 because it's blocking and not reactive-friendly. Spring recommends <strong>WebClient</strong> for all new code — it supports both sync and async modes, has a fluent API, better error handling, built-in retry/timeout/filter support, and works in both WebFlux and Servlet apps.<br><br>For synchronous calls in non-reactive code: call <code>.block()</code> on the Mono. In Spring Boot 3.2+, <strong>RestClient</strong> was introduced — a synchronous HTTP client with WebClient's fluent API (no reactive, no block()). Choose: <code>RestClient</code> (sync apps, no reactive), <code>WebClient</code> (reactive or async-in-sync).<div class="trick"><strong>⚡ If you're using RestTemplate in Spring Boot 3.x, migrate to RestClient (sync) or WebClient (async/reactive).</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">Why can't you use JPA/Hibernate with Spring WebFlux directly?</div><div class="iqtgl">▾</div></div><div class="iqb">JPA/Hibernate use JDBC which is a <strong>blocking API</strong>. Calling <code>entityManager.find()</code> blocks the calling thread until the DB responds. In WebFlux, the server runs on Netty's event loop — blocking this thread stops all concurrent requests on that event loop thread, completely defeating the purpose of reactive.<br><br>Solutions: <strong>1. R2DBC</strong> (Reactive Relational Database Connectivity) — non-blocking DB access, Spring Data R2DBC provides reactive repositories. <strong>2. Offload to scheduler</strong>: <code>Mono.fromCallable(() → jpaCall()).subscribeOn(Schedulers.boundedElastic())</code> — runs blocking code on a separate thread pool, doesn't block the event loop. Option 1 is preferred for new reactive projects.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">How do you test a WebFlux controller?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>WebTestClient</strong>: the reactive equivalent of MockMvc. Use with <code>@WebFluxTest(UserController.class)</code>:<br><code>webTestClient.get().uri("/users/1").exchange().expectStatus().isOk().expectBody(UserDto.class).returnResult()</code><br><br><strong>StepVerifier</strong>: test Mono/Flux pipelines directly without HTTP.<br><code>StepVerifier.create(userService.findById(1L)).expectNextMatches(u → u.getName().equals("Alice")).verifyComplete()</code><br><br><strong>StepVerifier.withVirtualTime()</strong>: test time-based operators (Flux.interval, delay) without actually waiting — virtual time advances instantly.<div class="info"><strong>💡 StepVerifier.withVirtualTime is essential for testing Flux.interval() or any timed operations without slow tests.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tsr">Senior</span><div class="iqqt">What is the difference between annotation-based controllers and functional routing in WebFlux?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>Annotation-based</strong> (@RestController, @GetMapping): familiar to MVC developers, Spring scans and registers handlers automatically, good IDE support, easier onboarding.<br><br><strong>Functional routing</strong> (RouterFunction + HandlerFunction): routes and handlers are plain Java — no reflection, explicit wiring, easier to compose programmatically, simpler unit testing (no MockMvc/WebTestClient needed for handler logic), immutable and thread-safe by design.<br><br>Both can coexist in the same app. Most teams use annotation-based for familiarity. Functional routing is preferred when you want explicit, testable handler logic without Spring's annotation processing overhead.</div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="t5m">
+      <div class="mtip"><div class="mico">💡</div><div><strong>WebFlux = Spring MVC but returns Mono/Flux instead of T.</strong><br>The framework subscribes and writes the HTTP response automatically.<br><br><strong>WebClient = non-blocking RestTemplate.</strong> Use in all new code — sync, async, and reactive apps.<br><br><strong>JPA in WebFlux = blocks event loop = bad.</strong> Use R2DBC for reactive DB, or wrap JPA in <code>Schedulers.boundedElastic()</code>.<br><br><strong>SSE</strong> = return Flux with content-type <code>text/event-stream</code>. Browser gets a real-time stream without polling.</div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+<div class="footer">PHASE 6 · BATCH PROCESSING & REACTIVE PROGRAMMING · TOPICS 31–36 · SENIOR ENGINEER INTERVIEW PREP</div>
+
+<script>
+let cur=0;
+const TOTAL=6;
+function go(i){
+  for(let j=0;j<TOTAL;j++){
+    document.getElementById('c'+j).classList.toggle('on',j===i);
+    const b=document.getElementById('nb'+j);
+    b.className='nb'+(j===i?' on':'');
+    const ps=document.getElementById('ps'+j);
+    ps.className='ps'+(j<i?' done':(j===i?' active':''));
+  }
+  cur=i;
+  window.scrollTo({top:document.querySelector('.nav').offsetTop,behavior:'smooth'});
+}
+function tab(ti,panel){
+  const tpMap={'c':0,'x':1,'q':2,'m':3};
+  const tabs=document.querySelectorAll('#tb'+ti+' .stab');
+  tabs.forEach((t,i)=>t.classList.toggle('on',i===tpMap[panel]));
+  const card=document.getElementById('c'+ti);
+  card.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById('t'+ti+panel).classList.add('on');
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'&&cur<TOTAL-1)go(cur+1);
+  if(e.key==='ArrowLeft'&&cur>0)go(cur-1);
+});
+</script>
+</body>
+</html>
