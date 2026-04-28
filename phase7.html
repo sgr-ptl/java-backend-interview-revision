@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Phase 7 — Testing & Events</title>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,400;0,600;0,700;0,900;1,400;1,600&family=Nunito:wght@300;400;500;600;700;800;900&family=Inconsolata:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#edf2f0;--surf:#ffffff;--surf2:#f4f8f6;--surf3:#e8eeeb;
+  --bdr:#ccd8d0;--bdr2:#a8bcb2;
+  --ink:#0e1c16;--ink2:#1e3028;--muted:#527060;--muted2:#88a898;
+  --tl:#0b6b54;--tl-l:#e6f7f2;--tl-b:#60c8a8;--tl-d:#084838;
+  --lm:#1a7a40;--lm-l:#e8f8ee;--lm-b:#70d090;
+  --amber:#7a5800;--amber-l:#fdf6e0;--amber-b:#d4b040;
+  --rose:#a01830;--rose-l:#fdf0f2;--rose-b:#e89098;
+  --sl:#1a3a78;--sl-l:#eaf0fb;--sl-b:#88b0e0;
+  --pl:#601878;--pl-l:#f5eafb;--pl-b:#c088d8;
+  --code:#090e0c;--csurf:#111a16;
+  --kw:#60d8a8;--tp:#70d880;--fn:#68c8f0;--st2:#f0a870;
+  --cm2:#507060;--nb2:#d0a850;--an:#c090d8;--cl:#70d880;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--ink);font-family:'Nunito',sans-serif;min-height:100vh;}
+
+/* HEADER */
+.hdr{background:var(--ink2);overflow:hidden;position:relative;}
+.hdr-top{height:5px;background:linear-gradient(90deg,var(--tl) 0%,var(--tl-b) 40%,var(--lm-b) 80%,var(--lm) 100%);}
+.hdr-inner{padding:42px 56px 38px;position:relative;z-index:2;}
+.hdr-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(11,107,84,0.15) 0%,transparent 60%);pointer-events:none;}
+.hdr-glyph{position:absolute;right:50px;top:50%;transform:translateY(-50%);font-family:'Bitter',serif;font-style:italic;font-size:200px;font-weight:900;color:rgba(255,255,255,0.025);line-height:1;pointer-events:none;user-select:none;}
+.eyebrow{font-family:'Inconsolata',monospace;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--tl-b);margin-bottom:12px;display:flex;align-items:center;gap:9px;}
+.eyebrow::before{content:'';width:20px;height:2px;background:var(--tl-b);}
+h1{font-family:'Bitter',serif;font-size:clamp(28px,4.5vw,50px);font-weight:900;line-height:1.06;color:#fff;}
+h1 em{font-style:italic;color:var(--tl-b);}
+.sub{margin-top:9px;font-family:'Inconsolata',monospace;font-size:11px;color:rgba(255,255,255,0.3);}
+.meta{display:flex;gap:20px;margin-top:16px;flex-wrap:wrap;}
+.mc{font-family:'Inconsolata',monospace;font-size:10px;color:rgba(255,255,255,0.35);}
+.mc b{color:rgba(255,255,255,0.65);}
+
+/* NAV */
+.nav{background:var(--surf);border-bottom:2px solid var(--bdr);padding:0 56px;display:flex;overflow-x:auto;scrollbar-width:none;}
+.nav::-webkit-scrollbar{display:none;}
+.nb{flex-shrink:0;padding:13px 18px;border:none;border-bottom:3px solid transparent;background:transparent;color:var(--muted);font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;cursor:pointer;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:7px;letter-spacing:0.2px;}
+.nb:hover{color:var(--ink2);background:var(--surf2);}
+.nb.on{color:var(--tl);border-bottom-color:var(--tl);}
+.nn{font-family:'Inconsolata',monospace;font-size:9px;padding:2px 5px;border-radius:2px;background:var(--surf3);color:var(--muted);}
+.nb.on .nn{background:var(--tl-l);color:var(--tl);}
+
+/* PROGRESS */
+.prog{background:var(--surf);border-bottom:1px solid var(--bdr);padding:10px 56px;display:flex;align-items:center;gap:5px;}
+.plbl{font-family:'Inconsolata',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-right:8px;white-space:nowrap;}
+.ps{flex:1;height:3px;border-radius:2px;background:var(--bdr);cursor:pointer;transition:background .25s;}
+.ps.done{background:rgba(11,107,84,0.35);}
+.ps.active{background:var(--tl);}
+.kbh{text-align:center;padding:6px;font-family:'Inconsolata',monospace;font-size:10px;color:var(--muted2);background:var(--surf2);border-bottom:1px solid var(--bdr);}
+kbd{background:var(--bdr);padding:1px 5px;border-radius:2px;font-size:10px;}
+
+/* MAIN */
+.main{max-width:1080px;margin:0 auto;padding:30px 56px 64px;}
+.card{display:none;animation:fi .28s ease;}
+.card.on{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* CARD */
+.band{background:var(--surf);border:1px solid var(--bdr);border-bottom:none;border-radius:12px 12px 0 0;padding:24px 32px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;position:relative;overflow:hidden;}
+.bar{position:absolute;top:0;left:0;right:0;height:4px;}
+.bl2{display:flex;align-items:flex-start;gap:14px;}
+.tn{font-family:'Bitter',serif;font-style:italic;font-size:50px;font-weight:900;line-height:1;flex-shrink:0;width:58px;text-align:right;color:var(--bdr);margin-top:1px;}
+.ttag{display:inline-flex;font-family:'Inconsolata',monospace;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:3px 9px;border-radius:2px;margin-bottom:7px;}
+.btitle{font-family:'Bitter',serif;font-size:22px;font-weight:700;color:var(--ink);line-height:1.2;}
+.bsub{margin-top:4px;font-size:13px;color:var(--muted);line-height:1.55;}
+.pbadge{flex-shrink:0;font-family:'Inconsolata',monospace;font-size:9px;font-weight:700;letter-spacing:1px;padding:4px 11px;border-radius:20px;margin-top:4px;text-transform:uppercase;}
+.content{background:var(--surf);border:1px solid var(--bdr);border-top:none;border-radius:0 0 12px 12px;padding:0 32px 32px;box-shadow:0 3px 14px rgba(0,0,0,0.05);}
+
+/* TABS */
+.stabs{display:flex;border-bottom:1px solid var(--bdr);margin:0 -32px 24px;padding:0 32px;overflow-x:auto;scrollbar-width:none;}
+.stabs::-webkit-scrollbar{display:none;}
+.stab{flex-shrink:0;padding:11px 14px;font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;font-family:'Inconsolata',monospace;letter-spacing:.5px;text-transform:uppercase;display:flex;align-items:center;gap:5px;}
+.stab:hover{color:var(--ink2);}
+.stab.on{color:var(--tl);border-bottom-color:var(--tl);}
+.panel{display:none;}.panel.on{display:block;}
+
+/* SECTION TITLE */
+.st{font-family:'Inconsolata',monospace;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding-bottom:7px;border-bottom:1px solid var(--bdr);}
+
+/* SIMPLE BOX */
+.sbox{background:var(--tl-l);border:1px solid var(--tl-b);border-radius:8px;padding:13px 16px;margin-bottom:16px;font-size:13px;line-height:1.72;display:flex;gap:11px;}
+.sico{font-size:17px;flex-shrink:0;}
+.stxt strong{color:var(--ink);}
+
+/* KEY POINTS */
+.kps{display:flex;flex-direction:column;gap:9px;}
+.kp{display:flex;gap:12px;padding:12px 15px;border-radius:8px;border:1px solid var(--bdr);background:var(--surf2);font-size:13px;line-height:1.68;transition:border-color .2s;}
+.kp:hover{border-color:var(--bdr2);}
+.ki{font-size:15px;flex-shrink:0;margin-top:2px;}
+.kt{flex:1;}
+.kt strong{color:var(--ink);}
+.kt code{background:var(--tl-l);border:1px solid var(--tl-b);color:var(--tl);padding:1px 5px;border-radius:3px;font-family:'Inconsolata',monospace;font-size:11px;}
+.go{color:var(--tl);font-weight:700;}.lm{color:var(--lm);font-weight:700;}.am{color:var(--amber);font-weight:700;}.re{color:var(--rose);font-weight:700;}.bl{color:var(--sl);font-weight:700;}.pl{color:var(--pl);font-weight:700;}
+
+/* CODE */
+.cblock{background:var(--code);border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);}
+.chdr{display:flex;align-items:center;justify-content:space-between;padding:9px 15px;background:var(--csurf);border-bottom:1px solid rgba(255,255,255,0.07);}
+.cdots{display:flex;gap:5px;}
+.dot{width:10px;height:10px;border-radius:50%;}
+.dr{background:#ff5f57;}.dy{background:#febc2e;}.dg{background:#28c840;}
+.clang{font-family:'Inconsolata',monospace;font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,0.2);text-transform:uppercase;}
+pre{padding:20px;overflow-x:auto;font-family:'Inconsolata',monospace;font-size:12px;line-height:1.8;color:#90b0a0;}
+.kw{color:var(--kw);}.tp{color:var(--tp);}.fn{color:var(--fn);}.st3{color:var(--st2);}.cm2{color:var(--cm2);font-style:italic;}.nb3{color:var(--nb2);}.an{color:var(--an);}.cl{color:var(--cl);}
+
+/* IQ */
+.iqs{display:flex;flex-direction:column;gap:9px;}
+.iq{border:1px solid var(--bdr);border-radius:8px;overflow:hidden;transition:border-color .2s,box-shadow .2s;}
+.iq:hover{border-color:var(--bdr2);box-shadow:0 2px 10px rgba(0,0,0,0.05);}
+.iqh{padding:12px 15px;cursor:pointer;display:flex;align-items:flex-start;gap:10px;background:var(--surf2);user-select:none;}
+.iqtag{font-family:'Inconsolata',monospace;font-size:9px;font-weight:700;letter-spacing:1px;padding:3px 7px;border-radius:2px;white-space:nowrap;flex-shrink:0;margin-top:2px;text-transform:uppercase;}
+.tm{background:var(--rose-l);color:var(--rose);border:1px solid var(--rose-b);}
+.tt{background:var(--amber-l);color:var(--amber);border:1px solid var(--amber-b);}
+.tc{background:var(--sl-l);color:var(--sl);border:1px solid var(--sl-b);}
+.tsr{background:var(--pl-l);color:var(--pl);border:1px solid var(--pl-b);}
+.tco{background:var(--tl-l);color:var(--tl-d);border:1px solid var(--tl-b);}
+.iqqt{font-size:13px;font-weight:700;color:var(--ink);flex:1;line-height:1.5;}
+.iqtgl{color:var(--muted);font-size:14px;flex-shrink:0;margin-top:3px;transition:transform .25s;}
+.iq.open .iqtgl{transform:rotate(180deg);}
+.iqb{display:none;padding:15px;font-size:13px;line-height:1.78;color:var(--ink2);border-top:1px solid var(--bdr);background:#fff;}
+.iq.open .iqb{display:block;}
+.iqb strong{color:var(--ink);}
+.iqb code{background:var(--tl-l);border:1px solid var(--tl-b);color:var(--tl);padding:1px 5px;border-radius:3px;font-family:'Inconsolata',monospace;font-size:11px;}
+.trick{margin-top:10px;padding:10px 13px;background:var(--amber-l);border-left:3px solid var(--amber);border-radius:0 6px 6px 0;font-size:12px;color:var(--amber);}
+.trick strong{color:var(--amber);}
+.warn{margin-top:10px;padding:10px 13px;background:var(--rose-l);border-left:3px solid var(--rose);border-radius:0 6px 6px 0;font-size:12px;color:var(--rose);}
+.info{margin-top:10px;padding:10px 13px;background:var(--sl-l);border-left:3px solid var(--sl);border-radius:0 6px 6px 0;font-size:12px;color:var(--sl);}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;border-radius:8px;overflow:hidden;border:1px solid var(--bdr);}
+.tbl th{background:var(--tl);color:rgba(255,255,255,0.92);padding:9px 13px;text-align:left;font-family:'Inconsolata',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;font-weight:700;}
+.tbl td{padding:9px 13px;border-bottom:1px solid rgba(204,216,208,.5);color:var(--ink2);vertical-align:top;line-height:1.5;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--surf2);}
+.tbl td code{background:var(--tl-l);color:var(--tl);padding:1px 5px;border-radius:3px;font-family:'Inconsolata',monospace;font-size:10.5px;border:1px solid var(--tl-b);}
+
+/* FLOW */
+.flow{background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;padding:15px 18px;overflow-x:auto;margin-bottom:14px;}
+.fr{display:flex;align-items:center;flex-wrap:nowrap;gap:0;}
+.fn2{flex-shrink:0;background:var(--surf);border:1.5px solid var(--bdr2);border-radius:6px;padding:7px 12px;font-family:'Inconsolata',monospace;font-size:10px;font-weight:600;color:var(--ink2);white-space:nowrap;text-align:center;}
+.fn-tl{background:var(--tl-l);border-color:var(--tl-b);color:var(--tl);}
+.fn-am{background:var(--amber-l);border-color:var(--amber-b);color:var(--amber);}
+.fn-lm{background:var(--lm-l);border-color:var(--lm-b);color:var(--lm);}
+.fn-ro{background:var(--rose-l);border-color:var(--rose-b);color:var(--rose);}
+.fa{color:var(--muted2);font-size:14px;padding:0 5px;flex-shrink:0;}
+.fsub{font-family:'Inconsolata',monospace;font-size:9px;color:var(--muted);margin-top:3px;text-align:center;}
+
+/* MEMORY */
+.mtip{background:linear-gradient(135deg,var(--tl-l),#fff);border:1px solid var(--tl-b);border-radius:10px;padding:16px 18px;font-size:13px;line-height:1.72;display:flex;gap:12px;}
+.mtip strong{color:var(--tl);}
+.mico{font-size:22px;flex-shrink:0;}
+
+.gap{margin-bottom:20px;}.gap-sm{margin-bottom:12px;}
+@media(max-width:640px){.main,.nav,.prog,.hdr-inner{padding-left:20px;padding-right:20px;}.band,.content{padding-left:20px;padding-right:20px;}.stabs{margin:0 -20px 20px;padding:0 20px;}}
+.footer{text-align:center;padding:24px;color:rgba(255,255,255,0.2);font-family:'Inconsolata',monospace;font-size:9px;letter-spacing:1px;background:var(--ink2);margin-top:48px;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-top"></div>
+  <div class="hdr-bg"></div>
+  <div class="hdr-inner">
+    <div class="hdr-glyph">Test</div>
+    <div class="eyebrow">Phase 7 · Testing &amp; Events</div>
+    <h1>Testing, Mocking<br>&amp; <em>Application Events</em></h1>
+    <div class="sub">// Topics 37–40 · Senior Engineer Level · @SpringBootTest · Mockito · MockMvc · @EventListener</div>
+    <div class="meta">
+      <div class="mc">Topics <b>4 (37–40)</b></div>
+      <div class="mc">Priority <b>🔴 High</b></div>
+      <div class="mc">Est. <b>1–2 days</b></div>
+    </div>
+  </div>
+</div>
+
+<div class="nav" id="tnav">
+  <button class="nb on" onclick="go(0)" id="nb0"><span class="nn">37</span>@SpringBootTest</button>
+  <button class="nb" onclick="go(1)" id="nb1"><span class="nn">38</span>Mocking with Mockito</button>
+  <button class="nb" onclick="go(2)" id="nb2"><span class="nn">39</span>MockMvc &amp; TestRestTemplate</button>
+  <button class="nb" onclick="go(3)" id="nb3"><span class="nn">40</span>Application Events</button>
+</div>
+<div class="prog">
+  <span class="plbl">Progress</span>
+  <div class="ps active" id="ps0" onclick="go(0)"></div>
+  <div class="ps" id="ps1" onclick="go(1)"></div>
+  <div class="ps" id="ps2" onclick="go(2)"></div>
+  <div class="ps" id="ps3" onclick="go(3)"></div>
+</div>
+<div class="kbh">Navigate: <kbd>←</kbd> <kbd>→</kbd> arrow keys · Click tabs to switch sections</div>
+
+<div class="main">
+
+<!-- ═══════════════════════════════════════
+     T37 — @SpringBootTest
+═══════════════════════════════════════ -->
+<div class="card on" id="c0">
+  <div class="band">
+    <div class="bar" style="background:linear-gradient(90deg,var(--tl),var(--tl-b))"></div>
+    <div class="bl2">
+      <div class="tn">37</div>
+      <div>
+        <div class="ttag" style="background:var(--tl-l);color:var(--tl);border:1px solid var(--tl-b)">Testing</div>
+        <div class="btitle">Unit &amp; Integration Testing with @SpringBootTest</div>
+        <div class="bsub">The testing pyramid — right annotation per layer means fast, focused, trustworthy tests</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--rose-l);color:var(--rose);border:1px solid var(--rose-b)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb0">
+      <div class="stab on" onclick="tab(0,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(0,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(0,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(0,'m')">🧠 Memory</div>
+    </div>
+
+    <!-- CONCEPTS -->
+    <div class="panel on" id="t0c">
+      <div class="sbox"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> The testing pyramid has 3 layers: Unit tests (bottom, many, fast) test one class in isolation with mocked dependencies. Integration tests (middle) test components working together with a real Spring context. End-to-end tests (top, few, slow) test the whole stack. Spring Boot provides specific annotations for each layer — pick the right one and your tests stay fast and focused.</div></div>
+      <div class="st">◆ Test Slice Annotations Cheatsheet</div>
+      <table class="tbl">
+        <tr><th>Annotation</th><th>Loads</th><th>Use For</th><th>Speed</th></tr>
+        <tr><td><em>No annotation</em></td><td>Nothing (pure JUnit)</td><td>Unit tests — plain Java logic, no Spring</td><td>⚡ Fastest</td></tr>
+        <tr><td><code>@WebMvcTest</code></td><td>MVC layer only</td><td>Controller logic, request mapping, validation</td><td>🚀 Fast</td></tr>
+        <tr><td><code>@WebFluxTest</code></td><td>WebFlux layer only</td><td>Reactive controllers</td><td>🚀 Fast</td></tr>
+        <tr><td><code>@DataJpaTest</code></td><td>JPA + in-memory DB</td><td>Repository queries, entity mapping</td><td>⚡ Fast</td></tr>
+        <tr><td><code>@JsonTest</code></td><td>Jackson only</td><td>JSON serialization/deserialization</td><td>⚡ Fastest</td></tr>
+        <tr><td><code>@SpringBootTest</code></td><td>Full context</td><td>Integration tests, full-stack tests</td><td>🐢 Slow</td></tr>
+      </table>
+      <div class="gap-sm"></div>
+      <div class="kps">
+        <div class="kp"><div class="ki">🔬</div><div class="kt"><strong class="go">@SpringBootTest</strong> — Loads the complete ApplicationContext (all beans). webEnvironment options: <code>MOCK</code> (no server, mocked servlet — default for MockMvc), <code>RANDOM_PORT</code> (real server on random port — use with TestRestTemplate), <code>DEFINED_PORT</code> (uses configured port), <code>NONE</code> (no web context, for batch/CLI tests). Slow to start but tests real wiring.</div></div>
+        <div class="kp"><div class="ki">🎯</div><div class="kt"><strong class="bl">@WebMvcTest(Controller.class)</strong> — Loads ONLY the web layer for specified controller(s): controllers, filters, interceptors, @ControllerAdvice, WebMvcConfigurer. Services and repositories are NOT loaded — must be <code>@MockBean</code>'d. Fast. Uses MockMvc for sending requests. Best for: testing request mapping, @Valid validation, response format, exception handling.</div></div>
+        <div class="kp"><div class="ki">🗄️</div><div class="kt"><strong class="am">@DataJpaTest</strong> — Loads JPA repositories, entity classes, data source. By default uses an in-memory H2 database and wraps each test in a transaction that auto-rolls back. Services are NOT loaded. Use <code>@AutoConfigureTestDatabase(replace=NONE)</code> to test against your real DB. Use <code>TestEntityManager</code> to set up test data.</div></div>
+        <div class="kp"><div class="ki">📦</div><div class="kt"><strong class="re">@MockBean vs @Mock</strong> — <code>@Mock</code> (Mockito): creates a mock outside Spring context. Fast, for unit tests with @ExtendWith(MockitoExtension.class). <code>@MockBean</code> (Spring): creates a mock AND registers it in the ApplicationContext, replacing any existing bean of that type. Use @MockBean in @WebMvcTest/@SpringBootTest. Adding @MockBean breaks context caching — use sparingly.</div></div>
+        <div class="kp"><div class="ki">⚡</div><div class="kt"><strong class="go">Context Caching</strong> — Spring caches the ApplicationContext between test classes with the same configuration. Loading a context takes 2–20 seconds — without caching, large suites would be impossibly slow. Tests with identical configuration share one context. Avoid <code>@DirtiesContext</code> (forces context reload per test class — very slow). Design stateless tests with @BeforeEach resets instead.</div></div>
+        <div class="kp"><div class="ki">🕵️</div><div class="kt"><strong class="pl">@SpyBean</strong> — Wraps the real Spring bean as a Mockito spy — calls the real implementation by default, allows stubbing specific methods. Use when you want to verify that a real bean method was called, or override just one method while keeping the rest real. Contrast with @MockBean (replaces entirely) and @Spy (Mockito only, not in Spring context).</div></div>
+      </div>
+    </div>
+
+    <!-- CODE -->
+    <div class="panel" id="t0x">
+      <div class="st">◆ Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">@WebMvcTest + @DataJpaTest + @SpringBootTest</div></div>
+<pre><span class="cm2">// ── @WebMvcTest — controller layer only ──────────</span>
+<span class="an">@WebMvcTest</span>(<span class="cl">UserController</span>.<span class="kw">class</span>)
+<span class="kw">class</span> <span class="cl">UserControllerTest</span> {
+
+    <span class="an">@Autowired</span> <span class="kw">private</span> <span class="tp">MockMvc</span> mockMvc;
+    <span class="an">@MockBean</span>  <span class="kw">private</span> <span class="tp">UserService</span> userService;   <span class="cm2">// mock the service</span>
+    <span class="an">@Autowired</span> <span class="kw">private</span> <span class="tp">ObjectMapper</span> mapper;
+
+    <span class="an">@Test</span>
+    <span class="kw">void</span> <span class="fn">getUser_found_returns200</span>() <span class="kw">throws</span> <span class="tp">Exception</span> {
+        <span class="tp">UserDto</span> dto = <span class="kw">new</span> <span class="tp">UserDto</span>(<span class="nb3">1L</span>, <span class="st3">"Alice"</span>, <span class="st3">"alice@x.com"</span>);
+        <span class="tp">Mockito</span>.<span class="fn">when</span>(userService.<span class="fn">findById</span>(<span class="nb3">1L</span>)).<span class="fn">thenReturn</span>(<span class="tp">Optional</span>.<span class="fn">of</span>(dto));
+
+        mockMvc.<span class="fn">perform</span>(<span class="fn">get</span>(<span class="st3">"/api/users/1"</span>)
+                .<span class="fn">accept</span>(<span class="tp">MediaType</span>.<span class="cl">APPLICATION_JSON</span>))
+            .<span class="fn">andExpect</span>(<span class="fn">status</span>().<span class="fn">isOk</span>())
+            .<span class="fn">andExpect</span>(<span class="fn">jsonPath</span>(<span class="st3">"$.name"</span>).<span class="fn">value</span>(<span class="st3">"Alice"</span>))
+            .<span class="fn">andExpect</span>(<span class="fn">jsonPath</span>(<span class="st3">"$.email"</span>).<span class="fn">value</span>(<span class="st3">"alice@x.com"</span>));
+    }
+
+    <span class="an">@Test</span>
+    <span class="kw">void</span> <span class="fn">getUser_notFound_returns404</span>() <span class="kw">throws</span> <span class="tp">Exception</span> {
+        <span class="tp">Mockito</span>.<span class="fn">when</span>(userService.<span class="fn">findById</span>(<span class="nb3">99L</span>)).<span class="fn">thenReturn</span>(<span class="tp">Optional</span>.<span class="fn">empty</span>());
+        mockMvc.<span class="fn">perform</span>(<span class="fn">get</span>(<span class="st3">"/api/users/99"</span>))
+            .<span class="fn">andExpect</span>(<span class="fn">status</span>().<span class="fn">isNotFound</span>());
+    }
+}
+
+<span class="cm2">// ── @DataJpaTest — repository only ───────────────</span>
+<span class="an">@DataJpaTest</span>
+<span class="kw">class</span> <span class="cl">UserRepositoryTest</span> {
+
+    <span class="an">@Autowired</span> <span class="kw">private</span> <span class="tp">UserRepository</span> repo;
+    <span class="an">@Autowired</span> <span class="kw">private</span> <span class="tp">TestEntityManager</span> em;  <span class="cm2">// JPA test helper</span>
+
+    <span class="an">@Test</span>
+    <span class="kw">void</span> <span class="fn">findByEmail_returnsUser</span>() {
+        em.<span class="fn">persistAndFlush</span>(<span class="kw">new</span> <span class="tp">User</span>(<span class="st3">"alice@x.com"</span>, <span class="st3">"Alice"</span>));
+
+        <span class="tp">Optional</span>&lt;<span class="tp">User</span>&gt; found = repo.<span class="fn">findByEmail</span>(<span class="st3">"alice@x.com"</span>);
+
+        <span class="fn">assertThat</span>(found).<span class="fn">isPresent</span>();
+        <span class="fn">assertThat</span>(found.<span class="fn">get</span>().<span class="fn">getName</span>()).<span class="fn">isEqualTo</span>(<span class="st3">"Alice"</span>);
+    }
+    <span class="cm2">// test data auto-rolled back after each test!</span>
+}
+
+<span class="cm2">// ── @SpringBootTest — full integration ───────────</span>
+<span class="an">@SpringBootTest</span>(webEnvironment = <span class="tp">SpringBootTest.WebEnvironment</span>.<span class="cl">RANDOM_PORT</span>)
+<span class="kw">class</span> <span class="cl">UserIntegrationTest</span> {
+
+    <span class="an">@Autowired</span> <span class="kw">private</span> <span class="tp">TestRestTemplate</span> restTemplate;
+    <span class="an">@LocalServerPort</span> <span class="kw">private int</span> port;
+
+    <span class="an">@Test</span>
+    <span class="kw">void</span> <span class="fn">createUser_returnsCreated</span>() {
+        <span class="tp">CreateUserRequest</span> req = <span class="kw">new</span> <span class="tp">CreateUserRequest</span>(<span class="st3">"Bob"</span>, <span class="st3">"bob@x.com"</span>);
+        <span class="tp">ResponseEntity</span>&lt;<span class="tp">UserDto</span>&gt; resp = restTemplate
+            .<span class="fn">postForEntity</span>(<span class="st3">"/api/users"</span>, req, <span class="tp">UserDto</span>.<span class="kw">class</span>);
+
+        <span class="fn">assertThat</span>(resp.<span class="fn">getStatusCode</span>()).<span class="fn">isEqualTo</span>(<span class="tp">HttpStatus</span>.<span class="cl">CREATED</span>);
+        <span class="fn">assertThat</span>(resp.<span class="fn">getBody</span>().<span class="fn">getName</span>()).<span class="fn">isEqualTo</span>(<span class="st3">"Bob"</span>);
+    }
+}
+
+<span class="cm2">// ── Use real DB with Testcontainers ───────────────</span>
+<span class="an">@DataJpaTest</span>
+<span class="an">@AutoConfigureTestDatabase</span>(replace = <span class="tp">Replace</span>.<span class="cl">NONE</span>)
+<span class="an">@Testcontainers</span>
+<span class="kw">class</span> <span class="cl">UserRepoRealDbTest</span> {
+    <span class="an">@Container</span>
+    <span class="kw">static</span> <span class="tp">PostgreSQLContainer</span>&lt;?&gt; pg = <span class="kw">new</span> <span class="tp">PostgreSQLContainer</span>&lt;&gt;(<span class="st3">"postgres:16"</span>);
+
+    <span class="an">@DynamicPropertySource</span>
+    <span class="kw">static void</span> <span class="fn">props</span>(<span class="tp">DynamicPropertyRegistry</span> r) {
+        r.<span class="fn">add</span>(<span class="st3">"spring.datasource.url"</span>,    pg::getJdbcUrl);
+        r.<span class="fn">add</span>(<span class="st3">"spring.datasource.username"</span>, pg::getUsername);
+        r.<span class="fn">add</span>(<span class="st3">"spring.datasource.password"</span>, pg::getPassword);
+    }
+}</pre>
+      </div>
+    </div>
+
+    <!-- Q&A -->
+    <div class="panel" id="t0q">
+      <div class="st">◆ Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is the difference between @SpringBootTest and @WebMvcTest?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>@SpringBootTest</strong>: loads the FULL application context — all beans (controllers, services, repos, security config, etc.). Slow startup (2–20s) but tests real integration. Use for: integration tests where multiple layers must work together, end-to-end HTTP tests with TestRestTemplate, testing cross-cutting concerns like security and transactions.<br><br><strong>@WebMvcTest</strong>: loads ONLY the web layer for a specific controller. No services, no repos. Faster (< 2s). All dependencies must be @MockBean'd. Use for: testing controller request mapping, @Valid validation, @ControllerAdvice error handling, response format — in isolation.<div class="trick"><strong>⚡ Prefer @WebMvcTest for controller tests — 10–50× faster than @SpringBootTest for the same coverage.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is Spring's test context caching and why does it matter for test speed?</div><div class="iqtgl">▾</div></div><div class="iqb">Spring caches the ApplicationContext keyed by its configuration (which @Configuration classes, profiles, properties, @MockBean definitions). Tests with identical config share one cached context — loading it once, reusing for all matching test classes.<br><br>Without caching: 200 test classes × 5-second startup = 1000 seconds just in startup. With caching: often 1–5 contexts total regardless of test count.<br><br>What breaks caching: <code>@DirtiesContext</code> (marks as dirty, forces reload), different <code>@MockBean</code> combinations per test class, different profiles, different properties. Solution: consolidate @MockBean usage, use shared base test classes, avoid @DirtiesContext.<div class="info"><strong>💡 Profile your test suite: if startup times dominate, you likely have too many unique ApplicationContext instances being created.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is the difference between @Mock, @MockBean, @Spy, and @SpyBean?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>@Mock</strong> (Mockito): creates a Mockito mock, no Spring context. Use in unit tests with @ExtendWith(MockitoExtension.class). All methods return null/empty by default.<br><br><strong>@MockBean</strong> (Spring): creates a Mockito mock AND replaces the bean of that type in the Spring ApplicationContext. Use in @WebMvcTest/@SpringBootTest when Spring context is active.<br><br><strong>@Spy</strong> (Mockito): wraps a real object. Calls real methods by default. Override specific methods. No Spring context.<br><br><strong>@SpyBean</strong> (Spring): wraps the real Spring bean as a spy. Real implementation runs unless stubbed. Use to verify real bean method calls without replacing the bean entirely.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">How do you test with a real PostgreSQL database instead of H2?</div><div class="iqtgl">▾</div></div><div class="iqb">Use <strong>Testcontainers</strong>: <code>@DataJpaTest + @AutoConfigureTestDatabase(replace=NONE) + @Testcontainers</code>. Declare a static <code>@Container PostgreSQLContainer&lt;?&gt;</code> — Testcontainers starts a real PostgreSQL Docker container. Use <code>@DynamicPropertySource</code> to inject the container's JDBC URL, username, and password into Spring's datasource config at runtime.<br><br>Benefits: tests against the real DB engine (catches H2 vs PostgreSQL SQL differences), no manual DB setup, container spins up/down automatically, shareable across test classes (static container).<div class="trick"><strong>⚡ H2 silently accepts some invalid SQL that PostgreSQL rejects. Use Testcontainers for anything with complex queries or DB-specific features.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tsr">Senior</span><div class="iqqt">How do you test a Spring Security-secured endpoint?</div><div class="iqtgl">▾</div></div><div class="iqb">Three approaches:<br><br><strong>1. @WithMockUser</strong> (Spring Security Test): inject a fake authenticated user into the SecurityContext for the test. <code>@WithMockUser(roles="ADMIN")</code>. Fast, no real auth. Use to test that security rules are correctly configured (right role = 200, wrong role = 403).<br><br><strong>2. @WithUserDetails(username)</strong>: loads a real <code>UserDetails</code> from your <code>UserDetailsService</code> mock. Tests that your role mapping from UserDetails to granted authorities works correctly.<br><br><strong>3. Full auth flow with TestRestTemplate</strong>: in @SpringBootTest, call the real login endpoint to get a JWT token, then include it in subsequent request headers. Tests the complete authentication pipeline end-to-end.</div></div></div>
+      </div>
+    </div>
+
+    <!-- MEMORY -->
+    <div class="panel" id="t0m">
+      <div class="st">◆ Memory Tip</div>
+      <div class="mtip"><div class="mico">💡</div><div><strong>Testing pyramid = right annotation per layer:</strong><br>• Service logic → no annotation + @ExtendWith(MockitoExtension.class)<br>• Controller behavior → <code>@WebMvcTest</code> + @MockBean services<br>• Repository queries → <code>@DataJpaTest</code> (H2 or Testcontainers)<br>• Full integration → <code>@SpringBootTest(RANDOM_PORT)</code> + TestRestTemplate<br><br><strong>Context caching mantra:</strong> "Same config = shared context." @MockBean differences create different contexts — consolidate them to keep your test suite fast.<br><br><strong>@MockBean = replaces bean. @SpyBean = wraps real bean.</strong></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     T38 — Mockito
+═══════════════════════════════════════ -->
+<div class="card" id="c1">
+  <div class="band">
+    <div class="bar" style="background:linear-gradient(90deg,var(--tl),var(--tl-b))"></div>
+    <div class="bl2">
+      <div class="tn">38</div>
+      <div>
+        <div class="ttag" style="background:var(--tl-l);color:var(--tl);border:1px solid var(--tl-b)">Testing</div>
+        <div class="btitle">Mocking with Mockito</div>
+        <div class="bsub">when() · verify() · ArgumentCaptor · Spy — isolating the class under test</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--rose-l);color:var(--rose);border:1px solid var(--rose-b)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb1">
+      <div class="stab on" onclick="tab(1,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(1,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(1,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(1,'m')">🧠 Memory</div>
+    </div>
+
+    <div class="panel on" id="t1c">
+      <div class="sbox"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> A mock is a fake replacement for a dependency. When testing OrderService you don't want to actually hit a real database or charge a real payment — you tell the mock: "when called with X, return Y." This lets you test just your class's logic in isolation, fast and without side effects.</div></div>
+      <div class="kps">
+        <div class="kp"><div class="ki">🎭</div><div class="kt"><strong class="go">Mock vs Stub vs Spy</strong> — <strong>Mock</strong>: fake object, all methods return empty/null by default, records all calls for verification. <strong>Stub</strong>: pre-programmed with <code>when().thenReturn()</code> to return specific values. Mockito mocks are both mock + stub. <strong>Spy</strong>: wraps a real object — real methods run by default, but you can stub specific ones and verify calls.</div></div>
+        <div class="kp"><div class="ki">📋</div><div class="kt"><strong class="bl">Stubbing with when()</strong> — <code>when(mock.method(arg)).thenReturn(val)</code>: return a value. <code>thenThrow(ex)</code>: throw exception. <code>thenAnswer(inv → ...)</code>: compute dynamically. <code>thenReturn(first).thenReturn(second)</code>: different values on consecutive calls. For void methods or spies: <code>doReturn(val).when(spy).method()</code> or <code>doThrow(ex).when(mock).voidMethod()</code>.</div></div>
+        <div class="kp"><div class="ki">✅</div><div class="kt"><strong class="am">Verification with verify()</strong> — <code>verify(mock).method(arg)</code>: called exactly once. <code>verify(mock, times(3)).method()</code>: exactly 3 times. <code>verify(mock, never()).method()</code>: never called. <code>verify(mock, atLeast(2)).method()</code>. Use <code>InOrder</code> for ordered verification. Don't over-verify — only check meaningful interactions, not every call.</div></div>
+        <div class="kp"><div class="ki">🎣</div><div class="kt"><strong class="re">ArgumentCaptor</strong> — Captures the actual argument passed to a mock method for assertion afterward. Use when: the argument is constructed internally (you can't pass it in yourself). Pattern: <code>ArgumentCaptor&lt;Order&gt; captor = ArgumentCaptor.forClass(Order.class)</code> → <code>verify(repo).save(captor.capture())</code> → <code>assertThat(captor.getValue().getStatus()).isEqualTo(PENDING)</code>.</div></div>
+        <div class="kp"><div class="ki">🎯</div><div class="kt"><strong class="go">Argument Matchers</strong> — <code>any()</code>, <code>any(User.class)</code>, <code>anyString()</code>, <code>anyLong()</code>, <code>eq("exact")</code>, <code>argThat(pred)</code>. Rule: if you use any matcher, ALL arguments in the same method call must use matchers — can't mix matchers and exact values. Use <code>eq()</code> to specify exact values alongside matchers.</div></div>
+        <div class="kp"><div class="ki">⚠️</div><div class="kt"><strong class="re">Don't Mock What You Don't Own</strong> — Avoid mocking third-party classes (JPA, HttpClient) — you likely misunderstand their contract. Wrap third-party code in your own interface and mock THAT. Also avoid mocking: value objects (use real instances), simple utilities. Over-mocking = brittle tests that break on refactoring, not behavior changes.</div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="t1x">
+      <div class="st">◆ Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Mockito — when() + verify() + ArgumentCaptor + Spy</div></div>
+<pre><span class="an">@ExtendWith</span>(<span class="cl">MockitoExtension</span>.<span class="kw">class</span>)
+<span class="kw">class</span> <span class="cl">OrderServiceTest</span> {
+
+    <span class="an">@Mock</span>  <span class="kw">private</span> <span class="tp">OrderRepository</span> orderRepo;
+    <span class="an">@Mock</span>  <span class="kw">private</span> <span class="tp">PaymentService</span>  paymentSvc;
+    <span class="an">@InjectMocks</span> <span class="kw">private</span> <span class="tp">OrderService</span> orderService;
+
+    <span class="an">@Test</span>
+    <span class="kw">void</span> <span class="fn">placeOrder_success</span>() {
+        <span class="cm2">// Arrange</span>
+        <span class="tp">Order</span> saved = <span class="kw">new</span> <span class="tp">Order</span>(<span class="nb3">1L</span>, <span class="tp">BigDecimal</span>.<span class="fn">TEN</span>);
+        <span class="tp">Mockito</span>.<span class="fn">when</span>(orderRepo.<span class="fn">save</span>(<span class="fn">any</span>(<span class="tp">Order</span>.<span class="kw">class</span>))).<span class="fn">thenReturn</span>(saved);
+        <span class="tp">Mockito</span>.<span class="fn">when</span>(paymentSvc.<span class="fn">charge</span>(<span class="fn">eq</span>(<span class="nb3">1L</span>), <span class="fn">any</span>())).<span class="fn">thenReturn</span>(<span class="kw">true</span>);
+
+        <span class="cm2">// Act</span>
+        <span class="tp">Order</span> result = orderService.<span class="fn">placeOrder</span>(<span class="kw">new</span> <span class="tp">OrderRequest</span>(<span class="nb3">1L</span>, <span class="tp">BigDecimal</span>.<span class="fn">TEN</span>));
+
+        <span class="cm2">// Assert + Verify</span>
+        <span class="fn">assertThat</span>(result.<span class="fn">getId</span>()).<span class="fn">isEqualTo</span>(<span class="nb3">1L</span>);
+        <span class="tp">Mockito</span>.<span class="fn">verify</span>(orderRepo, <span class="fn">times</span>(<span class="nb3">1</span>)).<span class="fn">save</span>(<span class="fn">any</span>());
+        <span class="tp">Mockito</span>.<span class="fn">verify</span>(paymentSvc).<span class="fn">charge</span>(<span class="fn">eq</span>(<span class="nb3">1L</span>), <span class="fn">any</span>());
+    }
+
+    <span class="an">@Test</span>
+    <span class="kw">void</span> <span class="fn">placeOrder_paymentFails_throws</span>() {
+        <span class="tp">Mockito</span>.<span class="fn">when</span>(paymentSvc.<span class="fn">charge</span>(<span class="fn">anyLong</span>(), <span class="fn">any</span>()))
+               .<span class="fn">thenThrow</span>(<span class="kw">new</span> <span class="tp">PaymentException</span>(<span class="st3">"Declined"</span>));
+
+        <span class="fn">assertThatThrownBy</span>(() -> orderService.<span class="fn">placeOrder</span>(req))
+            .<span class="fn">isInstanceOf</span>(<span class="tp">PaymentException</span>.<span class="kw">class</span>)
+            .<span class="fn">hasMessageContaining</span>(<span class="st3">"Declined"</span>);
+
+        <span class="tp">Mockito</span>.<span class="fn">verify</span>(orderRepo, <span class="fn">never</span>()).<span class="fn">save</span>(<span class="fn">any</span>()); <span class="cm2">// must NOT save</span>
+    }
+
+    <span class="an">@Test</span>
+    <span class="kw">void</span> <span class="fn">placeOrder_capturesSavedEntity</span>() {
+        <span class="cm2">// ArgumentCaptor: capture what was passed to mock</span>
+        <span class="tp">ArgumentCaptor</span>&lt;<span class="tp">Order</span>&gt; captor = <span class="tp">ArgumentCaptor</span>.<span class="fn">forClass</span>(<span class="tp">Order</span>.<span class="kw">class</span>);
+
+        orderService.<span class="fn">placeOrder</span>(<span class="kw">new</span> <span class="tp">OrderRequest</span>(<span class="nb3">1L</span>, <span class="tp">BigDecimal</span>.<span class="fn">TEN</span>));
+
+        <span class="tp">Mockito</span>.<span class="fn">verify</span>(orderRepo).<span class="fn">save</span>(captor.<span class="fn">capture</span>());
+        <span class="tp">Order</span> captured = captor.<span class="fn">getValue</span>();
+        <span class="fn">assertThat</span>(captured.<span class="fn">getStatus</span>()).<span class="fn">isEqualTo</span>(<span class="tp">OrderStatus</span>.<span class="cl">PENDING</span>);
+        <span class="fn">assertThat</span>(captured.<span class="fn">getAmount</span>()).<span class="fn">isEqualByComparingTo</span>(<span class="tp">BigDecimal</span>.<span class="fn">TEN</span>);
+    }
+
+    <span class="cm2">// ── Spy: real object, override one method ────────</span>
+    <span class="an">@Spy</span>
+    <span class="kw">private</span> <span class="tp">PriceCalculator</span> calc = <span class="kw">new</span> <span class="tp">PriceCalculator</span>();
+
+    <span class="an">@Test</span>
+    <span class="kw">void</span> <span class="fn">spy_overridesOneMethod</span>() {
+        <span class="cm2">// Override only formatPrice — real calcTotal still runs</span>
+        <span class="tp">Mockito</span>.<span class="fn">doReturn</span>(<span class="st3">"£99"</span>).<span class="fn">when</span>(calc).<span class="fn">formatPrice</span>(<span class="fn">any</span>());
+
+        <span class="tp">BigDecimal</span> total = calc.<span class="fn">calcTotal</span>(items); <span class="cm2">// real method!</span>
+        <span class="tp">String</span> fmt   = calc.<span class="fn">formatPrice</span>(total);  <span class="cm2">// stubbed</span>
+        <span class="fn">assertThat</span>(fmt).<span class="fn">isEqualTo</span>(<span class="st3">"£99"</span>);
+    }
+
+    <span class="cm2">// ── Consecutive return values ─────────────────────</span>
+    <span class="tp">Mockito</span>.<span class="fn">when</span>(service.<span class="fn">findStatus</span>(<span class="fn">anyLong</span>()))
+           .<span class="fn">thenReturn</span>(<span class="st3">"PROCESSING"</span>)  <span class="cm2">// 1st call</span>
+           .<span class="fn">thenReturn</span>(<span class="st3">"PROCESSING"</span>)  <span class="cm2">// 2nd call</span>
+           .<span class="fn">thenReturn</span>(<span class="st3">"COMPLETED"</span>);  <span class="cm2">// 3rd+ calls</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="panel" id="t1q">
+      <div class="st">◆ Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is the difference between @InjectMocks and @Autowired?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>@InjectMocks</strong> (Mockito): creates an instance of the class under test and injects all <code>@Mock</code>/<code>@Spy</code> fields from the test class using constructor, setter, or field injection. NO Spring context needed — pure Mockito. Fast. The class under test is a real instance, not a mock.<br><br><strong>@Autowired</strong> (Spring): injects the real Spring bean from the ApplicationContext. Requires Spring context (i.e., inside @SpringBootTest, @WebMvcTest etc.). Slow (context startup).<br><br><strong>Rule</strong>: unit tests → @InjectMocks + @Mock. Integration tests with Spring → @Autowired.<div class="trick"><strong>⚡ @InjectMocks does NOT understand @Qualifier — multiple deps of the same type may inject wrong bean silently. Prefer constructor injection in production code to avoid this.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">When should you use ArgumentCaptor vs argThat() matchers?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>ArgumentCaptor</strong>: capture the argument AFTER the fact, then assert with AssertJ/JUnit assertions. Better for: complex assertions, readable error messages when assertion fails, when you need to inspect multiple properties of the captured object. <code>verify(repo).save(captor.capture()); assertThat(captor.getValue().getStatus()).isEqualTo(PENDING)</code>.<br><br><strong>argThat(predicate)</strong>: inline assertion during verify. Better for: simple single-property checks. <code>verify(repo).save(argThat(o → o.getStatus() == PENDING))</code>. Error messages are less readable on failure. Avoid for complex assertions — ArgumentCaptor gives clearer failure output.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">Why should you avoid over-mocking? What is the "don't mock what you don't own" rule?</div><div class="iqtgl">▾</div></div><div class="iqb">Over-mocking makes tests brittle — they break when implementation changes, not when behavior changes. If you mock internal collaborators, you're testing implementation details, not contracts.<br><br>"Don't mock what you don't own" (Freeman & Pryce): avoid mocking third-party classes (JPA EntityManager, HttpClient, etc.) because you likely misunderstand their behaviour and could mock them incorrectly. Instead, wrap third-party code in your own interface (Repository, HttpGateway) and mock THAT interface — which you own and understand.<br><br>Mock only the <strong>boundary</strong> of your system — repository interfaces, external HTTP clients, email senders — not internal helpers.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tsr">Senior</span><div class="iqqt">What are the best practices for structuring unit tests with Mockito?</div><div class="iqtgl">▾</div></div><div class="iqb">Follow the <strong>AAA pattern</strong> (Arrange–Act–Assert): setup stubs in Arrange, call the real method in Act, assert results AND verify important interactions in Assert.<br><br>Name tests descriptively: <code>methodName_condition_expectedBehavior</code>.<br><br>One test, one concept — don't test multiple scenarios in one test method.<br><br>Verify only meaningful interactions — don't verify every mock call. If a class uses 5 mocks but the test only cares about 2, only verify those 2.<br><br>Stub only what's needed — don't set up stubs that aren't called. Unused stubs are noise.<br><br>Use <code>@ExtendWith(MockitoExtension.class)</code> over <code>MockitoAnnotations.openMocks(this)</code> — cleaner and avoids manual teardown.</div></div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="t1m">
+      <div class="mtip"><div class="mico">💡</div><div><strong>Mockito workflow: Arrange → Act → Assert + Verify</strong><br><br><code>when(mock.method(arg)).thenReturn(val)</code> — stub (Arrange)<br>Call the real method (Act)<br><code>assertThat(result)...</code> — assert output (Assert)<br><code>verify(mock).method(arg)</code> — verify key interactions (Assert)<br><br><strong>When to use what:</strong><br>• Control return value → <code>thenReturn()</code><br>• Test exception handling → <code>thenThrow()</code><br>• Capture what was passed → <code>ArgumentCaptor</code><br>• Partial real behavior → <code>@Spy</code> + <code>doReturn()</code></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     T39 — MockMvc & TestRestTemplate
+═══════════════════════════════════════ -->
+<div class="card" id="c2">
+  <div class="band">
+    <div class="bar" style="background:linear-gradient(90deg,var(--tl),var(--tl-b))"></div>
+    <div class="bl2">
+      <div class="tn">39</div>
+      <div>
+        <div class="ttag" style="background:var(--tl-l);color:var(--tl);border:1px solid var(--tl-b)">Testing</div>
+        <div class="btitle">MockMvc &amp; TestRestTemplate</div>
+        <div class="bsub">HTTP-layer testing — one mocks the servlet stack, one hits a real running server</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--rose-l);color:var(--rose);border:1px solid var(--rose-b)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb2">
+      <div class="stab on" onclick="tab(2,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(2,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(2,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(2,'m')">🧠 Memory</div>
+    </div>
+
+    <div class="panel on" id="t2c">
+      <div class="sbox"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> MockMvc = pretend HTTP through the DispatcherServlet — fast, no real network socket. TestRestTemplate = real HTTP to a real running server — slower but more realistic. MockMvc is for most controller tests; TestRestTemplate for the most critical full-stack paths.</div></div>
+      <div class="st">◆ Comparison</div>
+      <table class="tbl">
+        <tr><th>Tool</th><th>Requires</th><th>Real TCP?</th><th>Speed</th><th>Use With</th></tr>
+        <tr><td><code>MockMvc</code></td><td>Spring MVC context</td><td>❌ No</td><td>🚀 Fast</td><td>@WebMvcTest, @SpringBootTest(MOCK)</td></tr>
+        <tr><td><code>TestRestTemplate</code></td><td>Running server</td><td>✅ Yes</td><td>🐢 Slower</td><td>@SpringBootTest(RANDOM_PORT)</td></tr>
+        <tr><td><code>WebTestClient</code></td><td>WebFlux or full</td><td>Both</td><td>🚀 Fast</td><td>@WebFluxTest, reactive apps</td></tr>
+      </table>
+      <div class="gap-sm"></div>
+      <div class="kps">
+        <div class="kp"><div class="ki">🎭</div><div class="kt"><strong class="go">MockMvc</strong> — Calls your controller through the DispatcherServlet without a real TCP connection. Tests: request mapping, @Valid validation, @ControllerAdvice error handling, content negotiation, response body and headers. Auto-configured by @WebMvcTest. Rich assertion API: <code>status()</code>, <code>jsonPath()</code>, <code>header()</code>, <code>content()</code>.</div></div>
+        <div class="kp"><div class="ki">🌐</div><div class="kt"><strong class="bl">TestRestTemplate</strong> — Auto-configured by @SpringBootTest(RANDOM_PORT). Makes real HTTP calls. Handles redirects automatically. Returns ResponseEntity with error status instead of throwing exceptions (unlike RestTemplate). Use with <code>@LocalServerPort</code> to get the actual port. Good for: full auth flows, cookie testing, security integration testing.</div></div>
+        <div class="kp"><div class="ki">📍</div><div class="kt"><strong class="am">jsonPath() assertions</strong> — Powered by Jayway JsonPath. <code>jsonPath("$.name").value("Alice")</code>: simple field. <code>jsonPath("$.items").isArray()</code>: is array. <code>jsonPath("$.items.length()").value(3)</code>: array length. <code>jsonPath("$.address.city").value("NYC")</code>: nested. <code>jsonPath("$.errors.email").exists()</code>: field exists.</div></div>
+        <div class="kp"><div class="ki">🔐</div><div class="kt"><strong class="re">Testing Secured Endpoints</strong> — <code>@WithMockUser(roles="ADMIN")</code>: inject fake auth for the test. <code>@WithMockUser(authorities="orders:read")</code>: fine-grained authorities. No actual authentication happens — just sets up SecurityContext. For full auth flow testing: use @SpringBootTest + TestRestTemplate and call the real login endpoint.</div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="t2x">
+      <div class="st">◆ Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">MockMvc + Security Testing + TestRestTemplate</div></div>
+<pre><span class="cm2">// ── MockMvc comprehensive test ────────────────────</span>
+<span class="an">@WebMvcTest</span>(<span class="cl">OrderController</span>.<span class="kw">class</span>)
+<span class="kw">class</span> <span class="cl">OrderControllerTest</span> {
+    <span class="an">@Autowired</span> <span class="kw">private</span> <span class="tp">MockMvc</span> mockMvc;
+    <span class="an">@MockBean</span>  <span class="kw">private</span> <span class="tp">OrderService</span> orderSvc;
+    <span class="an">@Autowired</span> <span class="kw">private</span> <span class="tp">ObjectMapper</span> mapper;
+
+    <span class="an">@Test</span>
+    <span class="kw">void</span> <span class="fn">createOrder_valid_returns201</span>() <span class="kw">throws</span> <span class="tp">Exception</span> {
+        <span class="tp">OrderDto</span> created = <span class="kw">new</span> <span class="tp">OrderDto</span>(<span class="nb3">1L</span>, <span class="tp">BigDecimal</span>.<span class="fn">TEN</span>);
+        <span class="fn">when</span>(orderSvc.<span class="fn">create</span>(<span class="fn">any</span>())).<span class="fn">thenReturn</span>(created);
+
+        mockMvc.<span class="fn">perform</span>(
+                <span class="fn">post</span>(<span class="st3">"/api/orders"</span>)
+                .<span class="fn">contentType</span>(<span class="tp">MediaType</span>.<span class="cl">APPLICATION_JSON</span>)
+                .<span class="fn">content</span>(mapper.<span class="fn">writeValueAsString</span>(
+                    <span class="kw">new</span> <span class="tp">CreateOrderReq</span>(<span class="nb3">1L</span>, <span class="tp">BigDecimal</span>.<span class="fn">TEN</span>)))
+            )
+            .<span class="fn">andExpect</span>(<span class="fn">status</span>().<span class="fn">isCreated</span>())
+            .<span class="fn">andExpect</span>(<span class="fn">jsonPath</span>(<span class="st3">"$.id"</span>).<span class="fn">value</span>(<span class="nb3">1</span>))
+            .<span class="fn">andExpect</span>(<span class="fn">jsonPath</span>(<span class="st3">"$.amount"</span>).<span class="fn">value</span>(<span class="nb3">10</span>))
+            .<span class="fn">andDo</span>(<span class="fn">print</span>());           <span class="cm2">// print request+response for debug</span>
+    }
+
+    <span class="cm2">// Validation failure test</span>
+    <span class="an">@Test</span>
+    <span class="kw">void</span> <span class="fn">createOrder_negativeAmount_returns400</span>() <span class="kw">throws</span> <span class="tp">Exception</span> {
+        mockMvc.<span class="fn">perform</span>(<span class="fn">post</span>(<span class="st3">"/api/orders"</span>)
+                .<span class="fn">contentType</span>(<span class="tp">MediaType</span>.<span class="cl">APPLICATION_JSON</span>)
+                .<span class="fn">content</span>(<span class="st3">"""{"customerId":1,"amount":-5}"""</span>))
+            .<span class="fn">andExpect</span>(<span class="fn">status</span>().<span class="fn">isBadRequest</span>())
+            .<span class="fn">andExpect</span>(<span class="fn">jsonPath</span>(<span class="st3">"$.errors.amount"</span>).<span class="fn">exists</span>());
+    }
+
+    <span class="cm2">// ── Security testing with @WithMockUser ───────────</span>
+    <span class="an">@Test</span>
+    <span class="an">@WithMockUser</span>(roles = <span class="st3">"ADMIN"</span>)
+    <span class="kw">void</span> <span class="fn">delete_asAdmin_returns204</span>() <span class="kw">throws</span> <span class="tp">Exception</span> {
+        <span class="fn">doNothing</span>().<span class="fn">when</span>(orderSvc).<span class="fn">delete</span>(<span class="nb3">1L</span>);
+        mockMvc.<span class="fn">perform</span>(<span class="fn">delete</span>(<span class="st3">"/api/orders/1"</span>))
+            .<span class="fn">andExpect</span>(<span class="fn">status</span>().<span class="fn">isNoContent</span>());
+    }
+
+    <span class="an">@Test</span>
+    <span class="kw">void</span> <span class="fn">delete_noAuth_returns403</span>() <span class="kw">throws</span> <span class="tp">Exception</span> {
+        mockMvc.<span class="fn">perform</span>(<span class="fn">delete</span>(<span class="st3">"/api/orders/1"</span>))  <span class="cm2">// no @WithMockUser</span>
+            .<span class="fn">andExpect</span>(<span class="fn">status</span>().<span class="fn">isForbidden</span>());
+    }
+}
+
+<span class="cm2">// ── TestRestTemplate ──────────────────────────────</span>
+<span class="an">@SpringBootTest</span>(webEnvironment = <span class="tp">SpringBootTest.WebEnvironment</span>.<span class="cl">RANDOM_PORT</span>)
+<span class="kw">class</span> <span class="cl">OrderIntegrationTest</span> {
+    <span class="an">@Autowired</span> <span class="kw">private</span> <span class="tp">TestRestTemplate</span> restTemplate;
+
+    <span class="an">@Test</span>
+    <span class="kw">void</span> <span class="fn">createAndRetrieveOrder</span>() {
+        <span class="tp">ResponseEntity</span>&lt;<span class="tp">OrderDto</span>&gt; created = restTemplate
+            .<span class="fn">withBasicAuth</span>(<span class="st3">"user"</span>, <span class="st3">"password"</span>)
+            .<span class="fn">postForEntity</span>(<span class="st3">"/api/orders"</span>,
+                <span class="kw">new</span> <span class="tp">CreateOrderReq</span>(<span class="nb3">1L</span>, <span class="tp">BigDecimal</span>.<span class="fn">TEN</span>),
+                <span class="tp">OrderDto</span>.<span class="kw">class</span>);
+
+        <span class="fn">assertThat</span>(created.<span class="fn">getStatusCode</span>()).<span class="fn">isEqualTo</span>(<span class="tp">HttpStatus</span>.<span class="cl">CREATED</span>);
+        <span class="fn">assertThat</span>(created.<span class="fn">getBody</span>().<span class="fn">getId</span>()).<span class="fn">isNotNull</span>();
+
+        <span class="cm2">// Follow-up GET</span>
+        <span class="tp">ResponseEntity</span>&lt;<span class="tp">OrderDto</span>&gt; fetched = restTemplate
+            .<span class="fn">getForEntity</span>(<span class="st3">"/api/orders/{id}"</span>, <span class="tp">OrderDto</span>.<span class="kw">class</span>,
+                created.<span class="fn">getBody</span>().<span class="fn">getId</span>());
+        <span class="fn">assertThat</span>(fetched.<span class="fn">getStatusCode</span>()).<span class="fn">isEqualTo</span>(<span class="tp">HttpStatus</span>.<span class="cl">OK</span>);
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="panel" id="t2q">
+      <div class="st">◆ Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">When would you use MockMvc vs TestRestTemplate?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>MockMvc</strong>: testing controller behavior in isolation. Request mapping, @Valid validation, response format, @ControllerAdvice error handling, content negotiation. No real HTTP server — fast. Rich fluent assertion API. Use for the majority of controller tests.<br><br><strong>TestRestTemplate</strong>: full integration tests where the complete stack matters — real security filter chain, real database, real HTTP request/response cycle, cookie/redirect handling. Use with @SpringBootTest(RANDOM_PORT). Slower but representative of production. Use for critical end-to-end paths only — not every endpoint.<div class="trick"><strong>⚡ Strategy: 80% @WebMvcTest with MockMvc (fast, focused). 20% @SpringBootTest with TestRestTemplate (slow, comprehensive) for critical paths.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What are the limitations of @WithMockUser?</div><div class="iqtgl">▾</div></div><div class="iqb"><code>@WithMockUser</code> injects a pre-built <code>UsernamePasswordAuthenticationToken</code> into the SecurityContext — no actual authentication happens. This means it bypasses: JWT parsing, UserDetailsService loading, password verification, and any custom AuthenticationProvider logic.<br><br>It only tests that your <strong>authorization rules</strong> are correctly configured (does ROLE_ADMIN grant access to /admin/**?). It does NOT test authentication.<br><br>To test authentication itself: use @SpringBootTest + TestRestTemplate and actually call the login endpoint, get a real JWT, and use it in subsequent requests. Or use @WithUserDetails to test that your UserDetailsService correctly loads roles for a given username.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">How do you test a controller endpoint that accepts Pageable?</div><div class="iqtgl">▾</div></div><div class="iqb">Pass pagination parameters as request params in MockMvc: <code>mockMvc.perform(get("/api/users").param("page","0").param("size","10").param("sort","name,asc"))</code>. Spring's <code>PageableHandlerMethodArgumentResolver</code> auto-binds these to a <code>Pageable</code> object.<br><br>For the service stub, use <code>any(Pageable.class)</code> matcher. Return a real <code>PageImpl&lt;&gt;</code> object: <code>when(service.findAll(any(Pageable.class))).thenReturn(new PageImpl&lt;&gt;(users, pageable, 100))</code>.<br><br>Assert on the JSON response: <code>jsonPath("$.content.length()").value(users.size())</code>, <code>jsonPath("$.totalElements").value(100)</code>, <code>jsonPath("$.totalPages").value(5)</code>.<div class="info"><strong>💡 Use ArgumentCaptor&lt;Pageable&gt; to verify the controller passed the correct page/size/sort to the service.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tsr">Senior</span><div class="iqqt">How do you test @ControllerAdvice exception handling with MockMvc?</div><div class="iqtgl">▾</div></div><div class="iqb">@WebMvcTest automatically picks up @ControllerAdvice beans in the same package. Trigger the exception by stubbing the service to throw it: <code>when(service.findById(99L)).thenThrow(new EntityNotFoundException("User 99 not found"))</code>. Then send the request and assert on the error response format.<br><br>Example: <code>mockMvc.perform(get("/api/users/99")).andExpect(status().isNotFound()).andExpect(jsonPath("$.status").value(404)).andExpect(jsonPath("$.message").value("User 99 not found"))</code>.<br><br>Test all error paths: 404 not found, 400 validation error, 403 forbidden, 500 unexpected error. This ensures your error response format is consistent across all endpoints.</div></div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="t2m">
+      <div class="mtip"><div class="mico">💡</div><div><strong>MockMvc = fast, isolated. TestRestTemplate = slow, realistic.</strong><br>Build most tests with MockMvc. Use TestRestTemplate only for the most critical integration paths.<br><br><strong>MockMvc cheat sheet:</strong><br><code>perform(get("/url").param("k","v"))</code> → make request<br><code>.andExpect(status().isOk())</code> → check status<br><code>.andExpect(jsonPath("$.name").value("x"))</code> → check body field<br><code>.andExpect(header().string("Location","..."))</code> → check header<br><code>.andDo(print())</code> → print for debugging<br><br><strong>@WithMockUser tests authorization rules, NOT authentication. Use full auth flow with TestRestTemplate to test auth itself.</strong></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     T40 — Application Events
+═══════════════════════════════════════ -->
+<div class="card" id="c3">
+  <div class="band">
+    <div class="bar" style="background:linear-gradient(90deg,var(--tl),#28c898)"></div>
+    <div class="bl2">
+      <div class="tn">40</div>
+      <div>
+        <div class="ttag" style="background:var(--lm-l);color:var(--lm);border:1px solid var(--lm-b)">Spring Events</div>
+        <div class="btitle">Event Handling — ApplicationEvent &amp; @EventListener</div>
+        <div class="bsub">Decouple services with the Observer pattern — publish once, react anywhere, no direct dependency</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--amber-l);color:var(--amber);border:1px solid var(--amber-b)">🟡 Medium</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb3">
+      <div class="stab on" onclick="tab(3,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(3,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(3,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(3,'m')">🧠 Memory</div>
+    </div>
+
+    <div class="panel on" id="t3c">
+      <div class="sbox"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> Instead of OrderService calling EmailService, InventoryService, and AuditService directly (tight coupling), OrderService just shouts "Order was placed!" — and any service that cares can listen and react. Adding a new reaction never touches OrderService. This is the Observer pattern built into Spring.</div></div>
+      <div class="st">◆ Event Flow</div>
+      <div class="flow">
+        <div class="fr" style="flex-wrap:wrap;gap:5px;justify-content:center">
+          <div><div class="fn-tl">OrderService<br><small>publishEvent()</small></div><div class="fsub">Publisher</div></div>
+          <div class="fa">→</div>
+          <div><div class="fn2">ApplicationContext<br><small>event bus</small></div></div>
+          <div class="fa">→</div>
+          <div><div class="fn-lm">EmailListener<br><small>@EventListener</small></div><div class="fsub">Listener 1</div></div>
+          <div class="fa">+</div>
+          <div><div class="fn-lm">AuditListener<br><small>@EventListener</small></div><div class="fsub">Listener 2</div></div>
+          <div class="fa">+</div>
+          <div><div class="fn-lm">InventoryListener<br><small>@EventListener</small></div><div class="fsub">Listener 3</div></div>
+        </div>
+      </div>
+      <div class="kps">
+        <div class="kp"><div class="ki">📡</div><div class="kt"><strong class="go">Spring Event System</strong> — Any Spring bean can publish events via <code>ApplicationEventPublisher.publishEvent(event)</code>. Any @Component method annotated with <code>@EventListener</code> can listen. Events are synchronous and same-thread by default — listeners run in the publisher's thread, within the same transaction.</div></div>
+        <div class="kp"><div class="ki">📦</div><div class="kt"><strong class="bl">Event Classes</strong> — Extend <code>ApplicationEvent</code> (traditional) or use any POJO (Spring 4.2+). POJO events are preferred — no Spring coupling in your domain model. Use <code>record</code> for immutable events: <code>public record OrderPlacedEvent(Long orderId, String email, BigDecimal amount) {}</code>. Events should be immutable — they describe something that already happened.</div></div>
+        <div class="kp"><div class="ki">💾</div><div class="kt"><strong class="am">@TransactionalEventListener</strong> — Runs listener at a specific point in the publisher's transaction. <code>AFTER_COMMIT</code> (default): runs only after the transaction successfully commits. <strong>Critical for irreversible actions</strong>: sending an email after order is committed to DB guarantees the order exists when the email is sent. Other phases: <code>BEFORE_COMMIT</code>, <code>AFTER_ROLLBACK</code>, <code>AFTER_COMPLETION</code>.</div></div>
+        <div class="kp"><div class="ki">🔄</div><div class="kt"><strong class="re">Async Listeners with @Async</strong> — Combine <code>@TransactionalEventListener</code> + <code>@Async</code> to run listeners asynchronously in a thread pool after the transaction commits. Requires <code>@EnableAsync</code>. Prevents slow listeners (email sending, external API calls) from blocking the publisher's response. With @Async, the listener runs OUTSIDE the original transaction.</div></div>
+        <div class="kp"><div class="ki">🏗️</div><div class="kt"><strong class="go">Built-in Spring Events</strong> — <code>ContextRefreshedEvent</code> (context fully ready — all beans initialized), <code>ApplicationReadyEvent</code> (Spring Boot — app ready to serve, use for post-startup initialization), <code>ContextClosedEvent</code> (before shutdown), <code>ApplicationFailedEvent</code> (startup failed). Listen with <code>@EventListener(ApplicationReadyEvent.class)</code>.</div></div>
+        <div class="kp"><div class="ki">🎯</div><div class="kt"><strong class="pl">Event Filtering with Conditions</strong> — <code>@EventListener(condition = "#event.amount.compareTo(@bigOrderThreshold) > 0")</code>: SpEL condition, listener only runs when true. Order multiple listeners with <code>@Order(1)</code>: lower value = higher priority. Listen for multiple event types: <code>@EventListener({OrderPlacedEvent.class, OrderUpdatedEvent.class})</code>.</div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="t3x">
+      <div class="st">◆ Memorizable Code</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">ApplicationEvent + @EventListener + @TransactionalEventListener + @Async</div></div>
+<pre><span class="cm2">// ── POJO Event (no Spring coupling) ──────────────</span>
+<span class="kw">public record</span> <span class="cl">OrderPlacedEvent</span>(
+    <span class="tp">Long</span>       orderId,
+    <span class="tp">String</span>     customerEmail,
+    <span class="tp">BigDecimal</span> amount,
+    <span class="tp">Instant</span>    placedAt
+) {}
+
+<span class="cm2">// ── Publisher ─────────────────────────────────────</span>
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">OrderService</span> {
+    <span class="kw">private final</span> <span class="tp">ApplicationEventPublisher</span> publisher;
+    <span class="kw">private final</span> <span class="tp">OrderRepository</span> repo;
+
+    <span class="an">@Transactional</span>
+    <span class="kw">public</span> <span class="tp">Order</span> <span class="fn">placeOrder</span>(<span class="tp">OrderRequest</span> req) {
+        <span class="tp">Order</span> order = repo.<span class="fn">save</span>(<span class="tp">Order</span>.<span class="fn">from</span>(req));
+
+        publisher.<span class="fn">publishEvent</span>(<span class="kw">new</span> <span class="cl">OrderPlacedEvent</span>(
+            order.<span class="fn">getId</span>(), req.<span class="fn">getEmail</span>(),
+            req.<span class="fn">getAmount</span>(), <span class="tp">Instant</span>.<span class="fn">now</span>()
+        ));
+        <span class="kw">return</span> order;
+        <span class="cm2">// OrderService has ZERO knowledge of email/inventory/audit!</span>
+    }
+}
+
+<span class="cm2">// ── Synchronous listener (in publisher's TX) ──────</span>
+<span class="an">@Component</span>
+<span class="kw">public class</span> <span class="cl">InventoryListener</span> {
+    <span class="an">@EventListener</span>
+    <span class="kw">public void</span> <span class="fn">onOrderPlaced</span>(<span class="cl">OrderPlacedEvent</span> event) {
+        inventoryService.<span class="fn">deduct</span>(event.<span class="fn">orderId</span>()); <span class="cm2">// same TX as publisher</span>
+    }
+}
+
+<span class="cm2">// ── @TransactionalEventListener — AFTER_COMMIT ────</span>
+<span class="an">@Component</span>
+<span class="kw">public class</span> <span class="cl">EmailNotificationListener</span> {
+
+    <span class="an">@TransactionalEventListener</span>(phase = <span class="tp">TransactionPhase</span>.<span class="cl">AFTER_COMMIT</span>)
+    <span class="an">@Async</span>      <span class="cm2">// async: don't block publisher thread</span>
+    <span class="kw">public void</span> <span class="fn">sendConfirmation</span>(<span class="cl">OrderPlacedEvent</span> event) {
+        <span class="cm2">// Runs ONLY after order is committed to DB</span>
+        <span class="cm2">// Guaranteed: order exists in DB when this runs</span>
+        emailService.<span class="fn">sendOrderConfirmation</span>(
+            event.<span class="fn">customerEmail</span>(), event.<span class="fn">orderId</span>()
+        );
+    }
+}
+
+<span class="cm2">// ── Conditional listener ───────────────────────────</span>
+<span class="an">@Component</span>
+<span class="kw">public class</span> <span class="cl">BigOrderAlertListener</span> {
+    <span class="an">@EventListener</span>(condition = <span class="st3">"#event.amount.compareTo(@threshold) > 0"</span>)
+    <span class="kw">public void</span> <span class="fn">alertOnBigOrder</span>(<span class="cl">OrderPlacedEvent</span> event) {
+        alertService.<span class="fn">notifyManager</span>(event); <span class="cm2">// only for large orders</span>
+    }
+}
+
+<span class="cm2">// ── Listen to Spring Boot lifecycle ───────────────</span>
+<span class="an">@Component</span>
+<span class="kw">public class</span> <span class="cl">StartupInitializer</span> {
+    <span class="an">@EventListener</span>(<span class="tp">ApplicationReadyEvent</span>.<span class="kw">class</span>)
+    <span class="kw">public void</span> <span class="fn">onReady</span>() {
+        log.<span class="fn">info</span>(<span class="st3">"App ready! Warming up cache..."</span>);
+        cacheService.<span class="fn">warmup</span>();  <span class="cm2">// all beans ready, safe to call</span>
+    }
+}
+
+<span class="cm2">// ── Enable @Async ─────────────────────────────────</span>
+<span class="an">@Configuration</span>
+<span class="an">@EnableAsync</span>
+<span class="kw">public class</span> <span class="cl">AsyncConfig</span> {
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="tp">TaskExecutor</span> <span class="fn">taskExecutor</span>() {
+        <span class="tp">ThreadPoolTaskExecutor</span> ex = <span class="kw">new</span> <span class="tp">ThreadPoolTaskExecutor</span>();
+        ex.<span class="fn">setCorePoolSize</span>(<span class="nb3">5</span>); ex.<span class="fn">setMaxPoolSize</span>(<span class="nb3">20</span>);
+        ex.<span class="fn">setQueueCapacity</span>(<span class="nb3">100</span>);
+        <span class="kw">return</span> ex;
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="panel" id="t3q">
+      <div class="st">◆ Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What problem does Spring's event system solve? Why not call services directly?</div><div class="iqtgl">▾</div></div><div class="iqb">Direct service calls create <strong>tight coupling</strong>: OrderService must depend on EmailService, InventoryService, AuditService. Adding a new action on order placement requires modifying OrderService — violating the Open/Closed Principle.<br><br>With events: OrderService publishes an <code>OrderPlacedEvent</code> and knows nothing about who listens. New reactions are added by creating new listeners — OrderService unchanged. This is the <strong>Observer pattern</strong> built into Spring.<br><br>Benefits: loose coupling, easier unit testing of OrderService (no need to mock EmailService etc.), separate deployment of concerns, easy to add/remove side effects without risk to core business logic.<div class="trick"><strong>⚡ Events are best for: cross-cutting concerns (email, audit, analytics) where the publisher shouldn't care about the reaction.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is @TransactionalEventListener and why is it critical for correctness?</div><div class="iqtgl">▾</div></div><div class="iqb">Regular <code>@EventListener</code> runs synchronously within the publisher's transaction. If the listener sends an email, and the publisher's transaction later rolls back — you've sent an email for data that was rolled back.<br><br><code>@TransactionalEventListener(phase = AFTER_COMMIT)</code> delays execution until AFTER the transaction successfully commits. The listener ONLY runs if the transaction committed successfully — no email for rolled-back orders.<br><br>Other phases: <code>BEFORE_COMMIT</code> (last chance to affect the transaction), <code>AFTER_ROLLBACK</code> (cleanup after failure), <code>AFTER_COMPLETION</code> (always, like finally).<div class="warn"><strong>⚠️ Never send emails, charge payments, or call external APIs in a plain @EventListener. Always use @TransactionalEventListener(AFTER_COMMIT) for irreversible side effects.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">How do you test that an event was published?</div><div class="iqtgl">▾</div></div><div class="iqb">Three approaches:<br><br><strong>1. Mock ApplicationEventPublisher</strong>: <code>@MockBean ApplicationEventPublisher publisher</code> in @WebMvcTest/@SpringBootTest. Then verify: <code>ArgumentCaptor&lt;OrderPlacedEvent&gt; captor = ArgumentCaptor.forClass(OrderPlacedEvent.class); verify(publisher).publishEvent(captor.capture()); assertThat(captor.getValue().orderId()).isEqualTo(1L)</code>. Simplest for unit/slice tests.<br><br><strong>2. @RecordApplicationEvents</strong> (Spring Test 5.3+): <code>@SpringBootTest + @RecordApplicationEvents</code>, inject <code>ApplicationEvents events</code>. After action: <code>assertThat(events.stream(OrderPlacedEvent.class).count()).isEqualTo(1)</code>.<br><br><strong>3. @SpyBean on listener</strong>: verify the listener's method was called after the event was published.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What are the limitations of Spring's in-process event system?</div><div class="iqtgl">▾</div></div><div class="iqb">Spring ApplicationEvents are <strong>in-process only</strong>. Key limitations:<br><br>1. <strong>No durability</strong>: if the app crashes before an async listener executes, the event is lost — no retry, no dead-letter queue.<br>2. <strong>Single JVM</strong>: events don't cross service boundaries.<br>3. <strong>No ordering guarantee</strong> for async listeners.<br>4. <strong>No built-in replay</strong> capability.<br><br>For distributed systems: use <strong>Kafka or RabbitMQ</strong> which provide: persistence (events survive crashes), delivery guarantees (at-least-once/exactly-once), replay, cross-service communication.<br><br>Use Spring Events for: simple in-process decoupling, lightweight synchronous notifications within one service. Use Kafka/RabbitMQ for: critical events, cross-service, must-not-lose semantics.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tsr">Senior</span><div class="iqqt">What is the Transactional Outbox Pattern and how does it relate to Spring Events?</div><div class="iqtgl">▾</div></div><div class="iqb">The <strong>Outbox Pattern</strong> solves the dual-write problem: you want to save data to DB AND publish a message to Kafka in the same "unit of work" — but they're different systems, so you can't do both in one transaction.<br><br>Solution: write the event to an <code>outbox</code> table in the same DB transaction as the business data. A separate process (like Debezium CDC) reads from the outbox table and publishes to Kafka/RabbitMQ. The outbox row is only created if the main transaction commits — guaranteed consistency.<br><br>How it relates: <code>@TransactionalEventListener(AFTER_COMMIT)</code> is good for in-process side effects. But for cross-service event publishing to Kafka, the Outbox Pattern is the robust solution — especially when network partitions or Kafka downtime could cause you to miss publishing an event.</div></div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="t3m">
+      <div class="mtip"><div class="mico">💡</div><div><strong>Events = "I did something" announcement. Listeners = "I care about that" reaction.</strong><br>Publisher never knows the listeners. Adding a new reaction never touches the publisher. Open/Closed Principle in action.<br><br><strong>Critical rules:</strong><br>• Irreversible actions (email, payment) → <code>@TransactionalEventListener(AFTER_COMMIT)</code><br>• Slow listeners → add <code>@Async</code> so they don't block the publisher<br>• POJO records > ApplicationEvent subclasses (no Spring coupling)<br>• Spring Events = single JVM only → use Kafka for cross-service<br><br><strong>AFTER_COMMIT mnemonic: "Don't email about the pizza until it's actually baked."</strong></div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+<div class="footer">PHASE 7 · TESTING & APPLICATION EVENTS · TOPICS 37–40 · SENIOR ENGINEER INTERVIEW PREP</div>
+
+<script>
+let cur=0;
+const TOTAL=4;
+function go(i){
+  for(let j=0;j<TOTAL;j++){
+    document.getElementById('c'+j).classList.toggle('on',j===i);
+    const b=document.getElementById('nb'+j);
+    b.className='nb'+(j===i?' on':'');
+    const ps=document.getElementById('ps'+j);
+    ps.className='ps'+(j<i?' done':(j===i?' active':''));
+  }
+  cur=i;
+  window.scrollTo({top:document.querySelector('.nav').offsetTop,behavior:'smooth'});
+}
+function tab(ti,panel){
+  const tpMap={'c':0,'x':1,'q':2,'m':3};
+  const tabs=document.querySelectorAll('#tb'+ti+' .stab');
+  tabs.forEach((t,i)=>t.classList.toggle('on',i===tpMap[panel]));
+  const card=document.getElementById('c'+ti);
+  card.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById('t'+ti+panel).classList.add('on');
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'&&cur<TOTAL-1)go(cur+1);
+  if(e.key==='ArrowLeft'&&cur>0)go(cur-1);
+});
+</script>
+</body>
+</html>
