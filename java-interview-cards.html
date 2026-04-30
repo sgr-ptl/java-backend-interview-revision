@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java Coding Interview — Practice Cards</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f4ef;
+    --card: #ffffff;
+    --accent: #e05c2a;
+    --accent2: #2a6ae0;
+    --accent3: #28a66e;
+    --muted: #8a8075;
+    --border: #e5e0d8;
+    --tag-bg: #fdf0ea;
+    --tag-text: #c04a1a;
+    --code-bg: #f0ece4;
+    --tip-bg: #edf7f2;
+    --tip-border: #28a66e;
+    --q-bg: #f9f6f2;
+    --shadow: 0 4px 24px rgba(0,0,0,0.07);
+    --shadow-hover: 0 8px 32px rgba(0,0,0,0.13);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Nunito', sans-serif;
+    color: #2a2520;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: #fff;
+    border-bottom: 2px solid var(--border);
+    padding: 20px 28px 16px;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  }
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  header span {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .kbd-hint {
+    margin-left: auto;
+    font-size: 0.78rem;
+    color: var(--muted);
+    background: var(--code-bg);
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  kbd {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 0.8em;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── Topic Nav ── */
+  #topic-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 16px 28px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 73px;
+    z-index: 99;
+  }
+  .topic-btn {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 2px solid var(--border);
+    background: #fff;
+    color: #5a5248;
+    cursor: pointer;
+    transition: all .18s;
+    letter-spacing: .02em;
+  }
+  .topic-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+  .topic-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(224,92,42,0.28);
+  }
+
+  /* ── Progress Bar ── */
+  #progress-wrap {
+    height: 4px;
+    background: var(--border);
+    position: sticky;
+    top: 120px;
+    z-index: 98;
+  }
+  #progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #f0952a);
+    transition: width .3s ease;
+  }
+
+  /* ── Main Content ── */
+  main {
+    max-width: 840px;
+    margin: 32px auto;
+    padding: 0 20px 60px;
+  }
+
+  .topic-panel { display: none; }
+  .topic-panel.active { display: block; animation: fadeIn .3s ease; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: none; } }
+
+  /* ── Card ── */
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    border: 1.5px solid var(--border);
+    box-shadow: var(--shadow);
+    padding: 28px 32px;
+    margin-bottom: 24px;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .card-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--accent);
+    min-width: 32px;
+  }
+  .card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.25rem;
+    line-height: 1.3;
+    flex: 1;
+  }
+  .diff-badge {
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 12px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .diff-basic { background: #e8f5e9; color: #2e7d32; }
+  .diff-intermediate { background: #fff3e0; color: #e65100; }
+
+  /* ── Key Concepts ── */
+  .section-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .concepts p {
+    font-size: 0.92rem;
+    line-height: 1.7;
+    color: #3a3530;
+    margin-bottom: 6px;
+  }
+  code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.84em;
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 5px;
+    color: #c04a1a;
+    border: 1px solid #e8e0d4;
+  }
+
+  /* ── Memory Tip ── */
+  .memory-tip {
+    background: var(--tip-bg);
+    border-left: 4px solid var(--tip-border);
+    border-radius: 0 10px 10px 0;
+    padding: 10px 14px;
+    margin: 14px 0;
+    font-size: 0.88rem;
+    color: #1a5c42;
+    font-weight: 600;
+  }
+  .memory-tip span { font-size: 1.1em; }
+
+  /* ── Q&A ── */
+  .qa-section { margin-top: 16px; }
+  details {
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: box-shadow .18s;
+  }
+  details:hover { box-shadow: var(--shadow-hover); border-color: #d4cfc8; }
+  details[open] { border-color: var(--accent2); }
+  summary {
+    cursor: pointer;
+    padding: 11px 16px;
+    background: var(--q-bg);
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #2a2520;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    user-select: none;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::before {
+    content: '❓';
+    font-size: 0.9em;
+    flex-shrink: 0;
+  }
+  summary::after {
+    content: '▾';
+    margin-left: auto;
+    color: var(--muted);
+    transition: transform .2s;
+    font-size: 0.85em;
+  }
+  details[open] summary::after { transform: rotate(-180deg); }
+  .answer {
+    padding: 14px 16px;
+    font-size: 0.88rem;
+    line-height: 1.75;
+    color: #3a3530;
+    background: #fff;
+    border-top: 1px solid var(--border);
+  }
+  .answer pre {
+    background: #1e1b16;
+    color: #f0e8d8;
+    border-radius: 8px;
+    padding: 14px;
+    margin: 10px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    overflow-x: auto;
+    line-height: 1.6;
+  }
+  .answer pre .kw { color: #f0952a; }
+  .answer pre .cm { color: #7a8a6a; font-style: italic; }
+  .answer pre .st { color: #a3d977; }
+  .answer pre .nu { color: #82c8f0; }
+
+  /* ── Nav buttons ── */
+  .nav-strip {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    padding: 0 4px;
+  }
+  .nav-btn {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.88rem;
+    padding: 10px 22px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    background: #fff;
+    cursor: pointer;
+    color: #5a5248;
+    transition: all .18s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-btn:hover:not(:disabled) { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .topic-counter {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>☕ Java Interview Cards</h1>
+  <span>Basic → Intermediate · 30 Questions</span>
+  <div class="kbd-hint">Navigate: <kbd>←</kbd> <kbd>→</kbd> arrow keys</div>
+</header>
+
+<div id="topic-nav"></div>
+<div id="progress-wrap"><div id="progress-bar"></div></div>
+
+<main id="main-content"></main>
+
+<footer>30 must-know Java coding interview questions · Basic to Intermediate · Click ❓ to reveal answers</footer>
+
+<script>
+const topics = [
+  {
+    id: "arrays",
+    label: "📦 Arrays",
+    cards: [
+      {
+        num: 1,
+        title: "Two Sum — Find pair with target",
+        diff: "basic",
+        concept: `Given an array of integers, find two indices whose values sum to a <code>target</code>. The classic trick is using a <code>HashMap</code> to store <em>complement → index</em> in one pass instead of nested loops.`,
+        tip: "🧠 Think backwards: for each number, ask 'Have I seen target - num before?' Map stores the answer.",
+        qa: [
+          {
+            q: "What is the optimal time complexity for Two Sum?",
+            a: `O(n) time, O(n) space using a HashMap.<br><pre><span class="kw">Map</span>&lt;Integer,Integer&gt; map = <span class="kw">new</span> HashMap&lt;&gt;();
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="nu">0</span>; i &lt; nums.length; i++) {
+    <span class="kw">int</span> comp = target - nums[i];
+    <span class="kw">if</span> (map.containsKey(comp)) <span class="kw">return new int</span>[]{map.get(comp), i};
+    map.put(nums[i], i);
+}</pre>`
+          },
+          {
+            q: "Why not use sorting + two pointers?",
+            a: "Sorting takes O(n log n) and destroys original indices, making it harder to return index pairs. HashMap approach is faster and index-safe."
+          }
+        ]
+      },
+      {
+        num: 2,
+        title: "Find Maximum in Sliding Window",
+        diff: "intermediate",
+        concept: `Use a <code>Deque</code> (double-ended queue) to maintain a decreasing window of indices. Remove indices that fall out of the window from the front; remove smaller elements from the back before adding a new one. Front always holds the max index.`,
+        tip: "🧠 Deque = monotonic window. Front = king of the window. Evict useless pretenders from the back.",
+        qa: [
+          {
+            q: "What is the time complexity of the sliding window maximum?",
+            a: "O(n) — each element is added and removed from the deque at most once."
+          },
+          {
+            q: "Write the core loop using ArrayDeque.",
+            a: `<pre>Deque&lt;Integer&gt; dq = <span class="kw">new</span> ArrayDeque&lt;&gt;();
+<span class="kw">for</span> (<span class="kw">int</span> i = <span class="nu">0</span>; i &lt; nums.length; i++) {
+    <span class="cm">// Remove out-of-window</span>
+    <span class="kw">if</span> (!dq.isEmpty() &amp;&amp; dq.peek() &lt; i - k + <span class="nu">1</span>) dq.poll();
+    <span class="cm">// Maintain decreasing order</span>
+    <span class="kw">while</span> (!dq.isEmpty() &amp;&amp; nums[dq.peekLast()] &lt; nums[i]) dq.pollLast();
+    dq.offer(i);
+    <span class="kw">if</span> (i &gt;= k - <span class="nu">1</span>) res[i - k + <span class="nu">1</span>] = nums[dq.peek()];
+}</pre>`
+          }
+        ]
+      },
+      {
+        num: 3,
+        title: "Kadane's Algorithm — Max Subarray Sum",
+        diff: "basic",
+        concept: `Track a running <code>currentSum</code>. At each element, decide: extend the current subarray or start fresh? <code>currentSum = Math.max(num, currentSum + num)</code>. Update a global max every step.`,
+        tip: "🧠 'Fresh start or keep going?' — if current sum went negative, restart.",
+        qa: [
+          {
+            q: "What does Kadane's algorithm return for all-negative arrays?",
+            a: "The least negative number (the maximum single element). Initialize maxSum = Integer.MIN_VALUE to handle this."
+          },
+          {
+            q: "Can you find the actual subarray, not just its sum?",
+            a: "Yes — track start/end indices. Reset start when you restart; update end when maxSum improves."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "strings",
+    label: "🔤 Strings",
+    cards: [
+      {
+        num: 4,
+        title: "Check Anagram",
+        diff: "basic",
+        concept: `Two strings are anagrams if they contain the same characters with the same frequencies. Use an <code>int[26]</code> frequency array: increment for chars in <code>s</code>, decrement for <code>t</code>. If all zeros → anagram. <code>Arrays.sort</code> also works but is O(n log n).`,
+        tip: "🧠 Anagram = same character budget. One int[26] and two passes — done.",
+        qa: [
+          {
+            q: "Time and space complexity of the frequency array approach?",
+            a: "O(n) time, O(1) space (array is always size 26 regardless of input length)."
+          },
+          {
+            q: "What if strings contain Unicode, not just lowercase ASCII?",
+            a: "Use a HashMap<Character, Integer> instead of int[26] to handle arbitrary characters."
+          }
+        ]
+      },
+      {
+        num: 5,
+        title: "Longest Palindromic Substring",
+        diff: "intermediate",
+        concept: `Expand Around Centre: for every index, try expanding outward for both odd-length (<code>l=i, r=i</code>) and even-length (<code>l=i, r=i+1</code>) palindromes. Track the longest window found. No DP table needed.`,
+        tip: "🧠 Every palindrome has a centre. Sit at each seat and push outward.",
+        qa: [
+          {
+            q: "What is the time complexity of expand-around-centre?",
+            a: "O(n²) time, O(1) space — better than naive O(n³), and simpler to code than Manacher's O(n) algorithm."
+          },
+          {
+            q: "How do you handle even-length palindromes like 'abba'?",
+            a: "Start with l=i and r=i+1 (two adjacent equal characters as the centre) and expand outward."
+          }
+        ]
+      },
+      {
+        num: 6,
+        title: "Reverse Words in a String",
+        diff: "basic",
+        concept: `Split on whitespace (<code>trim().split("\\s+")</code>), reverse the array, then <code>String.join(" ", ...)</code>. In Java, <code>"\\s+"</code> handles multiple spaces. Using a <code>StringBuilder</code> loop is also common.`,
+        tip: "🧠 trim → split → reverse array → join. Four steps, zero edge-case regret.",
+        qa: [
+          {
+            q: "Why use \\s+ instead of a single space in split?",
+            a: "\\s+ matches one or more whitespace characters, handling multiple spaces and tabs gracefully."
+          },
+          {
+            q: "How would you do in-place reversal in a char array?",
+            a: "Reverse the whole array, then reverse each individual word between spaces."
+          }
+        ]
+      },
+      {
+        num: 7,
+        title: "Longest Substring Without Repeating Characters",
+        diff: "intermediate",
+        concept: `Sliding window with a <code>HashMap&lt;Character, Integer&gt;</code> storing the last seen index of each character. Move left pointer to <code>map.get(c) + 1</code> when a repeat is found. Window size = <code>r - l + 1</code>.`,
+        tip: "🧠 Left pointer jumps to 'one past the last duplicate'. Map is the cheat sheet for jump positions.",
+        qa: [
+          {
+            q: "What's the time complexity?",
+            a: "O(n) — each character is visited at most twice (once by right pointer, once by left)."
+          },
+          {
+            q: "Can you use a HashSet instead of a HashMap?",
+            a: "Yes, but the left pointer must slide one step at a time removing characters, making worst case O(2n) with higher constant. HashMap gives O(1) jumps."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "stack",
+    label: "📚 Stack",
+    cards: [
+      {
+        num: 8,
+        title: "Valid Parentheses",
+        diff: "basic",
+        concept: `Push every opening bracket onto a <code>Deque</code> (used as stack). On a closing bracket, check if the top matches. Mismatch or empty stack → invalid. At end, stack must be empty.`,
+        tip: "🧠 Stack = memory of 'what's still open'. Closing bracket must match the most recent open.",
+        qa: [
+          {
+            q: "Which Java class to use as a stack?",
+            a: "Prefer ArrayDeque over Stack class. Stack is legacy and synchronized (slow). Use Deque<Character> dq = new ArrayDeque<>();"
+          },
+          {
+            q: "How to map closing to opening brackets cleanly?",
+            a: `<pre>Map&lt;Character,Character&gt; map = Map.of(<span class="st">')'</span>,<span class="st">'('</span>, <span class="st">'}'</span>,<span class="st">'{'</span>, <span class="st">']'</span>,<span class="st">'['</span>);</pre>Then check <code>map.containsKey(c)</code> to detect closing brackets.`
+          }
+        ]
+      },
+      {
+        num: 9,
+        title: "Next Greater Element",
+        diff: "intermediate",
+        concept: `Monotonic stack pattern: iterate right to left, maintaining a stack of candidates. Pop elements smaller than current — they can never be the "next greater" for anything to the left. Stack top is the answer for current element.`,
+        tip: "🧠 Stack evicts losers. Only those who are 'greater' survive and serve as answers for elements to the left.",
+        qa: [
+          {
+            q: "What is the time complexity?",
+            a: "O(n) — each element is pushed and popped at most once."
+          },
+          {
+            q: "How do you handle circular arrays (like LeetCode 503)?",
+            a: "Iterate 2n times using index % n. Don't push results for the second pass, just use it to find answers for unresolved elements."
+          }
+        ]
+      },
+      {
+        num: 10,
+        title: "Evaluate Reverse Polish Notation",
+        diff: "basic",
+        concept: `Push numbers onto a stack. On encountering an operator (<code>+,-,*,/</code>), pop two values, apply the operator, push the result. Final answer is the single remaining stack element.`,
+        tip: "🧠 RPN = postfix. Operands queue, operators pop two and push one. Stack does the bookkeeping.",
+        qa: [
+          {
+            q: "What order do you pop operands?",
+            a: "Second pop is the LEFT operand, first pop is RIGHT. So: b = stack.pop(); a = stack.pop(); result = a op b;"
+          },
+          {
+            q: "How to check if a token is an operator?",
+            a: `<pre>Set&lt;String&gt; ops = Set.of(<span class="st">"+"</span>,<span class="st">"-"</span>,<span class="st">"*"</span>,<span class="st">"/"</span>);</pre>`
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "queue",
+    label: "🔁 Queue / Deque",
+    cards: [
+      {
+        num: 11,
+        title: "Implement Queue using Two Stacks",
+        diff: "basic",
+        concept: `Use an <em>inbox</em> stack and an <em>outbox</em> stack. <code>push()</code> always goes to inbox. <code>pop()/peek()</code>: if outbox is empty, pour all of inbox into outbox (reversing order). This gives amortised O(1) per operation.`,
+        tip: "🧠 Inbox = buffer. Outbox = ready to serve. Only refill when outbox is dry.",
+        qa: [
+          {
+            q: "Why is amortised O(1) despite the pour operation?",
+            a: "Each element is moved from inbox to outbox exactly once across its lifetime, so total cost across n operations is O(n) → O(1) amortised."
+          },
+          {
+            q: "How to implement peek() correctly?",
+            a: "After ensuring outbox is not empty (pour if needed), return outbox.peek() without popping."
+          }
+        ]
+      },
+      {
+        num: 12,
+        title: "BFS Level Order Traversal",
+        diff: "basic",
+        concept: `Use a <code>Queue&lt;TreeNode&gt;</code>. Add root, then loop: record queue size (current level count), process exactly that many nodes, add their children. Each outer loop iteration = one level.`,
+        tip: "🧠 Snapshot the queue size before the inner loop. That size = exactly one level's worth of nodes.",
+        qa: [
+          {
+            q: "How do you store level results?",
+            a: `<pre>List&lt;List&lt;Integer&gt;&gt; result = <span class="kw">new</span> ArrayList&lt;&gt;();
+<span class="kw">while</span> (!q.isEmpty()) {
+    <span class="kw">int</span> size = q.size();
+    List&lt;Integer&gt; level = <span class="kw">new</span> ArrayList&lt;&gt;();
+    <span class="kw">for</span> (<span class="kw">int</span> i=<span class="nu">0</span>;i&lt;size;i++) { <span class="cm">/* process */</span> }
+    result.add(level);
+}</pre>`
+          },
+          {
+            q: "What is the space complexity of BFS?",
+            a: "O(w) where w is the maximum width of the tree. Worst case (complete binary tree) is O(n/2) = O(n)."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "linkedlist",
+    label: "🔗 Linked List",
+    cards: [
+      {
+        num: 13,
+        title: "Reverse a Linked List",
+        diff: "basic",
+        concept: `Three pointers: <code>prev = null</code>, <code>curr = head</code>, <code>next = null</code>. In each iteration: save next, flip the link (<code>curr.next = prev</code>), advance both pointers. Return <code>prev</code> (new head).`,
+        tip: "🧠 Three dancers: prev, curr, next. Save next, reverse the link, all three step forward.",
+        qa: [
+          {
+            q: "Write iterative reversal in Java.",
+            a: `<pre>ListNode prev = <span class="kw">null</span>, curr = head;
+<span class="kw">while</span> (curr != <span class="kw">null</span>) {
+    ListNode next = curr.next;
+    curr.next = prev;
+    prev = curr;
+    curr = next;
+}
+<span class="kw">return</span> prev;</pre>`
+          },
+          {
+            q: "How do you reverse recursively?",
+            a: "Recurse to the tail, then on the way back: head.next.next = head; head.next = null; return newHead."
+          }
+        ]
+      },
+      {
+        num: 14,
+        title: "Detect Cycle — Floyd's Algorithm",
+        diff: "intermediate",
+        concept: `Fast pointer moves 2 steps, slow moves 1 step. If there's a cycle, they <em>must</em> meet inside it. To find cycle start: reset slow to head, keep fast at meeting point, advance both one step — they meet at the cycle entrance.`,
+        tip: "🧠 Tortoise and hare always meet in a cycle. Reset tortoise to start → they meet at cycle entry.",
+        qa: [
+          {
+            q: "Why do they meet at the cycle entrance after reset?",
+            a: "Mathematical property: distance from head to cycle start equals distance from meeting point to cycle start (mod cycle length). Moving both one step finds the entry."
+          },
+          {
+            q: "What if you only need to detect (not find) the cycle?",
+            a: "Just check if fast == slow after the initial traversal. No reset needed."
+          }
+        ]
+      },
+      {
+        num: 15,
+        title: "Merge Two Sorted Linked Lists",
+        diff: "basic",
+        concept: `Use a dummy head node. Compare l1 and l2 values; attach the smaller node, advance that pointer. After the loop, attach whichever list still has remaining nodes.`,
+        tip: "🧠 Dummy head eliminates edge cases. Just compare, attach, and advance — then staple the leftover tail.",
+        qa: [
+          {
+            q: "What's the time and space complexity?",
+            a: "O(m+n) time, O(1) space (iterative, no extra nodes created)."
+          },
+          {
+            q: "How to do it recursively?",
+            a: `<pre><span class="kw">if</span> (l1 == <span class="kw">null</span>) <span class="kw">return</span> l2;
+<span class="kw">if</span> (l2 == <span class="kw">null</span>) <span class="kw">return</span> l1;
+<span class="kw">if</span> (l1.val &lt;= l2.val) { l1.next = merge(l1.next, l2); <span class="kw">return</span> l1; }
+<span class="kw">else</span> { l2.next = merge(l1, l2.next); <span class="kw">return</span> l2; }</pre>`
+          }
+        ]
+      },
+      {
+        num: 16,
+        title: "Find Middle of Linked List",
+        diff: "basic",
+        concept: `Slow/fast pointer (tortoise and hare). Fast moves 2 steps, slow 1. When fast reaches end, slow is at the middle. For even-length lists, slow lands on the <em>second</em> middle node.`,
+        tip: "🧠 Fast finishes when slow is halfway. Always use this before split-and-sort operations.",
+        qa: [
+          {
+            q: "When does fast reach the end — null check or null.next check?",
+            a: "Use: while (fast != null && fast.next != null). This handles both odd and even length lists cleanly."
+          },
+          {
+            q: "How is this used in Merge Sort on linked lists?",
+            a: "Find middle, set mid.next = null to split the list, recursively sort both halves, merge."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "sorting",
+    label: "🔃 Sorting",
+    cards: [
+      {
+        num: 17,
+        title: "Sort Colors — Dutch National Flag",
+        diff: "intermediate",
+        concept: `Three-pointer approach: <code>lo=0, mid=0, hi=n-1</code>. If <code>arr[mid]==0</code>, swap with lo and advance both. If <code>arr[mid]==2</code>, swap with hi and decrement hi. If <code>arr[mid]==1</code>, just advance mid.`,
+        tip: "🧠 lo = next 0 slot, hi = next 2 slot. mid is the explorer. Only advance mid for 1s.",
+        qa: [
+          {
+            q: "Why don't you advance mid when swapping with hi?",
+            a: "The element that just came from hi is unknown — it could be 0, 1, or 2. You must re-examine it before moving mid forward."
+          },
+          {
+            q: "Time and space complexity?",
+            a: "O(n) time, O(1) space — single pass."
+          }
+        ]
+      },
+      {
+        num: 18,
+        title: "Custom Comparator — Sort by Frequency",
+        diff: "intermediate",
+        concept: `Build a frequency map with <code>HashMap</code>. Convert to a list, then sort using a custom comparator: <code>(a,b) -> freqMap.get(b) - freqMap.get(a)</code> for descending frequency. Tie-break by value if needed.`,
+        tip: "🧠 Negative comparator = descending. freqMap.get(b) - freqMap.get(a) puts highest freq first.",
+        qa: [
+          {
+            q: "How to sort an int array with a custom comparator?",
+            a: "Convert to Integer[] (boxed), then Arrays.sort(arr, comparator). Primitive int[] cannot use comparators directly."
+          },
+          {
+            q: "How to sort using streams?",
+            a: `<pre>nums.stream()
+    .sorted((a,b) -&gt; freqMap.get(b) - freqMap.get(a))
+    .mapToInt(Integer::intValue).toArray();</pre>`
+          }
+        ]
+      },
+      {
+        num: 19,
+        title: "Meeting Rooms — Interval Overlap",
+        diff: "intermediate",
+        concept: `Sort intervals by start time. Track the end of the last meeting. If next start &lt; last end → overlap (need extra room). Use a <code>PriorityQueue</code> of end times to count minimum rooms needed.`,
+        tip: "🧠 PQ of end times = current 'in-use' rooms. If soonest-ending room frees up before next start, reuse it.",
+        qa: [
+          {
+            q: "How to check if a person can attend ALL meetings?",
+            a: "Sort by start, check if any intervals[i].end > intervals[i+1].start. One conflict = false."
+          },
+          {
+            q: "Code for minimum meeting rooms?",
+            a: `<pre>Arrays.sort(intervals, (a,b) -&gt; a[<span class="nu">0</span>]-b[<span class="nu">0</span>]);
+PriorityQueue&lt;Integer&gt; pq = <span class="kw">new</span> PriorityQueue&lt;&gt;();
+<span class="kw">for</span> (<span class="kw">int</span>[] i : intervals) {
+    <span class="kw">if</span> (!pq.isEmpty() &amp;&amp; pq.peek() &lt;= i[<span class="nu">0</span>]) pq.poll();
+    pq.offer(i[<span class="nu">1</span>]);
+}
+<span class="kw">return</span> pq.size();</pre>`
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "priorityqueue",
+    label: "🏆 Priority Queue",
+    cards: [
+      {
+        num: 20,
+        title: "Kth Largest Element",
+        diff: "intermediate",
+        concept: `Maintain a min-heap (min <code>PriorityQueue</code>) of size <code>k</code>. Stream through the array: if heap size < k or current element > heap top, add it. If heap exceeds k, remove the minimum. The top of the heap is the kth largest.`,
+        tip: "🧠 Min-heap of k elements: the smallest of the top-k survivors is always at the root. Root = kth largest.",
+        qa: [
+          {
+            q: "Why min-heap for kth LARGEST?",
+            a: "A min-heap of k elements keeps the k largest seen so far. The smallest among them (the root) is the kth largest overall."
+          },
+          {
+            q: "What's the time complexity?",
+            a: "O(n log k) — n inserts, each at O(log k) cost."
+          }
+        ]
+      },
+      {
+        num: 21,
+        title: "Top K Frequent Elements",
+        diff: "intermediate",
+        concept: `Build a frequency map, then use a min-heap of size k sorted by frequency. Alternatively, use bucket sort: create buckets of size n+1 indexed by frequency; iterate buckets from high to low to collect top k.`,
+        tip: "🧠 Bucket sort trick: index = frequency, value = list of numbers. Scan right-to-left for top k.",
+        qa: [
+          {
+            q: "What is the time complexity of the bucket sort approach?",
+            a: "O(n) — building the map is O(n), building and scanning buckets is O(n)."
+          },
+          {
+            q: "PriorityQueue with custom comparator for this problem?",
+            a: `<pre>PriorityQueue&lt;Integer&gt; pq =
+  <span class="kw">new</span> PriorityQueue&lt;&gt;((a,b) -&gt; freqMap.get(a)-freqMap.get(b));
+<span class="kw">for</span> (<span class="kw">int</span> key : freqMap.keySet()) {
+    pq.offer(key);
+    <span class="kw">if</span> (pq.size() &gt; k) pq.poll();
+}</pre>`
+          }
+        ]
+      },
+      {
+        num: 22,
+        title: "Merge K Sorted Lists",
+        diff: "intermediate",
+        concept: `Add the head node of each list into a min-heap sorted by node value. Poll the minimum, add to result, then push that node's <code>next</code> into the heap if it's non-null. Repeat until heap is empty.`,
+        tip: "🧠 Heap = tournament bracket. Always the global minimum is at the top. Add next competitor when one exits.",
+        qa: [
+          {
+            q: "How to make ListNode comparable in the PriorityQueue?",
+            a: `<pre>PriorityQueue&lt;ListNode&gt; pq =
+  <span class="kw">new</span> PriorityQueue&lt;&gt;((a,b) -&gt; a.val - b.val);</pre>`
+          },
+          {
+            q: "Time complexity for k lists with total n nodes?",
+            a: "O(n log k) — each node is pushed/popped once, heap size is at most k."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "streams",
+    label: "🌊 Streams",
+    cards: [
+      {
+        num: 23,
+        title: "Java Streams — Core Operations",
+        diff: "basic",
+        concept: `Key methods: <code>filter(predicate)</code>, <code>map(function)</code>, <code>sorted(comparator)</code>, <code>distinct()</code>, <code>limit(n)</code>, <code>collect(Collectors.toList())</code>, <code>reduce()</code>. Streams are lazy — only evaluated at terminal operations.`,
+        tip: "🧠 Stream pipeline: source → intermediate ops (lazy) → terminal op (triggers execution).",
+        qa: [
+          {
+            q: "Find the sum of all even numbers in a list using streams.",
+            a: `<pre>list.stream()
+    .filter(n -&gt; n % <span class="nu">2</span> == <span class="nu">0</span>)
+    .mapToInt(Integer::intValue)
+    .sum();</pre>`
+          },
+          {
+            q: "What is the difference between map() and flatMap()?",
+            a: "map() transforms each element 1-to-1. flatMap() transforms each element into a stream and flattens all those streams into one."
+          }
+        ]
+      },
+      {
+        num: 24,
+        title: "Group and Count with Collectors",
+        diff: "intermediate",
+        concept: `<code>Collectors.groupingBy()</code> produces a <code>Map&lt;K, List&lt;V&gt;&gt;</code>. Combine with <code>Collectors.counting()</code> to get <code>Map&lt;K, Long&gt;</code>. Use <code>Collectors.joining(",")</code> for string grouping.`,
+        tip: "🧠 groupingBy is the stream version of SQL GROUP BY. counting() is COUNT(*).",
+        qa: [
+          {
+            q: "Group a list of words by their length.",
+            a: `<pre>Map&lt;Integer, List&lt;String&gt;&gt; grouped =
+  words.stream().collect(
+    Collectors.groupingBy(String::length));</pre>`
+          },
+          {
+            q: "Find the most frequent character in a string.",
+            a: `<pre>str.chars()
+   .mapToObj(c -&gt; (<span class="kw">char</span>)c)
+   .collect(Collectors.groupingBy(c -&gt; c, Collectors.counting()))
+   .entrySet().stream()
+   .max(Map.Entry.comparingByValue())
+   .get().getKey();</pre>`
+          }
+        ]
+      },
+      {
+        num: 25,
+        title: "Optional — Avoiding NullPointerException",
+        diff: "basic",
+        concept: `<code>Optional&lt;T&gt;</code> wraps a potentially null value. Key methods: <code>of()</code>, <code>ofNullable()</code>, <code>isPresent()</code>, <code>get()</code>, <code>orElse(default)</code>, <code>orElseGet(supplier)</code>, <code>map()</code>, <code>filter()</code>. Never call <code>get()</code> without checking!`,
+        tip: "🧠 Optional = a box that may or may not have a gift. orElse = 'if empty, use this backup'.",
+        qa: [
+          {
+            q: "What's the difference between orElse() and orElseGet()?",
+            a: "orElse(value) always evaluates the argument eagerly. orElseGet(supplier) evaluates lazily — only when needed. Use orElseGet for expensive defaults."
+          },
+          {
+            q: "How to chain Optional with stream operations?",
+            a: `<pre>Optional&lt;String&gt; result = list.stream()
+  .filter(s -&gt; s.startsWith(<span class="st">"A"</span>))
+  .findFirst();
+result.ifPresent(System.out::println);</pre>`
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "reverse",
+    label: "↩️ Reverse",
+    cards: [
+      {
+        num: 26,
+        title: "Reverse a String / StringBuilder",
+        diff: "basic",
+        concept: `<code>new StringBuilder(str).reverse().toString()</code> is the one-liner. Manually: two-pointer swap on char array. <code>String.valueOf(arr)</code> converts back. Remember — Strings are immutable in Java!`,
+        tip: "🧠 StringBuilder.reverse() is O(n) and handles Unicode surrogates correctly. Prefer it over manual loops.",
+        qa: [
+          {
+            q: "Reverse only the vowels in a string.",
+            a: "Two pointers from both ends. Skip non-vowels by advancing the pointer. Swap when both are vowels."
+          },
+          {
+            q: "Check if a string is a palindrome using two pointers.",
+            a: `<pre><span class="kw">int</span> l=<span class="nu">0</span>, r=s.length()-<span class="nu">1</span>;
+<span class="kw">while</span>(l&lt;r){
+  <span class="kw">if</span>(s.charAt(l)!=s.charAt(r)) <span class="kw">return false</span>;
+  l++; r--;
+}
+<span class="kw">return true</span>;</pre>`
+          }
+        ]
+      },
+      {
+        num: 27,
+        title: "Reverse Integer — Handle Overflow",
+        diff: "intermediate",
+        concept: `Extract digits with <code>digit = n % 10; n /= 10</code>. Build reverse: <code>rev = rev * 10 + digit</code>. Before multiplying, check overflow: if <code>rev > Integer.MAX_VALUE / 10</code> → overflow.`,
+        tip: "🧠 Check overflow BEFORE multiplying, not after. Compare rev to MAX_VALUE/10.",
+        qa: [
+          {
+            q: "What is Integer.MAX_VALUE in Java?",
+            a: "2,147,483,647 (2³¹ - 1). Integer.MIN_VALUE is -2,147,483,648. These are important bounds to memorise."
+          },
+          {
+            q: "How to handle negative numbers?",
+            a: "The modulo operation works naturally for negatives in Java. The sign follows automatically — just check bounds using absolute values."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "hashing",
+    label: "🗝️ HashMap / Set",
+    cards: [
+      {
+        num: 28,
+        title: "HashMap Patterns — getOrDefault & computeIfAbsent",
+        diff: "basic",
+        concept: `<code>map.getOrDefault(key, 0)</code> avoids null checks. <code>map.merge(key, 1, Integer::sum)</code> is the cleanest frequency counter. <code>map.computeIfAbsent(key, k -> new ArrayList<>())</code> is the pattern for building adjacency lists.`,
+        tip: "🧠 merge() = getOrDefault + put in one call. Use it for all frequency counting.",
+        qa: [
+          {
+            q: "How to count frequency of each character in a string?",
+            a: `<pre><span class="kw">for</span> (<span class="kw">char</span> c : s.toCharArray())
+    map.merge(c, <span class="nu">1</span>, Integer::sum);</pre>`
+          },
+          {
+            q: "What is the time complexity of HashMap operations?",
+            a: "O(1) average for put, get, containsKey. O(n) worst case (all keys hash to same bucket). In practice, Java's HashMap rehashes to keep O(1)."
+          }
+        ]
+      },
+      {
+        num: 29,
+        title: "Contains Duplicate & Set Tricks",
+        diff: "basic",
+        concept: `<code>HashSet.add()</code> returns <code>false</code> if element already exists. Use this to detect duplicates in O(n) time. <code>new HashSet&lt;&gt;(list).size() != list.size()</code> is a one-line duplicate check.`,
+        tip: "🧠 Set.add() returns true only on new elements. false = duplicate found. Use it as a detector.",
+        qa: [
+          {
+            q: "How to find the first non-repeating character?",
+            a: "Use LinkedHashMap to preserve insertion order. Count frequencies, then iterate keys to find count == 1."
+          },
+          {
+            q: "Find all duplicates in an array using O(1) space.",
+            a: "For arrays with values in range [1,n], use index marking: negate nums[Math.abs(num)-1]. If already negative, it's a duplicate."
+          }
+        ]
+      },
+      {
+        num: 30,
+        title: "Group Anagrams",
+        diff: "intermediate",
+        concept: `For each word, sort its characters to create a canonical key (e.g., "eat" → "aet"). All anagrams share the same key. Use <code>HashMap&lt;String, List&lt;String&gt;&gt;</code> to group them.`,
+        tip: "🧠 Sorted string = fingerprint of an anagram group. Same fingerprint = same family.",
+        qa: [
+          {
+            q: "Alternative key without sorting?",
+            a: "Use an int[26] frequency array converted to string key, e.g., '#1#0#0...' — this gives O(n) per word instead of O(n log n) sorting."
+          },
+          {
+            q: "Write the complete solution.",
+            a: `<pre>Map&lt;String, List&lt;String&gt;&gt; map = <span class="kw">new</span> HashMap&lt;&gt;();
+<span class="kw">for</span> (String s : strs) {
+    <span class="kw">char</span>[] ca = s.toCharArray(); Arrays.sort(ca);
+    String key = String.valueOf(ca);
+    map.computeIfAbsent(key, k -&gt; <span class="kw">new</span> ArrayList&lt;&gt;()).add(s);
+}
+<span class="kw">return new</span> ArrayList&lt;&gt;(map.values());</pre>`
+          }
+        ]
+      }
+    ]
+  }
+];
+
+// ── Build UI ──────────────────────────────────────────────
+const nav = document.getElementById('topic-nav');
+const main = document.getElementById('main-content');
+const progressBar = document.getElementById('progress-bar');
+let currentTopicIdx = 0;
+
+function buildTopicBtn(topic, idx) {
+  const btn = document.createElement('button');
+  btn.className = 'topic-btn' + (idx === 0 ? ' active' : '');
+  btn.textContent = topic.label;
+  btn.dataset.idx = idx;
+  btn.addEventListener('click', () => switchTopic(idx));
+  return btn;
+}
+
+function buildCard(card) {
+  return `
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">#${card.num}</span>
+      <span class="card-title">${card.title}</span>
+      <span class="diff-badge ${card.diff === 'basic' ? 'diff-basic' : 'diff-intermediate'}">
+        ${card.diff === 'basic' ? '🟢 Basic' : '🟠 Intermediate'}
+      </span>
+    </div>
+    <div class="section-label">🔑 Key Concept</div>
+    <div class="concepts"><p>${card.concept}</p></div>
+    <div class="memory-tip"><span>🧠</span> ${card.tip.replace('🧠 ','')}</div>
+    <div class="qa-section">
+      <div class="section-label">❓ Interview Q&A</div>
+      ${card.qa.map(qa => `
+        <details>
+          <summary>${qa.q}</summary>
+          <div class="answer">${qa.a}</div>
+        </details>
+      `).join('')}
+    </div>
+  </div>`;
+}
+
+function buildPanel(topic, idx) {
+  const div = document.createElement('div');
+  div.className = 'topic-panel' + (idx === 0 ? ' active' : '');
+  div.id = 'panel-' + idx;
+  div.innerHTML = topic.cards.map(buildCard).join('') + `
+    <div class="nav-strip">
+      <button class="nav-btn" id="prev-btn" onclick="switchTopic(${idx-1})" ${idx===0?'disabled':''}>← Prev</button>
+      <span class="topic-counter">${idx+1} / ${topics.length}</span>
+      <button class="nav-btn" id="next-btn" onclick="switchTopic(${idx+1})" ${idx===topics.length-1?'disabled':''}>Next →</button>
+    </div>`;
+  return div;
+}
+
+// Render
+topics.forEach((topic, idx) => {
+  nav.appendChild(buildTopicBtn(topic, idx));
+  main.appendChild(buildPanel(topic, idx));
+});
+
+function switchTopic(idx) {
+  if (idx < 0 || idx >= topics.length) return;
+  // Deactivate old
+  document.querySelectorAll('.topic-btn')[currentTopicIdx].classList.remove('active');
+  document.getElementById('panel-' + currentTopicIdx).classList.remove('active');
+  // Activate new
+  currentTopicIdx = idx;
+  document.querySelectorAll('.topic-btn')[idx].classList.add('active');
+  document.getElementById('panel-' + idx).classList.add('active');
+  // Progress
+  progressBar.style.width = ((idx + 1) / topics.length * 100) + '%';
+  // Scroll to topic nav
+  document.getElementById('topic-nav').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// Arrow key navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') switchTopic(currentTopicIdx + 1);
+  if (e.key === 'ArrowLeft') switchTopic(currentTopicIdx - 1);
+});
+
+// Init progress bar
+progressBar.style.width = (1 / topics.length * 100) + '%';
+</script>
+</body>
+</html>

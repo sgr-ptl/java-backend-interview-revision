@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Phase 11 — Kafka, Kafka Streams & Azure</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Clash+Display:wght@400;500;600;700&family=Manrope:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0a0c0f;
+  --bg2:#0f1218;
+  --surf:#131820;
+  --surf2:#1a2230;
+  --surf3:#1e2840;
+  --bdr:#1e2d40;
+  --bdr2:#2a3d58;
+  --bdr3:#3a5070;
+
+  --ink:#e8f0f8;
+  --ink2:#c0ccd8;
+  --muted:#6080a0;
+  --muted2:#405870;
+
+  /* Kafka yellow */
+  --kf:#f5c842;
+  --kf-d:#c89e20;
+  --kf-dk:#282010;
+  --kf-l:rgba(245,200,66,0.12);
+  --kf-b:rgba(245,200,66,0.35);
+
+  /* Streams cyan */
+  --st:#00e8d8;
+  --st-d:#00b8a8;
+  --st-dk:#001a18;
+  --st-l:rgba(0,232,216,0.1);
+  --st-b:rgba(0,232,216,0.3);
+
+  /* Azure red */
+  --az:#ff4e6a;
+  --az-d:#cc3050;
+  --az-dk:#200810;
+  --az-l:rgba(255,78,106,0.1);
+  --az-b:rgba(255,78,106,0.3);
+
+  /* Green good */
+  --gn:#38e878;
+  --gn-l:rgba(56,232,120,0.1);
+  --gn-b:rgba(56,232,120,0.3);
+
+  /* Purple config */
+  --pu:#a878f8;
+  --pu-l:rgba(168,120,248,0.1);
+  --pu-b:rgba(168,120,248,0.3);
+
+  --code-bg:#070a0d;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Manrope',sans-serif;
+  min-height:100vh;
+  background-image:
+    repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(30,45,64,0.3) 39px,rgba(30,45,64,0.3) 40px),
+    repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(30,45,64,0.15) 39px,rgba(30,45,64,0.15) 40px);
+}
+
+/* ═══ HEADER ═══════════════════════════════════ */
+.hdr{
+  background:var(--bg2);
+  border-bottom:1px solid var(--bdr);
+  position:relative;overflow:hidden;
+}
+.hdr-scanline{
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent 0,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px);
+  pointer-events:none;
+}
+.hdr-glow{
+  position:absolute;top:-80px;left:50%;transform:translateX(-50%);
+  width:800px;height:300px;
+  background:radial-gradient(ellipse,rgba(245,200,66,0.06) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hdr-top{
+  display:flex;
+  background:var(--kf);
+  padding:0;
+}
+.hdr-top-seg{
+  padding:5px 16px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--bg);
+}
+.hdr-top-seg.az{background:var(--az);color:#fff;}
+.hdr-top-seg.st{background:var(--st);color:var(--bg);}
+.hdr-top-gap{flex:1;background:transparent;}
+
+.hdr-inner{padding:40px 60px 36px;}
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;
+  letter-spacing:3px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;
+}
+.eyebrow span{color:var(--kf);}
+.eyebrow::before{content:'>';color:var(--kf);}
+
+h1{
+  font-family:'Clash Display',sans-serif;
+  font-size:clamp(28px,4.5vw,52px);
+  font-weight:700;line-height:1.05;
+  letter-spacing:-1px;
+}
+h1 .k{color:var(--kf);}
+h1 .s{color:var(--st);}
+h1 .a{color:var(--az);}
+
+.hdr-sub{
+  margin-top:10px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--muted);
+}
+.hdr-chips{display:flex;gap:16px;margin-top:18px;flex-wrap:wrap;}
+.chip{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:var(--muted2);
+  display:flex;align-items:center;gap:5px;
+}
+.chip b{color:var(--kf);}
+
+/* ═══ NAV ════════════════════════════════════ */
+.nav{
+  background:var(--bg2);
+  border-bottom:1px solid var(--bdr);
+  padding:0 60px;
+  display:flex;overflow-x:auto;scrollbar-width:none;
+}
+.nav::-webkit-scrollbar{display:none;}
+.nb{
+  flex-shrink:0;
+  padding:12px 18px;
+  border:none;border-bottom:2px solid transparent;
+  background:transparent;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;font-weight:600;
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+  display:flex;align-items:center;gap:7px;letter-spacing:0.5px;
+}
+.nb:hover{color:var(--ink2);background:var(--surf);}
+.nb.on.kf{color:var(--kf);border-bottom-color:var(--kf);}
+.nb.on.st{color:var(--st);border-bottom-color:var(--st);}
+.nb.on.az{color:var(--az);border-bottom-color:var(--az);}
+.nn{
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  padding:2px 5px;border-radius:2px;
+  background:var(--surf2);color:var(--muted);
+}
+.nb.on.kf .nn{background:var(--kf-l);color:var(--kf);}
+.nb.on.st .nn{background:var(--st-l);color:var(--st);}
+.nb.on.az .nn{background:var(--az-l);color:var(--az);}
+
+/* PROGRESS */
+.prog{
+  background:var(--bg2);border-bottom:1px solid var(--bdr);
+  padding:10px 60px;display:flex;align-items:center;gap:4px;
+}
+.plbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-right:8px;white-space:nowrap;}
+.ps{flex:1;height:2px;border-radius:1px;background:var(--bdr);cursor:pointer;transition:background .25s;}
+.ps.dk{background:rgba(245,200,66,0.3);}
+.ps.ds{background:rgba(0,232,216,0.3);}
+.ps.da{background:rgba(255,78,106,0.3);}
+.ps.ak{background:var(--kf);}
+.ps.as{background:var(--st);}
+.ps.aa{background:var(--az);}
+.psep{width:8px;flex-shrink:0;}
+.kbh{
+  text-align:center;padding:6px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:var(--muted2);
+  background:var(--surf);border-bottom:1px solid var(--bdr);
+}
+kbd{background:var(--surf2);border:1px solid var(--bdr2);padding:1px 5px;border-radius:2px;font-size:10px;color:var(--muted);}
+
+/* ═══ MAIN ════════════════════════════════════ */
+.main{max-width:1100px;margin:0 auto;padding:30px 60px 64px;}
+.card{display:none;animation:fi .28s ease;}
+.card.on{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* ═══ CARD ════════════════════════════════════ */
+.band{
+  background:var(--surf);
+  border:1px solid var(--bdr);
+  border-bottom:none;
+  border-radius:10px 10px 0 0;
+  padding:24px 32px;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:20px;
+  position:relative;overflow:hidden;
+}
+.band-bar{position:absolute;top:0;left:0;right:0;height:3px;}
+.bl{display:flex;align-items:flex-start;gap:14px;}
+.tnum{
+  font-family:'JetBrains Mono',monospace;
+  font-size:46px;font-weight:800;line-height:1;
+  flex-shrink:0;width:58px;text-align:right;
+  color:var(--bdr2);margin-top:1px;
+}
+.ttag{
+  display:inline-flex;font-family:'JetBrains Mono',monospace;
+  font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  padding:3px 9px;border-radius:2px;margin-bottom:7px;
+}
+.btitle{
+  font-family:'Clash Display',sans-serif;
+  font-size:20px;font-weight:700;color:var(--ink);line-height:1.2;
+}
+.bsub{margin-top:4px;font-size:13px;color:var(--muted);line-height:1.55;}
+.pbadge{
+  flex-shrink:0;font-family:'JetBrains Mono',monospace;
+  font-size:9px;font-weight:700;letter-spacing:1px;
+  padding:4px 11px;border-radius:20px;margin-top:4px;text-transform:uppercase;
+}
+.content{
+  background:var(--surf);
+  border:1px solid var(--bdr);border-top:none;
+  border-radius:0 0 10px 10px;
+  padding:0 32px 32px;
+}
+
+/* TABS */
+.stabs{
+  display:flex;border-bottom:1px solid var(--bdr);
+  margin:0 -32px 24px;padding:0 32px;overflow-x:auto;scrollbar-width:none;
+}
+.stabs::-webkit-scrollbar{display:none;}
+.stab{
+  flex-shrink:0;padding:11px 14px;
+  font-size:10px;font-weight:700;color:var(--muted);
+  cursor:pointer;border-bottom:2px solid transparent;
+  transition:all .2s;font-family:'JetBrains Mono',monospace;
+  letter-spacing:.5px;text-transform:uppercase;
+  display:flex;align-items:center;gap:5px;
+}
+.stab:hover{color:var(--ink2);}
+.stab.onk{color:var(--kf);border-bottom-color:var(--kf);}
+.stab.ons{color:var(--st);border-bottom-color:var(--st);}
+.stab.ona{color:var(--az);border-bottom-color:var(--az);}
+.panel{display:none;}.panel.on{display:block;}
+
+/* SECTION TITLE */
+.stitle{
+  font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;color:var(--muted);
+  margin-bottom:12px;padding-bottom:7px;border-bottom:1px solid var(--bdr);
+}
+
+/* SIMPLE BOX */
+.sbox{
+  border-radius:8px;padding:13px 16px;margin-bottom:16px;
+  font-size:13px;line-height:1.72;display:flex;gap:11px;
+}
+.sboxk{background:var(--kf-l);border:1px solid var(--kf-b);}
+.sboxs{background:var(--st-l);border:1px solid var(--st-b);}
+.sboxa{background:var(--az-l);border:1px solid var(--az-b);}
+.sico{font-size:17px;flex-shrink:0;}
+.stxt{color:var(--ink2);}
+.stxt strong{color:var(--ink);}
+
+/* KEY POINTS */
+.kps{display:flex;flex-direction:column;gap:9px;}
+.kp{
+  display:flex;gap:12px;padding:12px 15px;
+  border-radius:8px;border:1px solid var(--bdr);
+  background:var(--surf2);font-size:13px;line-height:1.68;
+  transition:border-color .2s;
+}
+.kp:hover{border-color:var(--bdr2);}
+.ki{font-size:15px;flex-shrink:0;margin-top:2px;}
+.kt{flex:1;color:var(--ink2);}
+.kt strong{color:var(--ink);}
+.kt code{
+  background:var(--kf-l);border:1px solid var(--kf-b);color:var(--kf);
+  padding:1px 5px;border-radius:3px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+}
+.ck{color:var(--kf);font-weight:700;}
+.cs{color:var(--st);font-weight:700;}
+.ca{color:var(--az);font-weight:700;}
+.cg{color:var(--gn);font-weight:700;}
+.cp{color:var(--pu);font-weight:700;}
+
+/* CODE */
+.cblock{
+  background:var(--code-bg);
+  border-radius:8px;overflow:hidden;
+  border:1px solid var(--bdr);
+}
+.chdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 15px;background:rgba(255,255,255,0.03);
+  border-bottom:1px solid var(--bdr);
+}
+.cdots{display:flex;gap:5px;}
+.dot{width:10px;height:10px;border-radius:50%;}
+.dr{background:#ff5f57;}.dy{background:#febc2e;}.dg{background:#28c840;}
+.clang{
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  letter-spacing:1.5px;color:var(--muted2);text-transform:uppercase;
+}
+pre{
+  padding:20px;overflow-x:auto;
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;line-height:1.8;color:#708898;
+}
+.kw{color:#f5c842;}.tp{color:#78d898;}.fn{color:#68c8f0;}.st2{color:#f09870;}
+.cm{color:#3a5060;font-style:italic;}.nb{color:#d0a060;}.an{color:#c890f0;}.cl{color:#78d898;}
+
+/* IQ */
+.iqs{display:flex;flex-direction:column;gap:9px;}
+.iq{
+  border:1px solid var(--bdr);border-radius:8px;overflow:hidden;
+  transition:border-color .2s;
+}
+.iq:hover{border-color:var(--bdr2);}
+.iqh{
+  padding:12px 15px;cursor:pointer;
+  display:flex;align-items:flex-start;gap:10px;
+  background:var(--surf2);user-select:none;
+}
+.iqtag{
+  font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  letter-spacing:1px;padding:3px 7px;border-radius:2px;
+  white-space:nowrap;flex-shrink:0;margin-top:2px;text-transform:uppercase;
+}
+.tm{background:rgba(255,78,106,0.15);color:var(--az);border:1px solid var(--az-b);}
+.tt{background:rgba(245,200,66,0.12);color:var(--kf-d);border:1px solid var(--kf-b);}
+.tc{background:var(--st-l);color:var(--st-d);border:1px solid var(--st-b);}
+.tp2{background:var(--pu-l);color:var(--pu);border:1px solid var(--pu-b);}
+.taz{background:var(--az-l);color:var(--az);border:1px solid var(--az-b);}
+.iqqt{font-size:13px;font-weight:700;color:var(--ink);flex:1;line-height:1.5;}
+.iqtgl{color:var(--muted);font-size:14px;flex-shrink:0;margin-top:3px;transition:transform .25s;}
+.iq.open .iqtgl{transform:rotate(180deg);}
+.iqb{
+  display:none;padding:15px;font-size:13px;line-height:1.78;
+  color:var(--ink2);border-top:1px solid var(--bdr);
+  background:var(--surf);
+}
+.iq.open .iqb{display:block;}
+.iqb strong{color:var(--ink);}
+.iqb code{
+  background:var(--kf-l);border:1px solid var(--kf-b);color:var(--kf);
+  padding:1px 5px;border-radius:3px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+}
+.trick{
+  margin-top:10px;padding:10px 13px;
+  background:rgba(245,200,66,0.08);
+  border-left:3px solid var(--kf);
+  border-radius:0 5px 5px 0;font-size:12px;color:var(--kf-d);
+}
+.warn{
+  margin-top:10px;padding:10px 13px;
+  background:var(--az-l);border-left:3px solid var(--az);
+  border-radius:0 5px 5px 0;font-size:12px;color:var(--az);
+}
+.info{
+  margin-top:10px;padding:10px 13px;
+  background:var(--st-l);border-left:3px solid var(--st);
+  border-radius:0 5px 5px 0;font-size:12px;color:var(--st-d);
+}
+
+/* TABLE */
+.tbl{
+  width:100%;border-collapse:collapse;font-size:12.5px;
+  border-radius:8px;overflow:hidden;border:1px solid var(--bdr);
+}
+.tbl th{
+  padding:9px 13px;text-align:left;
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  letter-spacing:1px;text-transform:uppercase;font-weight:700;
+  border-bottom:1px solid var(--bdr);
+}
+.thk{background:var(--kf-l);color:var(--kf);}
+.ths{background:var(--st-l);color:var(--st);}
+.tha{background:var(--az-l);color:var(--az);}
+.tbl td{
+  padding:9px 13px;
+  border-bottom:1px solid rgba(30,45,64,0.8);
+  color:var(--ink2);vertical-align:top;line-height:1.5;
+}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--surf2);}
+.tbl td code{
+  background:var(--kf-l);color:var(--kf);
+  padding:1px 5px;border-radius:3px;
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;
+  border:1px solid var(--kf-b);
+}
+
+/* FLOW */
+.flow{
+  background:var(--surf2);border:1px solid var(--bdr);
+  border-radius:8px;padding:16px 18px;overflow-x:auto;margin-bottom:14px;
+}
+.fr{display:flex;align-items:center;flex-wrap:nowrap;gap:0;}
+.fn2{
+  flex-shrink:0;background:var(--surf);
+  border:1.5px solid var(--bdr2);border-radius:6px;
+  padding:8px 12px;font-family:'JetBrains Mono',monospace;
+  font-size:10px;font-weight:600;color:var(--ink2);
+  white-space:nowrap;text-align:center;
+}
+.fnk{background:var(--kf-l);border-color:var(--kf-b);color:var(--kf);}
+.fns{background:var(--st-l);border-color:var(--st-b);color:var(--st);}
+.fna{background:var(--az-l);border-color:var(--az-b);color:var(--az);}
+.fng{background:var(--gn-l);border-color:var(--gn-b);color:var(--gn);}
+.fnp{background:var(--pu-l);border-color:var(--pu-b);color:var(--pu);}
+.fa{color:var(--muted2);font-size:14px;padding:0 6px;flex-shrink:0;}
+.fsub{
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:var(--muted);margin-top:3px;text-align:center;
+}
+
+/* MEMORY TIP */
+.mtip{
+  border-radius:8px;padding:16px 18px;font-size:13px;line-height:1.72;
+  display:flex;gap:12px;
+}
+.mtipk{background:var(--kf-l);border:1px solid var(--kf-b);}
+.mtipk strong{color:var(--kf);}
+.mtips{background:var(--st-l);border:1px solid var(--st-b);}
+.mtips strong{color:var(--st);}
+.mtipa{background:var(--az-l);border:1px solid var(--az-b);}
+.mtipa strong{color:var(--az);}
+.mico{font-size:22px;flex-shrink:0;}
+
+.tags{display:flex;flex-wrap:wrap;gap:7px;}
+.tag{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  padding:3px 10px;border-radius:20px;font-weight:600;
+}
+.gap{margin-bottom:20px;}.gap-sm{margin-bottom:12px;}
+
+@media(max-width:640px){
+  .main,.nav,.prog,.hdr-inner{padding-left:20px;padding-right:20px;}
+  .band,.content{padding-left:20px;padding-right:20px;}
+  .stabs{margin:0 -20px 20px;padding:0 20px;}
+}
+
+.footer{
+  text-align:center;padding:24px;
+  color:var(--muted2);
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;
+  background:var(--bg2);border-top:1px solid var(--bdr);
+  margin-top:48px;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div class="hdr">
+  <div class="hdr-scanline"></div>
+  <div class="hdr-glow"></div>
+  <div class="hdr-top">
+    <div class="hdr-top-seg">Apache Kafka</div>
+    <div class="hdr-top-seg st">Kafka Streams</div>
+    <div class="hdr-top-seg az">Azure Event Hubs</div>
+    <div class="hdr-top-gap"></div>
+  </div>
+  <div class="hdr-inner">
+    <div class="eyebrow"><span>PHASE 11</span> · Event Streaming &amp; Cloud</div>
+    <h1><span class="k">Kafka</span>, <span class="s">Streams</span><br>&amp; <span class="a">Azure Cloud</span></h1>
+    <div class="hdr-sub">// Topics · Senior Engineer Level · Producers · Consumers · Partitions · KStreams · Azure Event Hubs · Spring Cloud Azure</div>
+    <div class="hdr-chips">
+      <div class="chip">Topics <b>6</b></div>
+      <div class="chip">Stack <b>Kafka 3.x · Spring Kafka · Kafka Streams · Azure</b></div>
+      <div class="chip">Est. <b>3–4 days</b></div>
+      <div class="chip">Priority <b>🔴 HIGH</b></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ NAV ═══ -->
+<div class="nav" id="tnav">
+  <button class="nb on kf" onclick="go(0,0)" id="nb0"><span class="nn">01</span>Kafka Core</button>
+  <button class="nb" onclick="go(1,0)" id="nb1"><span class="nn">02</span>Producers &amp; Consumers</button>
+  <button class="nb" onclick="go(2,0)" id="nb2"><span class="nn">03</span>Spring Kafka</button>
+  <button class="nb" onclick="go(3,1)" id="nb3"><span class="nn">04</span>Kafka Streams</button>
+  <button class="nb" onclick="go(4,1)" id="nb4"><span class="nn">05</span>Streams DSL</button>
+  <button class="nb" onclick="go(5,2)" id="nb5"><span class="nn">06</span>Azure Event Hubs</button>
+</div>
+<div class="prog">
+  <span class="plbl">Progress</span>
+  <div class="ps ak" id="ps0" onclick="go(0,0)"></div>
+  <div class="ps" id="ps1" onclick="go(1,0)"></div>
+  <div class="ps" id="ps2" onclick="go(2,0)"></div>
+  <div class="psep"></div>
+  <div class="ps" id="ps3" onclick="go(3,1)"></div>
+  <div class="ps" id="ps4" onclick="go(4,1)"></div>
+  <div class="psep"></div>
+  <div class="ps" id="ps5" onclick="go(5,2)"></div>
+</div>
+<div class="kbh">Navigate: <kbd>←</kbd> <kbd>→</kbd> arrow keys · Click tabs for sections</div>
+
+<div class="main">
+
+<!-- ════════════════════════════════════════════
+     C0 — KAFKA CORE ARCHITECTURE
+════════════════════════════════════════════ -->
+<div class="card on" id="c0">
+  <div class="band">
+    <div class="band-bar" style="background:linear-gradient(90deg,var(--kf),var(--kf-d))"></div>
+    <div class="bl">
+      <div class="tnum" style="color:var(--kf-b)">01</div>
+      <div>
+        <div class="ttag" style="background:var(--kf-l);color:var(--kf);border:1px solid var(--kf-b)">Apache Kafka</div>
+        <div class="btitle">Kafka Core Architecture</div>
+        <div class="bsub">Topics · Partitions · Brokers · Consumer Groups · Offsets — the distributed log that changed everything</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--az-l);color:var(--az);border:1px solid var(--az-b)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb0">
+      <div class="stab onk" onclick="tab(0,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(0,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(0,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(0,'m')">🧠 Memory</div>
+    </div>
+
+    <div class="panel on" id="t0c">
+      <div class="sbox sboxk"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> Kafka is a distributed, fault-tolerant, high-throughput message broker. Think of it as an append-only log database for events. Producers write to it, consumers read from it at their own pace, and Kafka keeps data for a configurable time. It can handle millions of events per second without losing anything.</div></div>
+
+      <div class="stitle">◆ Architecture Flow</div>
+      <div class="flow">
+        <div class="fr" style="flex-wrap:wrap;gap:4px">
+          <div><div class="fnk">Producer<br><small>App → sends</small></div><div class="fsub">key+value+headers</div></div>
+          <div class="fa">→</div>
+          <div><div class="fnp">Topic<br><small>orders</small></div><div class="fsub">logical channel</div></div>
+          <div class="fa">→</div>
+          <div><div class="fn2">Partition 0<br><small>[offset 0,1,2…]</small></div></div>
+          <div class="fa">+</div>
+          <div><div class="fn2">Partition 1<br><small>[offset 0,1,2…]</small></div></div>
+          <div class="fa">+</div>
+          <div><div class="fn2">Partition 2<br><small>[offset 0,1,2…]</small></div></div>
+          <div class="fa">→</div>
+          <div><div class="fnk">Consumer<br><small>Group A</small></div><div class="fsub">reads &amp; commits offset</div></div>
+        </div>
+      </div>
+
+      <div class="kps">
+        <div class="kp"><div class="ki">📂</div><div class="kt"><strong class="ck">Topic</strong> — A named category/feed for messages. Like a database table or a folder. Messages are ordered within a partition, but not across partitions. Topics are split into partitions for parallelism and scalability. Retain messages for a configurable duration (default 7 days) — regardless of whether anyone consumed them.</div></div>
+        <div class="kp"><div class="ki">🗂️</div><div class="kt"><strong class="ck">Partition</strong> — The unit of parallelism in Kafka. Each partition is an ordered, immutable, append-only log. Replicated across multiple brokers for fault tolerance. <strong>Partitions determine max parallelism</strong>: a topic with 12 partitions can have at most 12 consumers in a group actively consuming in parallel. More partitions = higher throughput but more overhead.</div></div>
+        <div class="kp"><div class="ki">📏</div><div class="kt"><strong class="ck">Offset</strong> — A sequential ID assigned to each message within a partition. Consumers track which messages they've processed by committing offsets to Kafka (stored in the internal <code>__consumer_offsets</code> topic). This enables restart from failure: if a consumer crashes, it resumes from the last committed offset.</div></div>
+        <div class="kp"><div class="ki">👥</div><div class="kt"><strong class="ck">Consumer Group</strong> — A group of consumers that together consume all partitions of a topic. Each partition is assigned to exactly ONE consumer in the group at a time. Multiple groups can independently consume the same topic — each gets its own copy. This is how pub-sub (each group = independent subscriber) and point-to-point (one group, one consumer) both work in Kafka.</div></div>
+        <div class="kp"><div class="ki">🔑</div><div class="kt"><strong class="ck">Message Key &amp; Partitioning</strong> — When a producer sets a key, the same key always goes to the same partition (hash of key % numPartitions). <strong>Use keys to guarantee ordering for related events</strong>: all events for user 42 go to partition 3 — they'll be consumed in order. Null key = round-robin distribution across partitions.</div></div>
+        <div class="kp"><div class="ki">🛡️</div><div class="kt"><strong class="ck">Replication Factor &amp; Leader</strong> — Each partition has N replicas across N brokers. One replica is the Leader (handles reads/writes), others are Followers (sync data). If the leader broker dies, ZooKeeper/KRaft elects a new leader from followers. <code>min.insync.replicas=2</code>: producer writes are acknowledged only when data is on 2+ replicas — prevents data loss.</div></div>
+        <div class="kp"><div class="ki">⚙️</div><div class="kt"><strong class="cp">KRaft Mode (Kafka 3.3+ default)</strong> — Replaces ZooKeeper with Kafka's own built-in consensus protocol (Raft). Simpler deployment (no separate ZooKeeper cluster), faster metadata operations, easier scaling. As of Kafka 3.7+, ZooKeeper mode is deprecated. Spring Boot 3.x + Spring Kafka work seamlessly with KRaft.</div></div>
+      </div>
+      <div class="gap-sm"></div>
+      <table class="tbl">
+        <tr><th class="thk">Concept</th><th class="thk">Analogy</th><th class="thk">Key Config</th><th class="thk">Default</th></tr>
+        <tr><td><strong>Topic</strong></td><td>Database table</td><td><code>num.partitions</code></td><td>1</td></tr>
+        <tr><td><strong>Partition</strong></td><td>Table shard/bucket</td><td><code>replication.factor</code></td><td>1</td></tr>
+        <tr><td><strong>Offset</strong></td><td>Row primary key</td><td><code>retention.ms</code></td><td>7 days</td></tr>
+        <tr><td><strong>Consumer Group</strong></td><td>Team of readers</td><td><code>group.id</code></td><td>required</td></tr>
+        <tr><td><strong>Broker</strong></td><td>Database server</td><td><code>min.insync.replicas</code></td><td>1</td></tr>
+        <tr><td><strong>Message Key</strong></td><td>Partition routing key</td><td><code>acks</code></td><td>1</td></tr>
+      </table>
+    </div>
+
+    <div class="panel" id="t0x">
+      <div class="stitle">◆ Memorizable Code — Kafka Admin &amp; Topic Creation</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Kafka Core — Topic Admin + Properties</div></div>
+<pre><span class="cm">// ── application.yml — Kafka core config ──────────</span>
+<span class="cm">// spring:</span>
+<span class="cm">//   kafka:</span>
+<span class="cm">//     bootstrap-servers: localhost:9092,localhost:9093</span>
+<span class="cm">//     producer:</span>
+<span class="cm">//       key-serializer:   org.apache.kafka.common.serialization.StringSerializer</span>
+<span class="cm">//       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer</span>
+<span class="cm">//       acks: all           # wait for ALL in-sync replicas (safest)</span>
+<span class="cm">//       retries: 3</span>
+<span class="cm">//       properties:</span>
+<span class="cm">//         enable.idempotence: true   # exactly-once producer semantics</span>
+<span class="cm">//     consumer:</span>
+<span class="cm">//       group-id: order-service</span>
+<span class="cm">//       auto-offset-reset: earliest  # start from beginning if no committed offset</span>
+<span class="cm">//       key-deserializer:   org.apache.kafka.common.serialization.StringDeserializer</span>
+<span class="cm">//       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer</span>
+<span class="cm">//       properties:</span>
+<span class="cm">//         spring.json.trusted.packages: "com.example.events"</span>
+
+<span class="cm">// ── Topic creation with NewTopic bean ────────────</span>
+<span class="an">@Configuration</span>
+<span class="kw">public class</span> <span class="cl">KafkaTopicConfig</span> {
+
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="tp">NewTopic</span> <span class="fn">ordersTopic</span>() {
+        <span class="kw">return</span> <span class="tp">TopicBuilder</span>
+            .<span class="fn">name</span>(<span class="st2">"orders"</span>)
+            .<span class="fn">partitions</span>(<span class="nb">12</span>)             <span class="cm">// 12 partitions = 12 max parallel consumers</span>
+            .<span class="fn">replicas</span>(<span class="nb">3</span>)               <span class="cm">// replicate across 3 brokers</span>
+            .<span class="fn">config</span>(<span class="tp">TopicConfig</span>.<span class="cl">RETENTION_MS_CONFIG</span>, <span class="st2">"604800000"</span>) <span class="cm">// 7 days</span>
+            .<span class="fn">build</span>();
+    }
+
+    <span class="an">@Bean</span>
+    <span class="kw">public</span> <span class="tp">NewTopic</span> <span class="fn">ordersDlqTopic</span>() {         <span class="cm">// Dead Letter Queue</span>
+        <span class="kw">return</span> <span class="tp">TopicBuilder</span>.<span class="fn">name</span>(<span class="st2">"orders.DLT"</span>)
+            .<span class="fn">partitions</span>(<span class="nb">3</span>).<span class="fn">replicas</span>(<span class="nb">3</span>)
+            .<span class="fn">build</span>();
+    }
+}
+
+<span class="cm">// ── Programmatic topic management ────────────────</span>
+<span class="an">@Autowired</span> <span class="kw">private</span> <span class="tp">AdminClient</span> adminClient;
+
+<span class="kw">public</span> <span class="kw">void</span> <span class="fn">describeTopic</span>(<span class="tp">String</span> topicName) <span class="kw">throws</span> <span class="tp">Exception</span> {
+    <span class="tp">DescribeTopicsResult</span> result = adminClient.<span class="fn">describeTopics</span>(
+        <span class="tp">Collections</span>.<span class="fn">singletonList</span>(topicName));
+    <span class="tp">TopicDescription</span> desc = result.<span class="fn">all</span>().<span class="fn">get</span>().<span class="fn">get</span>(topicName);
+    <span class="kw">int</span> partitions = desc.<span class="fn">partitions</span>().<span class="fn">size</span>();
+    log.<span class="fn">info</span>(<span class="st2">"Topic {} has {} partitions"</span>, topicName, partitions);
+}
+
+<span class="cm">// ── Key insight: message with key ────────────────</span>
+<span class="cm">// key = "userId-42" → always routes to same partition</span>
+<span class="cm">// → all events for user 42 are ordered ✅</span>
+<span class="cm">// null key → round-robin → may go to different partitions</span>
+<span class="cm">// → ordering NOT guaranteed across partitions ⚠️</span></pre>
+      </div>
+    </div>
+
+    <div class="panel" id="t0q">
+      <div class="stitle">◆ Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is a Kafka partition and why does it matter for ordering and parallelism?</div><div class="iqtgl">▾</div></div><div class="iqb">A partition is an ordered, append-only log. Messages within a partition are strictly ordered by offset. Messages across different partitions have no ordering guarantee.<br><br><strong>Parallelism</strong>: partitions are the unit of parallelism. A consumer group can have at most one consumer per partition actively consuming. 12 partitions = at most 12 consumers processing in parallel. If you add a 13th consumer, it sits idle until one of the 12 leaves.<br><br><strong>Ordering use case</strong>: use message keys to route related messages to the same partition. <code>orderId</code> as key → all events for one order go to the same partition → consumed in order.<div class="trick"><strong>⚡ "How many partitions should I use?" Rule of thumb: target throughput / per-partition throughput. If you expect 120k msg/sec and each partition handles 10k/sec → 12 partitions minimum.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is a Consumer Group and how does Kafka balance partitions across consumers?</div><div class="iqtgl">▾</div></div><div class="iqb">A consumer group is a logical group of consumers that collaboratively consume all partitions of one or more topics. Kafka assigns each partition to exactly one consumer in the group at a time — this is called partition assignment.<br><br><strong>Rebalancing</strong>: when consumers join/leave the group, Kafka triggers a rebalance — redistributes partitions. During rebalance, all consumers in the group pause briefly. Strategies: Range (contiguous), RoundRobin (even distribution), Sticky (minimizes movement on rebalance), CooperativeSticky (incremental — avoids stop-the-world pauses, default in modern Kafka).<br><br><strong>Multiple groups</strong>: each consumer group maintains its own offset — they consume independently. This is Kafka's pub-sub model: N groups = N independent consumption pipelines from the same topic.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is the difference between acks=0, acks=1, and acks=all?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>acks=0</strong>: fire-and-forget. Producer doesn't wait for acknowledgment. Fastest, but messages can be silently lost (broker crash before write). Use for: non-critical metrics, logging where some loss is acceptable.<br><br><strong>acks=1</strong>: leader writes to its log and acknowledges. Fast but risky: if leader crashes after ack but before followers sync, message is lost. Default in Kafka until 3.x.<br><br><strong>acks=all (or acks=-1)</strong>: producer waits until ALL in-sync replicas (ISR) have the message. Slowest but safest. Combine with <code>min.insync.replicas=2</code>: requires at least 2 replicas to be in-sync before ack. If fewer brokers are available, producer throws <code>NotEnoughReplicasException</code> — better than silent data loss.<div class="trick"><strong>⚡ Production recommendation: acks=all + min.insync.replicas=2 + enable.idempotence=true. This gives at-least-once delivery with deduplication.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is the difference between at-most-once, at-least-once, and exactly-once semantics?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>At-most-once</strong>: messages may be lost but never duplicated. Offset committed BEFORE processing. If consumer crashes after commit but before processing → message skipped. Use for: tolerable loss (metrics, click events).<br><br><strong>At-least-once</strong>: no messages lost but duplicates possible. Offset committed AFTER processing. If consumer crashes after processing but before commit → message reprocessed. Consumer must be idempotent. Most common in practice.<br><br><strong>Exactly-once</strong>: no loss, no duplicates. Achieved via Kafka Transactions (producer + consumer in same transaction) or Idempotent Producer (deduplication using producer ID + sequence). Kafka Streams uses this natively. Complex to implement with external systems (requires idempotent writes at the destination).<div class="info"><strong>💡 Spring Kafka: set enable-idempotence=true + isolation-level=read_committed to enable exactly-once semantics.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tp2">Senior</span><div class="iqqt">How do you choose the right number of partitions for a Kafka topic?</div><div class="iqtgl">▾</div></div><div class="iqb">Key factors: <br><strong>1. Throughput</strong>: each partition can sustain ~10–50 MB/s (depends on hardware). Target throughput / per-partition throughput = minimum partitions.<br><strong>2. Consumer parallelism</strong>: partitions = max parallel consumers. Design for your expected peak consumer count.<br><strong>3. Ordering requirements</strong>: fewer partitions = stronger ordering guarantees per key group.<br><strong>4. Broker capacity</strong>: each partition = files on disk, memory for indexing. Too many partitions = broker overhead.<br><br>Rule of thumb: start with max(target_throughput/50MB, expected_consumers) × 2 for headroom. It's easy to increase partitions (keys may re-route to new partitions) but impossible to decrease without re-creating the topic.<div class="trick"><strong>⚡ Can't decrease partitions once created. Pick slightly higher than needed upfront. Common values: 6, 12, 24 (multiples of common broker counts).</strong></div></div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="t0m">
+      <div class="stitle">◆ Memory Tip</div>
+      <div class="mtip mtipk"><div class="mico">💡</div><div><strong>Kafka = distributed append-only log with subscriber groups.</strong><br><br><strong>Key mental model:</strong><br>• Topic = table. Partition = table shard. Offset = row number.<br>• Consumer Group = team of workers sharing partitions.<br>• Same key → same partition → ordered events for that key.<br>• Multiple groups → each group gets ALL messages independently.<br><br><strong>acks cheatsheet:</strong> 0 = fastest/unsafe · 1 = default/moderate · all = safe/slowest<br><br><strong>Partition parallelism rule: max concurrent consumers = number of partitions.</strong> Extra consumers in a group sit idle.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     C1 — PRODUCERS & CONSUMERS
+════════════════════════════════════════════ -->
+<div class="card" id="c1">
+  <div class="band">
+    <div class="band-bar" style="background:linear-gradient(90deg,var(--kf),var(--kf-d))"></div>
+    <div class="bl">
+      <div class="tnum" style="color:var(--kf-b)">02</div>
+      <div>
+        <div class="ttag" style="background:var(--kf-l);color:var(--kf);border:1px solid var(--kf-b)">Apache Kafka</div>
+        <div class="btitle">Producers &amp; Consumers — Deep Dive</div>
+        <div class="bsub">Delivery guarantees · Offset management · Error handling · Dead Letter Topics</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--az-l);color:var(--az);border:1px solid var(--az-b)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb1">
+      <div class="stab onk" onclick="tab(1,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(1,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(1,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(1,'m')">🧠 Memory</div>
+    </div>
+
+    <div class="panel on" id="t1c">
+      <div class="sbox sboxk"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> Producers push messages into topics; consumers pull messages from topics at their own pace. The critical decisions are: how many retries on failure? when to commit the offset (before or after processing)? what happens when processing fails — dead letter or retry?</div></div>
+      <div class="kps">
+        <div class="kp"><div class="ki">📤</div><div class="kt"><strong class="ck">Producer Internals</strong> — Producer batches messages (<code>batch.size</code>: max bytes per batch) and waits for more (<code>linger.ms</code>: how long to wait before sending). Larger batches = better throughput, slightly higher latency. Compression (<code>compression.type=snappy/lz4/zstd</code>) reduces network and disk usage — especially effective for repetitive JSON. <code>max.block.ms</code>: how long to block if the buffer is full.</div></div>
+        <div class="kp"><div class="ki">📥</div><div class="kt"><strong class="ck">Consumer Polling Loop</strong> — Consumer calls <code>poll(timeout)</code> in a loop to fetch records. <code>max.poll.records</code>: max records per poll (default 500). <code>max.poll.interval.ms</code>: if the consumer doesn't call poll() within this window, Kafka considers it dead and triggers rebalance. Long processing tasks must either: increase <code>max.poll.interval.ms</code>, process records asynchronously, or use pause/resume.</div></div>
+        <div class="kp"><div class="ki">💾</div><div class="kt"><strong class="ck">Offset Commit Strategies</strong> — <code>enable.auto.commit=true</code> (default): Kafka commits offsets automatically every <code>auto.commit.interval.ms</code>. Risk: at-most-once (commit may happen before processing completes). Manual commit: <code>ackMode=MANUAL_IMMEDIATE</code> in Spring Kafka — call <code>acknowledgment.acknowledge()</code> after successful processing. Risk: at-least-once (duplicate processing if crash between processing and commit).</div></div>
+        <div class="kp"><div class="ki">🔁</div><div class="kt"><strong class="ck">Retry &amp; Dead Letter Topic (DLT)</strong> — Spring Kafka's <code>DefaultErrorHandler</code> retries failed records with configurable backoff. After max retries exhausted, sends the failed record to a Dead Letter Topic (e.g., <code>orders.DLT</code>). Dead letter topics are critical for production: failed messages don't block the partition, are stored for investigation, and can be replayed. Configure via <code>DeadLetterPublishingRecoverer</code>.</div></div>
+        <div class="kp"><div class="ki">⏸️</div><div class="kt"><strong class="ck">Consumer Lag</strong> — The difference between the latest offset in a partition and the consumer's committed offset. High lag = consumer is falling behind. Monitor with: <code>kafka-consumer-groups.sh --describe --group my-group</code> or Kafka's metrics. Alert when lag exceeds threshold. Increase consumers (up to partition count) or optimize processing to reduce lag.</div></div>
+        <div class="kp"><div class="ki">🏊</div><div class="kt"><strong class="cp">Concurrency &amp; Listener Containers</strong> — Spring Kafka's listener container can run N listener threads: <code>@KafkaListener(concurrency = "3")</code> — creates 3 consumer threads, each assigned different partitions. Effective when a single consumer can't keep up. Max useful concurrency = partition count. Set <code>containerFactory</code> for different concurrency configs per listener.</div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="t1x">
+      <div class="stitle">◆ Memorizable Code — Producer + Consumer + Error Handling</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Producers + Consumers + DLT + Manual Ack</div></div>
+<pre><span class="cm">// ── KafkaTemplate: send with key ─────────────────</span>
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">OrderEventProducer</span> {
+    <span class="kw">private final</span> <span class="tp">KafkaTemplate</span>&lt;<span class="tp">String</span>, <span class="tp">OrderEvent</span>&gt; kafka;
+
+    <span class="kw">public void</span> <span class="fn">send</span>(<span class="tp">OrderEvent</span> event) {
+        <span class="tp">String</span> key = <span class="st2">"order-"</span> + event.<span class="fn">getOrderId</span>();  <span class="cm">// same order → same partition</span>
+        <span class="tp">CompletableFuture</span>&lt;<span class="tp">SendResult</span>&lt;<span class="tp">String</span>, <span class="tp">OrderEvent</span>&gt;&gt; future =
+            kafka.<span class="fn">send</span>(<span class="st2">"orders"</span>, key, event);
+
+        future.<span class="fn">whenComplete</span>((result, ex) -> {
+            <span class="kw">if</span> (ex == <span class="kw">null</span>) {
+                <span class="tp">RecordMetadata</span> meta = result.<span class="fn">getRecordMetadata</span>();
+                log.<span class="fn">info</span>(<span class="st2">"Sent to partition={} offset={}"</span>,
+                    meta.<span class="fn">partition</span>(), meta.<span class="fn">offset</span>());
+            } <span class="kw">else</span> {
+                log.<span class="fn">error</span>(<span class="st2">"Failed to send: {}"</span>, ex.<span class="fn">getMessage</span>());
+            }
+        });
+    }
+
+    <span class="cm">// Send with headers (correlation ID, trace)</span>
+    <span class="kw">public void</span> <span class="fn">sendWithHeaders</span>(<span class="tp">OrderEvent</span> event, <span class="tp">String</span> traceId) {
+        <span class="tp">ProducerRecord</span>&lt;<span class="tp">String</span>, <span class="tp">OrderEvent</span>&gt; record =
+            <span class="kw">new</span> <span class="tp">ProducerRecord</span>&lt;&gt;(<span class="st2">"orders"</span>, <span class="kw">null</span>, event.<span class="fn">getOrderId</span>().<span class="fn">toString</span>(), event);
+        record.<span class="fn">headers</span>().<span class="fn">add</span>(<span class="st2">"X-Trace-Id"</span>, traceId.<span class="fn">getBytes</span>());
+        kafka.<span class="fn">send</span>(record);
+    }
+}
+
+<span class="cm">// ── @KafkaListener — manual acknowledgment ────────</span>
+<span class="an">@Component</span>
+<span class="kw">public class</span> <span class="cl">OrderEventConsumer</span> {
+
+    <span class="an">@KafkaListener</span>(
+        topics = <span class="st2">"orders"</span>,
+        groupId = <span class="st2">"order-processor"</span>,
+        concurrency = <span class="st2">"3"</span>,                           <span class="cm">// 3 threads (need ≥3 partitions)</span>
+        containerFactory = <span class="st2">"manualAckContainerFactory"</span>
+    )
+    <span class="kw">public void</span> <span class="fn">consume</span>(
+            <span class="tp">ConsumerRecord</span>&lt;<span class="tp">String</span>, <span class="tp">OrderEvent</span>&gt; record,
+            <span class="tp">Acknowledgment</span> ack) {
+
+        log.<span class="fn">info</span>(<span class="st2">"Processing partition={} offset={}"</span>,
+            record.<span class="fn">partition</span>(), record.<span class="fn">offset</span>());
+        <span class="kw">try</span> {
+            orderService.<span class="fn">process</span>(record.<span class="fn">value</span>());
+            ack.<span class="fn">acknowledge</span>();   <span class="cm">// commit AFTER success (at-least-once)</span>
+        } <span class="kw">catch</span> (<span class="tp">RetryableException</span> e) {
+            <span class="cm">// don't ack — will be retried by error handler</span>
+            <span class="kw">throw</span> e;
+        }
+    }
+}
+
+<span class="cm">// ── Error Handler + Dead Letter Topic ────────────</span>
+<span class="an">@Bean</span>
+<span class="kw">public</span> <span class="tp">DefaultErrorHandler</span> <span class="fn">kafkaErrorHandler</span>(
+        <span class="tp">KafkaTemplate</span>&lt;<span class="tp">Object</span>, <span class="tp">Object</span>&gt; template) {
+
+    <span class="tp">DeadLetterPublishingRecoverer</span> recoverer =
+        <span class="kw">new</span> <span class="tp">DeadLetterPublishingRecoverer</span>(template,
+            (record, ex) -> <span class="kw">new</span> <span class="tp">TopicPartition</span>(
+                record.<span class="fn">topic</span>() + <span class="st2">".DLT"</span>,  <span class="cm">// orders → orders.DLT</span>
+                record.<span class="fn">partition</span>()
+            )
+        );
+
+    <span class="tp">ExponentialBackOff</span> backoff = <span class="kw">new</span> <span class="tp">ExponentialBackOff</span>(<span class="nb">1000L</span>, <span class="nb">2.0</span>);
+    backoff.<span class="fn">setMaxAttempts</span>(<span class="nb">3</span>);     <span class="cm">// retry 3 times: 1s, 2s, 4s</span>
+
+    <span class="tp">DefaultErrorHandler</span> handler = <span class="kw">new</span> <span class="tp">DefaultErrorHandler</span>(recoverer, backoff);
+    handler.<span class="fn">addNotRetryableExceptions</span>(<span class="tp">ValidationException</span>.<span class="kw">class</span>); <span class="cm">// no retry</span>
+    <span class="kw">return</span> handler;
+}
+
+<span class="cm">// ── ContainerFactory for manual ack ───────────────</span>
+<span class="an">@Bean</span>
+<span class="kw">public</span> <span class="tp">ConcurrentKafkaListenerContainerFactory</span>&lt;<span class="tp">String</span>, <span class="tp">OrderEvent</span>&gt;
+        <span class="fn">manualAckContainerFactory</span>(<span class="tp">ConsumerFactory</span>&lt;<span class="tp">String</span>, <span class="tp">OrderEvent</span>&gt; cf) {
+    <span class="kw">var</span> factory = <span class="kw">new</span> <span class="tp">ConcurrentKafkaListenerContainerFactory</span>&lt;&gt;();
+    factory.<span class="fn">setConsumerFactory</span>(cf);
+    factory.<span class="fn">getContainerProperties</span>().<span class="fn">setAckMode</span>(<span class="tp">AckMode</span>.<span class="cl">MANUAL_IMMEDIATE</span>);
+    factory.<span class="fn">setCommonErrorHandler</span>(<span class="fn">kafkaErrorHandler</span>(kafkaTemplate));
+    <span class="kw">return</span> factory;
+}</pre>
+      </div>
+    </div>
+
+    <div class="panel" id="t1q">
+      <div class="stitle">◆ Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is consumer lag and how do you handle it?</div><div class="iqtgl">▾</div></div><div class="iqb">Consumer lag = latest offset in partition MINUS consumer's committed offset. If a topic has offset 10,000 and the consumer has committed offset 9,500, lag = 500 messages.<br><br><strong>Causes</strong>: slow processing, consumer crashes, insufficient consumers, GC pauses.<br><br><strong>Solutions</strong>: (1) Add more consumers up to partition count. (2) Increase <code>concurrency</code> in @KafkaListener. (3) Optimize processing — batch writes, async calls. (4) Increase partition count (requires new consumers). (5) Scale out horizontally (more pods in K8s).<br><br><strong>Monitoring</strong>: Kafka's built-in metrics (<code>records-lag-max</code>), Prometheus + Grafana via JMX exporter, Confluent Control Center, or Burrow (lag monitoring tool).<div class="trick"><strong>⚡ If lag keeps growing despite max consumers, the bottleneck is processing speed, not consumer count. Profile your processing logic.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What causes a rebalance and how can you minimize its impact?</div><div class="iqtgl">▾</div></div><div class="iqb">Rebalance triggers: consumer joins group, consumer leaves/crashes, <code>max.poll.interval.ms</code> exceeded (consumer took too long to poll), topics subscribed to change, partition count changes.<br><br>Impact: during rebalance, all consumers in the group pause processing (stop-the-world for old protocol). Can cause duplicate processing (uncommitted offsets re-processed by new assignees).<br><br>Minimization strategies: (1) <code>CooperativeSticky</code> assignor — incremental rebalance, only affected partitions move, others keep processing. (2) Static group membership: <code>group.instance.id</code> — K8s pod restarts without triggering rebalance within <code>session.timeout.ms</code>. (3) Increase <code>max.poll.interval.ms</code> if processing takes long. (4) Reduce processing time per batch.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is a Dead Letter Topic (DLT) and why is it better than just logging the error?</div><div class="iqtgl">▾</div></div><div class="iqb">A Dead Letter Topic stores messages that failed processing after all retry attempts. Better than logging because: (1) Message is preserved intact (key, value, headers, original offset) — you can replay it after fixing the bug. (2) Doesn't block the main topic partition — processing continues for other messages. (3) Structured for tooling — you can monitor DLT size, alert on growth, write automated replay jobs. (4) Headers include failure reason, original topic/partition/offset, and stack trace — traceable.<br><br>Pattern: consumers of the DLT can: alert ops team, attempt different processing strategy, route to manual review, or replay after a fix is deployed.<div class="info"><strong>💡 Spring Kafka automatically adds headers to DLT records: kafka_dlt-original-topic, kafka_dlt-exception-message, kafka_dlt-original-offset.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tp2">Senior</span><div class="iqqt">How do you implement exactly-once semantics end-to-end with Kafka?</div><div class="iqtgl">▾</div></div><div class="iqb">True exactly-once (EOS) requires coordination at both producer and consumer sides:<br><br><strong>Producer side</strong>: enable idempotent producer (<code>enable.idempotence=true</code>) + transactions (<code>transactional.id=unique-id</code>). The broker deduplicates retried messages using producer ID + sequence number.<br><br><strong>Consumer side</strong>: set <code>isolation.level=read_committed</code> — consumers only see messages from committed transactions, not in-progress ones.<br><br><strong>Database sink</strong>: the hardest part. For a Kafka→DB pipeline: consume in a transaction, write to DB in the same transaction, then commit the Kafka offset. This works with databases that support transactions. If the DB write succeeds but Kafka commit fails → duplicate write on retry — make DB writes idempotent (UPSERT, unique constraints).<br><br>Kafka Streams does all of this natively with <code>processing.guarantee=exactly_once_v2</code>.</div></div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="t1m">
+      <div class="mtip mtipk"><div class="mico">💡</div><div><strong>Producer sends → Kafka stores → Consumer pulls at own pace.</strong><br><br><strong>Delivery semantics cheatsheet:</strong><br>• Commit before processing → at-most-once (fast, may lose)<br>• Commit after processing → at-least-once (safe, may duplicate)<br>• Idempotent + transactions → exactly-once (complex, guaranteed)<br><br><strong>DLT pattern:</strong> fail → retry N times with backoff → send to orders.DLT → keep processing rest → investigate DLT separately.<br><br><strong>Consumer performance:</strong> lag growing? → add consumers (up to partition count) OR optimize processing OR both.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     C2 — SPRING KAFKA
+════════════════════════════════════════════ -->
+<div class="card" id="c2">
+  <div class="band">
+    <div class="band-bar" style="background:linear-gradient(90deg,var(--kf),#80d848)"></div>
+    <div class="bl">
+      <div class="tnum" style="color:var(--kf-b)">03</div>
+      <div>
+        <div class="ttag" style="background:var(--gn-l);color:var(--gn);border:1px solid var(--gn-b)">Spring Kafka</div>
+        <div class="btitle">Spring Kafka Integration</div>
+        <div class="bsub">@KafkaListener · KafkaTemplate · Transactions · Testing · Embedded Kafka</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--az-l);color:var(--az);border:1px solid var(--az-b)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb2">
+      <div class="stab onk" onclick="tab(2,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(2,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(2,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(2,'m')">🧠 Memory</div>
+    </div>
+
+    <div class="panel on" id="t2c">
+      <div class="sbox sboxk"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> Spring Kafka wraps the native Kafka client with Spring idioms — @KafkaListener for consuming, KafkaTemplate for producing, transaction support, retry/DLT wiring, and EmbeddedKafka for tests. You configure once in application.yml and use annotations everywhere.</div></div>
+      <div class="kps">
+        <div class="kp"><div class="ki">📨</div><div class="kt"><strong class="ck">@KafkaListener Features</strong> — Listen to multiple topics: <code>topics = {"orders", "payments"}</code>. Listen to specific partitions: <code>topicPartitions = @TopicPartition(topic="orders", partitions={"0","1"})</code>. Filter records: <code>filter</code> attribute with a <code>RecordFilterStrategy</code>. Batch listening: receive <code>List&lt;ConsumerRecord&gt;</code> instead of one record at a time. Access message metadata via <code>@Header(KafkaHeaders.RECEIVED_PARTITION)</code>.</div></div>
+        <div class="kp"><div class="ki">🔗</div><div class="kt"><strong class="ck">Kafka Transactions in Spring</strong> — <code>@Transactional</code> on a method that both produces and consumes wraps both in a Kafka transaction. If the method throws, the message production is rolled back. Configure via <code>spring.kafka.producer.transaction-id-prefix=tx-</code>. Enables consume-process-produce atomicity: if you consume a message, transform it, and produce to another topic — all or nothing.</div></div>
+        <div class="kp"><div class="ki">📊</div><div class="kt"><strong class="ck">Metrics &amp; Monitoring</strong> — Spring Kafka exposes Micrometer metrics: <code>kafka.consumer.records-lag</code>, <code>kafka.producer.record-send-rate</code>, etc. Add <code>spring-boot-starter-actuator</code> + Prometheus dependency → metrics auto-exported to <code>/actuator/prometheus</code>. Pair with Grafana dashboards for real-time visibility.</div></div>
+        <div class="kp"><div class="ki">🧪</div><div class="kt"><strong class="cp">@EmbeddedKafka for Testing</strong> — <code>@EmbeddedKafka(partitions = 1, topics = {"orders"})</code> starts an in-process Kafka broker. Use <code>@SpringBootTest</code> or <code>@KafkaTest</code>. Override bootstrap-servers with <code>${spring.embedded.kafka.brokers}</code>. Can send test messages with <code>KafkaTemplate</code> and verify received records with <code>ConsumerRecord</code> capture using a <code>BlockingQueue</code>.</div></div>
+        <div class="kp"><div class="ki">🎯</div><div class="kt"><strong class="cg">Idempotent Consumer Pattern</strong> — Kafka guarantees at-least-once delivery — consumers must handle duplicates. Strategies: (1) Check if message ID already processed in DB before processing. (2) Use UPSERT operations (INSERT ... ON CONFLICT DO UPDATE). (3) Use distributed locks. Store <code>messageId</code> or <code>kafkaOffset</code> in a processed-events table to detect replays.</div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="t2x">
+      <div class="stitle">◆ Memorizable Code — Spring Kafka Complete Setup</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Spring Kafka — @KafkaListener + Transactions + Testing</div></div>
+<pre><span class="cm">// ── Advanced @KafkaListener features ─────────────</span>
+<span class="an">@KafkaListener</span>(
+    topics = <span class="st2">"orders"</span>,
+    groupId = <span class="st2">"invoice-service"</span>,
+    containerFactory = <span class="st2">"filteringContainerFactory"</span>
+)
+<span class="kw">public void</span> <span class="fn">handleOrder</span>(
+        <span class="an">@Payload</span> <span class="tp">OrderEvent</span> event,
+        <span class="an">@Header</span>(<span class="tp">KafkaHeaders</span>.<span class="cl">RECEIVED_PARTITION</span>) <span class="kw">int</span> partition,
+        <span class="an">@Header</span>(<span class="tp">KafkaHeaders</span>.<span class="cl">OFFSET</span>) <span class="kw">long</span> offset,
+        <span class="an">@Header</span>(<span class="tp">KafkaHeaders</span>.<span class="cl">RECEIVED_TOPIC</span>) <span class="tp">String</span> topic) {
+
+    log.<span class="fn">info</span>(<span class="st2">"topic={} partition={} offset={} event={}"</span>,
+        topic, partition, offset, event);
+    invoiceService.<span class="fn">generate</span>(event);
+}
+
+<span class="cm">// Batch listener</span>
+<span class="an">@KafkaListener</span>(topics = <span class="st2">"orders"</span>, containerFactory = <span class="st2">"batchFactory"</span>)
+<span class="kw">public void</span> <span class="fn">handleBatch</span>(<span class="tp">List</span>&lt;<span class="tp">ConsumerRecord</span>&lt;<span class="tp">String</span>,<span class="tp">OrderEvent</span>&gt;&gt; records) {
+    log.<span class="fn">info</span>(<span class="st2">"Processing batch of {} records"</span>, records.<span class="fn">size</span>());
+    orderService.<span class="fn">processBatch</span>(records.<span class="fn">stream</span>().<span class="fn">map</span>(<span class="tp">ConsumerRecord</span>::<span class="fn">value</span>).<span class="fn">toList</span>());
+}
+
+<span class="cm">// ── Kafka Transaction: consume + produce atomically</span>
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">OrderTransformService</span> {
+    <span class="kw">private final</span> <span class="tp">KafkaTemplate</span>&lt;<span class="tp">String</span>,<span class="tp">InvoiceEvent</span>&gt; kafka;
+
+    <span class="an">@Transactional</span>(<span class="st2">"kafkaTransactionManager"</span>)
+    <span class="an">@KafkaListener</span>(topics = <span class="st2">"orders"</span>)
+    <span class="kw">public void</span> <span class="fn">transform</span>(<span class="tp">OrderEvent</span> order) {
+        <span class="tp">InvoiceEvent</span> invoice = <span class="fn">toInvoice</span>(order);
+        kafka.<span class="fn">send</span>(<span class="st2">"invoices"</span>, order.<span class="fn">getId</span>(), invoice); <span class="cm">// part of same TX</span>
+        <span class="cm">// If this method throws → send to "invoices" is rolled back</span>
+    }
+}
+
+<span class="cm">// ── @EmbeddedKafka test ───────────────────────────</span>
+<span class="an">@SpringBootTest</span>
+<span class="an">@EmbeddedKafka</span>(partitions = <span class="nb">1</span>, topics = {<span class="st2">"orders"</span>, <span class="st2">"invoices"</span>},
+               brokerProperties = {<span class="st2">"listeners=PLAINTEXT://localhost:9093"</span>,
+                                   <span class="st2">"port=9093"</span>})
+<span class="kw">class</span> <span class="cl">OrderConsumerTest</span> {
+
+    <span class="an">@Autowired</span> <span class="kw">private</span> <span class="tp">KafkaTemplate</span>&lt;<span class="tp">String</span>, <span class="tp">OrderEvent</span>&gt; producer;
+    <span class="kw">private final</span> <span class="tp">BlockingQueue</span>&lt;<span class="tp">ConsumerRecord</span>&lt;<span class="tp">String</span>, <span class="tp">OrderEvent</span>&gt;&gt; records =
+        <span class="kw">new</span> <span class="tp">LinkedBlockingQueue</span>&lt;&gt;();
+
+    <span class="an">@KafkaListener</span>(topics = <span class="st2">"orders"</span>)
+    <span class="kw">public void</span> <span class="fn">capture</span>(<span class="tp">ConsumerRecord</span>&lt;<span class="tp">String</span>, <span class="tp">OrderEvent</span>&gt; record) {
+        records.<span class="fn">offer</span>(record);
+    }
+
+    <span class="an">@Test</span>
+    <span class="kw">void</span> <span class="fn">testConsumeOrder</span>() <span class="kw">throws</span> <span class="tp">Exception</span> {
+        <span class="tp">OrderEvent</span> event = <span class="kw">new</span> <span class="tp">OrderEvent</span>(<span class="nb">1L</span>, <span class="st2">"PLACED"</span>);
+        producer.<span class="fn">send</span>(<span class="st2">"orders"</span>, event);
+
+        <span class="tp">ConsumerRecord</span>&lt;<span class="tp">String</span>, <span class="tp">OrderEvent</span>&gt; received =
+            records.<span class="fn">poll</span>(<span class="nb">5</span>, <span class="tp">TimeUnit</span>.<span class="cl">SECONDS</span>);
+
+        <span class="fn">assertThat</span>(received).<span class="fn">isNotNull</span>();
+        <span class="fn">assertThat</span>(received.<span class="fn">value</span>().<span class="fn">getOrderId</span>()).<span class="fn">isEqualTo</span>(<span class="nb">1L</span>);
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="panel" id="t2q">
+      <div class="stitle">◆ Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">How do you handle serialization/deserialization of complex Java objects in Kafka?</div><div class="iqtgl">▾</div></div><div class="iqb">Options in order of recommendation:<br><br><strong>1. JSON with JsonSerializer/JsonDeserializer</strong> (Spring Kafka): human-readable, easy debugging, schema-free. Configure <code>spring.json.trusted.packages</code> to prevent deserialization of untrusted classes. Works immediately with POJOs.<br><br><strong>2. Apache Avro + Schema Registry</strong>: binary format (smaller, faster), schema evolution support, schema validation. Producer registers schema; consumer validates. Confluent Schema Registry or AWS Glue Schema Registry. <code>io.confluent:kafka-avro-serializer</code>. Best for production at scale.<br><br><strong>3. Protobuf</strong>: Google's binary format — extremely compact, strongly typed. Good for polyglot environments (Java, Python, Go all consume the same messages).<div class="trick"><strong>⚡ JSON for dev/small scale. Avro + Schema Registry for production with high volume and schema evolution needs.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is the difference between @KafkaListener with auto-commit vs manual acknowledgment?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>Auto-commit</strong> (enable.auto.commit=true): Kafka commits offsets automatically every <code>auto.commit.interval.ms</code> (default 5s). Risk: consumer processes record, auto-commit fires, then consumer crashes before completing — offset committed, record treated as consumed even if processing failed (at-most-once for failed records).<br><br><strong>Manual acknowledgment</strong> (AckMode.MANUAL_IMMEDIATE): you call <code>acknowledgment.acknowledge()</code> only after successful processing. If crash before ack → record reprocessed on restart (at-least-once). This is the safer production choice — combined with idempotent processing, it's reliable.<br><br><strong>AckMode options</strong>: RECORD (ack per record), BATCH (ack after processing all polled records), MANUAL, MANUAL_IMMEDIATE (ack immediately when you call it).</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">How do you test Kafka consumers and producers without a real Kafka cluster?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>@EmbeddedKafka</strong> (Spring Test): starts an in-memory Kafka broker for your test. Real Kafka behavior — topics, partitions, offsets. Override <code>spring.kafka.bootstrap-servers</code> with <code>${spring.embedded.kafka.brokers}</code>. Works great for integration tests.<br><br><strong>Testcontainers</strong>: start a real Kafka Docker container per test class. More realistic (real Kafka version), slightly slower. <code>@Container KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4"))</code>. Inject URL with <code>@DynamicPropertySource</code>.<br><br><strong>Mock KafkaTemplate</strong>: for unit tests, mock <code>KafkaTemplate</code> with @MockBean and verify <code>.send(topic, key, value)</code> was called.<div class="info"><strong>💡 For consumer tests: publish to EmbeddedKafka via KafkaTemplate, listen with a test @KafkaListener that puts records into a BlockingQueue, assert with poll(timeout).</strong></div></div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="t2m">
+      <div class="mtip mtipk"><div class="mico">💡</div><div><strong>Spring Kafka = Spring idioms over native Kafka client.</strong><br><br><strong>@KafkaListener is to Kafka what @RestController is to HTTP.</strong> Define a method, add the annotation — Spring handles threading, deserialization, offset management, and error recovery.<br><br><strong>Testing strategy:</strong><br>• Unit test service logic with mocked KafkaTemplate<br>• Integration test with @EmbeddedKafka (fast, in-process)<br>• System test with Testcontainers (real Kafka, Docker)<br><br><strong>Serialization rule: JSON for simplicity, Avro+Schema Registry for production scale.</strong></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     C3 — KAFKA STREAMS
+════════════════════════════════════════════ -->
+<div class="card" id="c3">
+  <div class="band">
+    <div class="band-bar" style="background:linear-gradient(90deg,var(--st),var(--st-d))"></div>
+    <div class="bl">
+      <div class="tnum" style="color:var(--st-b)">04</div>
+      <div>
+        <div class="ttag" style="background:var(--st-l);color:var(--st);border:1px solid var(--st-b)">Kafka Streams</div>
+        <div class="btitle">Kafka Streams — Core Concepts</div>
+        <div class="bsub">Stream processing directly on Kafka — stateless and stateful transformations, KTable, GlobalKTable</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--az-l);color:var(--az);border:1px solid var(--az-b)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb3">
+      <div class="stab ons" onclick="tab(3,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(3,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(3,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(3,'m')">🧠 Memory</div>
+    </div>
+
+    <div class="panel on" id="t3c">
+      <div class="sbox sboxs"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> Kafka Streams is a library (not a separate cluster) that lets you process data IN Kafka using Java code. Read from a topic, transform/filter/join/aggregate, write back to a topic — all in a single Java application. No Spark, no Flink, no separate infrastructure needed.</div></div>
+      <div class="stitle">◆ Core Abstractions</div>
+      <div class="flow">
+        <div class="fr" style="flex-wrap:wrap;gap:4px;justify-content:center">
+          <div><div class="fns">KStream<br><small>unbounded stream</small></div><div class="fsub">event-by-event</div></div>
+          <div class="fa">vs</div>
+          <div><div class="fnp">KTable<br><small>changelog table</small></div><div class="fsub">latest value per key</div></div>
+          <div class="fa">vs</div>
+          <div><div class="fn2">GlobalKTable<br><small>replicated table</small></div><div class="fsub">all partitions on all instances</div></div>
+        </div>
+      </div>
+      <div class="kps">
+        <div class="kp"><div class="ki">🌊</div><div class="kt"><strong class="cs">KStream</strong> — Represents an unbounded sequence of records. Every record is an independent event. Operations: <code>filter</code>, <code>map</code>, <code>flatMap</code>, <code>foreach</code>, <code>to</code> (write to topic), <code>branch</code> (split into multiple streams). Like Java Streams but infinite and backed by Kafka topics. Processing is stateless by default.</div></div>
+        <div class="kp"><div class="ki">📋</div><div class="kt"><strong class="cs">KTable</strong> — A table of latest values keyed by key. Each new record for a key updates/replaces the previous value (like a database). Backed by a compacted topic and a local RocksDB state store. When joined with a KStream: each stream event is enriched with the latest table value for the matching key. Think: event-driven database lookup.</div></div>
+        <div class="kp"><div class="ki">🌍</div><div class="kt"><strong class="cs">GlobalKTable</strong> — Like KTable but replicated across ALL application instances. Partitioned KTable: each instance only has a subset of data. GlobalKTable: every instance has ALL data. Enables lookups using non-partition-key fields. Uses more memory. Good for: small reference data (country codes, product catalog) used in joins.</div></div>
+        <div class="kp"><div class="ki">⏱️</div><div class="kt"><strong class="ck">Windowing</strong> — Group stream events into time windows for aggregation. Types: <strong>Tumbling</strong> (fixed, non-overlapping: 5-min windows), <strong>Hopping</strong> (overlapping: 5-min window, advance every 1 min), <strong>Session</strong> (activity-based: inactivity gap defines window boundary). Use with <code>windowedBy()</code> in an aggregation chain.</div></div>
+        <div class="kp"><div class="ki">🗃️</div><div class="kt"><strong class="cs">State Stores &amp; RocksDB</strong> — Kafka Streams uses local RocksDB instances for stateful operations (aggregations, joins). State is backed by changelog topics in Kafka — if an instance crashes, another instance restores state from the changelog. State stores are partitioned — each instance only manages state for its assigned partitions. Interactive Queries API allows querying local state.</div></div>
+        <div class="kp"><div class="ki">💡</div><div class="kt"><strong class="cg">Exactly-Once v2 (EOS)</strong> — Set <code>processing.guarantee=exactly_once_v2</code>. Kafka Streams wraps read-process-write in a transaction. If processing fails mid-way, the output is rolled back. The most efficient exactly-once implementation available. Works only with Kafka as source and sink (no external systems in the exactly-once boundary).</div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="t3x">
+      <div class="stitle">◆ Memorizable Code — Kafka Streams Topology</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Kafka Streams DSL — Filter + Map + Aggregate + Window + Join</div></div>
+<pre><span class="cm">// ── StreamsConfig ─────────────────────────────────</span>
+<span class="an">@Configuration</span>
+<span class="an">@EnableKafkaStreams</span>
+<span class="kw">public class</span> <span class="cl">KafkaStreamsConfig</span> {
+    <span class="an">@Bean</span>(<span class="tp">name</span> = <span class="tp">KafkaStreamsDefaultConfiguration</span>.<span class="cl">DEFAULT_STREAMS_CONFIG_BEAN_NAME</span>)
+    <span class="kw">public</span> <span class="tp">KafkaStreamsConfiguration</span> <span class="fn">kStreamsConfig</span>() {
+        <span class="kw">return new</span> <span class="tp">KafkaStreamsConfiguration</span>(<span class="tp">Map</span>.<span class="fn">of</span>(
+            <span class="tp">StreamsConfig</span>.<span class="cl">APPLICATION_ID_CONFIG</span>, <span class="st2">"order-analytics"</span>,
+            <span class="tp">StreamsConfig</span>.<span class="cl">BOOTSTRAP_SERVERS_CONFIG</span>, <span class="st2">"localhost:9092"</span>,
+            <span class="tp">StreamsConfig</span>.<span class="cl">DEFAULT_KEY_SERDE_CLASS_CONFIG</span>,   <span class="tp">Serdes</span>.<span class="fn">String</span>().<span class="fn">getClass</span>(),
+            <span class="tp">StreamsConfig</span>.<span class="cl">DEFAULT_VALUE_SERDE_CLASS_CONFIG</span>, <span class="tp">Serdes</span>.<span class="fn">String</span>().<span class="fn">getClass</span>(),
+            <span class="tp">StreamsConfig</span>.<span class="cl">PROCESSING_GUARANTEE_CONFIG</span>,   <span class="tp">StreamsConfig</span>.<span class="cl">EXACTLY_ONCE_V2</span>
+        ));
+    }
+}
+
+<span class="cm">// ── Topology: filter + transform + to ────────────</span>
+<span class="an">@Component</span>
+<span class="kw">public class</span> <span class="cl">OrderStreamTopology</span> {
+
+    <span class="an">@Autowired</span>
+    <span class="kw">void</span> <span class="fn">buildTopology</span>(<span class="tp">StreamsBuilder</span> builder) {
+
+        <span class="tp">KStream</span>&lt;<span class="tp">String</span>, <span class="tp">Order</span>&gt; orders = builder.<span class="fn">stream</span>(<span class="st2">"orders"</span>);
+
+        <span class="cm">// ── Filter + Map ───────────────────────────────</span>
+        orders
+            .<span class="fn">filter</span>((key, order) -> order.<span class="fn">getAmount</span>().<span class="fn">compareTo</span>(<span class="tp">BigDecimal</span>.<span class="fn">TEN</span>) &gt; <span class="nb">0</span>)
+            .<span class="fn">mapValues</span>(order -> <span class="kw">new</span> <span class="tp">LargeOrderEvent</span>(order.<span class="fn">getId</span>(), order.<span class="fn">getAmount</span>()))
+            .<span class="fn">to</span>(<span class="st2">"large-orders"</span>);
+
+        <span class="cm">// ── Branch: split stream ───────────────────────</span>
+        <span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">KStream</span>&lt;<span class="tp">String</span>, <span class="tp">Order</span>&gt;&gt; branches = orders.<span class="fn">split</span>(<span class="tp">Named</span>.<span class="fn">as</span>(<span class="st2">"split-"</span>))
+            .<span class="fn">branch</span>((<span class="fn">k</span>, v) -> v.<span class="fn">getStatus</span>().<span class="fn">equals</span>(<span class="st2">"PLACED"</span>),   <span class="tp">Branched</span>.<span class="fn">as</span>(<span class="st2">"placed"</span>))
+            .<span class="fn">branch</span>((<span class="fn">k</span>, v) -> v.<span class="fn">getStatus</span>().<span class="fn">equals</span>(<span class="st2">"SHIPPED"</span>), <span class="tp">Branched</span>.<span class="fn">as</span>(<span class="st2">"shipped"</span>))
+            .<span class="fn">defaultBranch</span>(<span class="tp">Branched</span>.<span class="fn">as</span>(<span class="st2">"other"</span>));
+        branches.<span class="fn">get</span>(<span class="st2">"split-placed"</span>).<span class="fn">to</span>(<span class="st2">"placed-orders"</span>);
+
+        <span class="cm">// ── Aggregation: count orders per customer ─────</span>
+        orders
+            .<span class="fn">groupBy</span>((key, order) -> order.<span class="fn">getCustomerId</span>()) <span class="cm">// re-key by customer</span>
+            .<span class="fn">count</span>(<span class="tp">Materialized</span>.<span class="fn">as</span>(<span class="st2">"order-counts"</span>))       <span class="cm">// state store name</span>
+            .<span class="fn">toStream</span>()
+            .<span class="fn">to</span>(<span class="st2">"customer-order-counts"</span>);
+
+        <span class="cm">// ── Windowed aggregation: orders per 5 min ────</span>
+        orders
+            .<span class="fn">groupByKey</span>()
+            .<span class="fn">windowedBy</span>(<span class="tp">TimeWindows</span>.<span class="fn">ofSizeWithNoGrace</span>(<span class="tp">Duration</span>.<span class="fn">ofMinutes</span>(<span class="nb">5</span>)))
+            .<span class="fn">count</span>()
+            .<span class="fn">toStream</span>()
+            .<span class="fn">map</span>((window, count) ->
+                <span class="tp">KeyValue</span>.<span class="fn">pair</span>(window.<span class="fn">key</span>(),
+                    <span class="kw">new</span> <span class="tp">WindowCount</span>(window.<span class="fn">window</span>().<span class="fn">startTime</span>(), count)))
+            .<span class="fn">to</span>(<span class="st2">"order-window-counts"</span>);
+
+        <span class="cm">// ── KStream-KTable Join ───────────────────────</span>
+        <span class="tp">KTable</span>&lt;<span class="tp">String</span>, <span class="tp">Customer</span>&gt; customers = builder.<span class="fn">table</span>(<span class="st2">"customers"</span>);
+        orders
+            .<span class="fn">join</span>(customers,
+                (order, customer) -> <span class="kw">new</span> <span class="tp">EnrichedOrder</span>(order, customer),
+                <span class="tp">Joined</span>.<span class="fn">with</span>(<span class="tp">Serdes</span>.<span class="fn">String</span>(), orderSerde, customerSerde))
+            .<span class="fn">to</span>(<span class="st2">"enriched-orders"</span>);
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="panel" id="t3q">
+      <div class="stitle">◆ Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is the difference between KStream, KTable, and GlobalKTable?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>KStream</strong>: an infinite sequence of individual events. Each record is independent — doesn't replace previous records with the same key. Like a database's INSERT-only log. Use for: event streams, activity logs, transactions.<br><br><strong>KTable</strong>: represents the latest state per key — a materialized view. A new record with the same key updates/replaces the previous. Backed by a local RocksDB store. Partitioned like the source topic. Use for: user profiles, account balances, order statuses (current state).<br><br><strong>GlobalKTable</strong>: a KTable fully replicated to all application instances. Every instance has ALL the data. Enables non-key-based joins (lookup by a field that's not the partition key). More memory, but no network hop on join. Use for: small, stable reference data (product catalog, country codes).<div class="trick"><strong>⚡ KStream = facts (immutable events). KTable = state (current snapshot). GlobalKTable = broadcast state (available everywhere).</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">How does state store persistence work in Kafka Streams?</div><div class="iqtgl">▾</div></div><div class="iqb">Kafka Streams uses local RocksDB (embedded key-value store) for stateful operations. Every state store is backed by a Kafka changelog topic — every change to the store is written to the changelog.<br><br>On application failure/restart: the new instance reads the changelog topic from the beginning and reconstructs the state store. This can take time for large stores (offset by using standby replicas).<br><br><strong>Standby replicas</strong>: <code>num.standby.replicas=1</code> — Kafka Streams maintains a copy of each state store on another instance. If primary fails, standby takes over immediately (near-instant failover instead of rebuilding from scratch).<br><br>Interactive Queries: query a state store from outside: <code>streams.store(StoreQueryParameters.fromNameAndType("order-counts", QueryableStoreTypes.keyValueStore()))</code>. Enables a REST API backed by the stream state.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What are the different window types in Kafka Streams and when do you use each?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>Tumbling Window</strong>: fixed-size, non-overlapping. Events 0–5min in window 1, 5–10min in window 2. Each event belongs to exactly one window. Use for: per-5-minute aggregations, hourly reports.<br><br><strong>Hopping Window</strong>: fixed-size, overlapping. 5-min window advancing every 1 min. Events may belong to multiple windows. Use for: rolling averages, sliding metrics.<br><br><strong>Session Window</strong>: dynamic size based on activity. Groups events within an inactivity gap (e.g., all user events within 30 minutes of each other). Use for: user sessions, activity tracking, burst detection.<br><br>All windows have grace period (<code>withGracePeriod()</code>) — late-arriving events within the grace period are included in the window. Events after the grace period are dropped.<div class="trick"><strong>⚡ Use Session Windows for behavioral analytics (user sessions, clickstreams). Use Tumbling for fixed-period reporting. Use Hopping for smooth rolling metrics.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tp2">Senior</span><div class="iqqt">Kafka Streams vs Apache Flink vs Spark Streaming — when to use which?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>Kafka Streams</strong>: embedded library, no separate cluster, runs as part of your app. Simple deployment. Kafka-only (source and sink). Best for: teams already on Kafka wanting stream processing without new infrastructure, microservices pattern, moderate complexity processing.<br><br><strong>Apache Flink</strong>: dedicated cluster, more powerful (event time semantics, complex stateful processing, exactly-once with external systems). Better for: complex CEP (Complex Event Processing), ML pipelines, joins between non-Kafka sources, when you need fine-grained resource management.<br><br><strong>Spark Streaming / Structured Streaming</strong>: micro-batch processing, tight Spark ecosystem integration, great for batch+streaming hybrid. Best for: teams already using Spark, ETL pipelines, batch ML + streaming scoring, HDFS/data lake integration.<div class="info"><strong>💡 Start with Kafka Streams if Kafka is your source/sink. Only add Flink/Spark when you outgrow Kafka Streams' capabilities.</strong></div></div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="t3m">
+      <div class="mtip mtips"><div class="mico">💡</div><div><strong>Kafka Streams = stream processing inside your JVM. No extra cluster.</strong><br><br><strong>Mental models:</strong><br>• KStream + KStream join = event correlation (order + payment event)<br>• KStream + KTable join = event enrichment (order + user profile)<br>• KStream → groupBy → aggregate = running totals/counts<br>• Windowed aggregate = time-boxed totals (orders per 5 min)<br><br><strong>State store = local RocksDB + Kafka changelog backup.</strong><br>Crash → restore from changelog. Standby replica → instant failover.<br><br><strong>processing.guarantee=exactly_once_v2 → the gold standard for correctness.</strong></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     C4 — KAFKA STREAMS DSL ADVANCED
+════════════════════════════════════════════ -->
+<div class="card" id="c4">
+  <div class="band">
+    <div class="band-bar" style="background:linear-gradient(90deg,var(--st),#20d0b0)"></div>
+    <div class="bl">
+      <div class="tnum" style="color:var(--st-b)">05</div>
+      <div>
+        <div class="ttag" style="background:var(--st-l);color:var(--st);border:1px solid var(--st-b)">Kafka Streams</div>
+        <div class="btitle">Streams DSL — Advanced Patterns</div>
+        <div class="bsub">Joins · Aggregations · CQRS with Streams · Interactive Queries · Error Handling</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--az-l);color:var(--az);border:1px solid var(--az-b)">🟡 Medium</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb4">
+      <div class="stab ons" onclick="tab(4,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(4,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(4,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(4,'m')">🧠 Memory</div>
+    </div>
+
+    <div class="panel on" id="t4c">
+      <div class="sbox sboxs"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> Advanced Kafka Streams patterns cover joins between streams and tables (enrichment), building read models (CQRS), exposing in-memory state via REST (Interactive Queries), and handling schema evolution. These are the patterns that make Kafka Streams a complete stream processing solution.</div></div>
+      <div class="kps">
+        <div class="kp"><div class="ki">🔗</div><div class="kt"><strong class="cs">Join Types in Kafka Streams</strong><br>
+        <code>KStream-KStream</code>: windowed join (events within a time window).<br>
+        <code>KStream-KTable</code>: lookup join (enrich each event with latest table value).<br>
+        <code>KStream-GlobalKTable</code>: non-key join (join on non-partition key field).<br>
+        <code>KTable-KTable</code>: equi-join (update the join result whenever either table updates).<br>
+        All joins require co-partitioned sources (same partition count and key type) except GlobalKTable joins.</div></div>
+        <div class="kp"><div class="ki">🏗️</div><div class="kt"><strong class="ck">CQRS with Kafka Streams</strong> — Pattern: Commands → Kafka topic → Kafka Streams processor → update state store → Query side reads from state store. Event Sourcing + CQRS: every state change is an event; the current state is derived by replaying events (changelog). State store = read model. Interactive Queries = query API for the read model.</div></div>
+        <div class="kp"><div class="ki">🔍</div><div class="kt"><strong class="cs">Interactive Queries</strong> — Query local state stores from outside the Streams topology. Example: expose order count via REST endpoint. <code>ReadOnlyKeyValueStore&lt;String, Long&gt; store = streams.store(...)</code>. In a distributed deployment (multiple app instances), some queries may require forwarding to the instance that owns that key's partition. Use Kafka's Streams Metadata API to find the right instance.</div></div>
+        <div class="kp"><div class="ki">📊</div><div class="kt"><strong class="ck">Aggregation Operations</strong> — <code>count()</code>: count records per key. <code>reduce()</code>: combine values (sum, min, max). <code>aggregate()</code>: custom aggregation with initializer and adder. All produce a KTable. Chain after <code>groupByKey()</code> or <code>groupBy()</code>. All backed by local state stores with changelog topics.</div></div>
+        <div class="kp"><div class="ki">⚠️</div><div class="kt"><strong class="re">Repartitioning &amp; Co-partitioning</strong> — When you <code>groupBy()</code> on a non-partition-key field, Kafka Streams creates an internal repartition topic and reroutes records. This is transparent but has overhead (extra topic, extra read/write). For joins: all joined topics must have the same number of partitions and the same key type. Verify before deploying or you get a <code>TopologyException</code>.</div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="t4x">
+      <div class="stitle">◆ Memorizable Code — Advanced Patterns</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Kafka Streams — Joins + Aggregate + Interactive Queries + CQRS</div></div>
+<pre><span class="cm">// ── KStream-KStream windowed join ─────────────────</span>
+<span class="tp">KStream</span>&lt;<span class="tp">String</span>, <span class="tp">Order</span>&gt;   orders   = builder.<span class="fn">stream</span>(<span class="st2">"orders"</span>);
+<span class="tp">KStream</span>&lt;<span class="tp">String</span>, <span class="tp">Payment</span>&gt; payments = builder.<span class="fn">stream</span>(<span class="st2">"payments"</span>);
+
+<span class="tp">JoinWindows</span> window = <span class="tp">JoinWindows</span>.<span class="fn">ofTimeDifferenceWithNoGrace</span>(<span class="tp">Duration</span>.<span class="fn">ofMinutes</span>(<span class="nb">5</span>));
+orders.<span class="fn">join</span>(payments,
+    (order, payment) -> <span class="kw">new</span> <span class="tp">PaidOrder</span>(order, payment),
+    window
+).<span class="fn">to</span>(<span class="st2">"paid-orders"</span>);
+
+<span class="cm">// ── Custom Aggregation: sum amounts per customer ──</span>
+orders
+    .<span class="fn">groupBy</span>((key, order) -> order.<span class="fn">getCustomerId</span>(),
+             <span class="tp">Grouped</span>.<span class="fn">with</span>(<span class="tp">Serdes</span>.<span class="fn">String</span>(), orderSerde))
+    .<span class="fn">aggregate</span>(
+        () -> <span class="tp">BigDecimal</span>.<span class="cl">ZERO</span>,           <span class="cm">// initializer</span>
+        (customerId, order, total) ->        <span class="cm">// adder</span>
+            total.<span class="fn">add</span>(order.<span class="fn">getAmount</span>()),
+        <span class="tp">Materialized</span>.&lt;<span class="tp">String</span>, <span class="tp">BigDecimal</span>, <span class="tp">KeyValueStore</span>&lt;<span class="tp">Bytes</span>, <span class="kw">byte</span>[]&gt;&gt;
+            .<span class="fn">as</span>(<span class="st2">"customer-totals"</span>)
+            .<span class="fn">withValueSerde</span>(new <span class="tp">JsonSerde</span>&lt;&gt;(<span class="tp">BigDecimal</span>.<span class="kw">class</span>))
+    )
+    .<span class="fn">toStream</span>().<span class="fn">to</span>(<span class="st2">"customer-revenue"</span>);
+
+<span class="cm">// ── Interactive Queries: expose state via REST ────</span>
+<span class="an">@RestController</span>
+<span class="kw">public class</span> <span class="cl">OrderCountController</span> {
+    <span class="kw">private final</span> <span class="tp">KafkaStreams</span> streams;
+
+    <span class="an">@GetMapping</span>(<span class="st2">"/counts/{customerId}"</span>)
+    <span class="kw">public</span> <span class="tp">Long</span> <span class="fn">getCount</span>(<span class="an">@PathVariable</span> <span class="tp">String</span> customerId) {
+        <span class="tp">ReadOnlyKeyValueStore</span>&lt;<span class="tp">String</span>, <span class="tp">Long</span>&gt; store = streams.<span class="fn">store</span>(
+            <span class="tp">StoreQueryParameters</span>.<span class="fn">fromNameAndType</span>(
+                <span class="st2">"order-counts"</span>,
+                <span class="tp">QueryableStoreTypes</span>.<span class="fn">keyValueStore</span>()
+            )
+        );
+        <span class="tp">Long</span> count = store.<span class="fn">get</span>(customerId);
+        <span class="kw">return</span> count != <span class="kw">null</span> ? count : <span class="nb">0L</span>;
+    }
+
+    <span class="cm">// Get all entries (for small stores)</span>
+    <span class="an">@GetMapping</span>(<span class="st2">"/counts"</span>)
+    <span class="kw">public</span> <span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">Long</span>&gt; <span class="fn">getAllCounts</span>() {
+        <span class="tp">ReadOnlyKeyValueStore</span>&lt;<span class="tp">String</span>, <span class="tp">Long</span>&gt; store = <span class="fn">getStore</span>();
+        <span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">Long</span>&gt; result = <span class="kw">new</span> <span class="tp">HashMap</span>&lt;&gt;();
+        store.<span class="fn">all</span>().<span class="fn">forEachRemaining</span>(kv -> result.<span class="fn">put</span>(kv.<span class="fn">key</span>, kv.<span class="fn">value</span>));
+        <span class="kw">return</span> result;
+    }
+}
+
+<span class="cm">// ── Streams error handling ────────────────────────</span>
+<span class="tp">StreamsBuilder</span> builder = <span class="kw">new</span> <span class="tp">StreamsBuilder</span>();
+<span class="tp">Properties</span> props = <span class="kw">new</span> <span class="tp">Properties</span>();
+<span class="cm">// Deserialization error: skip bad records</span>
+props.<span class="fn">put</span>(<span class="tp">StreamsConfig</span>.<span class="cl">DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG</span>,
+    <span class="tp">LogAndContinueExceptionHandler</span>.<span class="kw">class</span>);
+<span class="cm">// Production exception: restart or stop</span>
+props.<span class="fn">put</span>(<span class="tp">StreamsConfig</span>.<span class="cl">DEFAULT_PRODUCTION_EXCEPTION_HANDLER_CLASS_CONFIG</span>,
+    <span class="tp">DefaultProductionExceptionHandler</span>.<span class="kw">class</span>);</pre>
+      </div>
+    </div>
+
+    <div class="panel" id="t4q">
+      <div class="stitle">◆ Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is co-partitioning and why is it required for Kafka Streams joins?</div><div class="iqtgl">▾</div></div><div class="iqb">Co-partitioning means two topics have the same number of partitions and use the same partitioning strategy (same key → same partition number in both topics). Kafka Streams joins require co-partitioning because each stream instance processes specific partitions — for a join, the matching keys from both topics must be on the same instance.<br><br>If topics have different partition counts, the join key might be on different instances for the two topics — they'd never meet. Kafka Streams throws a <code>TopologyException</code> at startup if it detects non-co-partitioned topics in a join.<br><br><strong>Fix</strong>: create both topics with the same partition count. If they differ: use <code>repartition()</code> to create a new repartitioned topic before the join. <code>GlobalKTable</code> is the exception — it's fully replicated so co-partitioning is not required.<div class="trick"><strong>⚡ Rule: always create related Kafka topics (that you'll join) with the same partition count. Plan this upfront — changing partition counts is disruptive.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">How do you handle late-arriving events in Kafka Streams windows?</div><div class="iqtgl">▾</div></div><div class="iqb">By default, Kafka Streams windows close after their end time and discard late events. Configure a grace period: <code>TimeWindows.ofSizeAndGrace(Duration.ofMinutes(5), Duration.ofMinutes(1))</code> — events up to 1 minute late are still accepted into the window.<br><br>After the grace period, late records are dropped (no error). If you need to handle late records differently: use a <code>KStream</code> with punctuators to manage time-based processing manually, or use the Processor API for fine-grained control.<br><br>Event time vs processing time: Kafka Streams can use the record's timestamp (set by the producer at event time) rather than wall clock. Configure <code>TimestampExtractor</code> to extract event time from record headers or payload for more accurate windowing.<div class="info"><strong>💡 Grace period is the trade-off between result completeness and latency. Larger grace = more complete but slower results.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tp2">Senior</span><div class="iqqt">How would you implement a CQRS/Event Sourcing pattern with Kafka Streams?</div><div class="iqtgl">▾</div></div><div class="iqb">Pattern: <strong>Commands → Kafka topic → Streams processor → State store (Read Model) → REST API</strong>.<br><br>1. <strong>Write side</strong>: commands produce events to Kafka (OrderPlaced, OrderShipped, OrderCancelled). Each event is immutable and represents what happened.<br><br>2. <strong>Streams processor</strong>: aggregate events by order ID using <code>groupByKey().aggregate()</code> — maintains current order state (read model) in a local state store backed by a changelog topic.<br><br>3. <strong>Read side</strong>: REST API queries the local state store via Interactive Queries. For queries hitting a different partition's data: use Kafka Streams' metadata API to locate the right instance and forward the HTTP request there.<br><br>4. <strong>Replay</strong>: to rebuild read models, reset the consumer group and replay from offset 0. The state stores get rebuilt automatically from the changelog.</div></div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="t4m">
+      <div class="mtip mtips"><div class="mico">💡</div><div><strong>Kafka Streams joins cheatsheet:</strong><br>• Stream + Stream = windowed (events within time window)<br>• Stream + KTable = enrich each event with latest state<br>• Stream + GlobalKTable = enrich with any key (no co-partition needed)<br>• KTable + KTable = delta join (updates trigger new join result)<br><br><strong>Co-partitioning rule: same topic partition count + same key for Stream-KTable and Stream-Stream joins.</strong><br><br><strong>Interactive Queries = turn your stream state into a queryable REST API without an extra database.</strong></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     C5 — AZURE EVENT HUBS
+════════════════════════════════════════════ -->
+<div class="card" id="c5">
+  <div class="band">
+    <div class="band-bar" style="background:linear-gradient(90deg,var(--az),#ff8060)"></div>
+    <div class="bl">
+      <div class="tnum" style="color:var(--az-b)">06</div>
+      <div>
+        <div class="ttag" style="background:var(--az-l);color:var(--az);border:1px solid var(--az-b)">Azure Cloud</div>
+        <div class="btitle">Azure Event Hubs &amp; Spring Cloud Azure</div>
+        <div class="bsub">Kafka on Azure — Event Hubs Kafka Protocol · Spring Cloud Azure · Managed Kafka comparison</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--az-l);color:var(--az);border:1px solid var(--az-b)">🟡 Medium</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb5">
+      <div class="stab ona" onclick="tab(5,'c')">📌 Concepts</div>
+      <div class="stab" onclick="tab(5,'x')">💻 Code</div>
+      <div class="stab" onclick="tab(5,'q')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(5,'m')">🧠 Memory</div>
+    </div>
+
+    <div class="panel on" id="t5c">
+      <div class="sbox sboxa"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> Azure Event Hubs is Microsoft's fully managed event streaming service. It exposes a Kafka-compatible endpoint — you can point your Spring Kafka application at Azure Event Hubs just by changing the connection string. No code changes, no retraining. Azure Service Bus is for queues/pub-sub (smaller scale); Event Hubs is for high-throughput event streaming.</div></div>
+      <div class="stitle">◆ Azure Event Streaming Services</div>
+      <table class="tbl">
+        <tr><th class="tha">Service</th><th class="tha">Type</th><th class="tha">Kafka Compatible?</th><th class="tha">Best For</th></tr>
+        <tr><td><strong>Event Hubs</strong></td><td>Streaming (like Kafka)</td><td>✅ Yes — Kafka Protocol</td><td>High-throughput events, telemetry, analytics</td></tr>
+        <tr><td><strong>Service Bus</strong></td><td>Messaging (queues/topics)</td><td>❌ No</td><td>Reliable message delivery, ordered processing, transactions</td></tr>
+        <tr><td><strong>Event Grid</strong></td><td>Event routing</td><td>❌ No</td><td>React to Azure resource events, webhook fan-out</td></tr>
+        <tr><td><strong>HDInsight Kafka</strong></td><td>Managed Kafka cluster</td><td>✅ Full Kafka</td><td>Full Kafka API, Kafka Streams, existing Kafka apps</td></tr>
+      </table>
+      <div class="gap-sm"></div>
+      <div class="kps">
+        <div class="kp"><div class="ki">🔌</div><div class="kt"><strong class="ca">Event Hubs Kafka Endpoint</strong> — Azure Event Hubs Standard tier and above expose a Kafka-compatible endpoint: <code>{namespace}.servicebus.windows.net:9093</code>. Uses SASL/SSL authentication with the Event Hub connection string as the password. Event Hubs → Topic maps to Event Hub instance. Consumer groups work identically. Most Kafka producer/consumer code works with zero changes.</div></div>
+        <div class="kp"><div class="ki">⚠️</div><div class="kt"><strong class="ca">Event Hubs Limitations vs Native Kafka</strong> — No support for: Kafka Streams (no change log topics management), Kafka Connect (limited), <code>__consumer_offsets</code> compacted topics, <code>kafka-topics.sh</code> admin commands, transaction IDs across restarts. Also: maximum retention 90 days (Standard), max message size 1 MB (Standard). For Kafka Streams, use HDInsight Kafka or Azure Kubernetes + self-managed Kafka.</div></div>
+        <div class="kp"><div class="ki">☁️</div><div class="kt"><strong class="ca">Spring Cloud Azure</strong> — Official Microsoft library for integrating Spring apps with Azure services. For messaging: <code>spring-cloud-azure-starter-servicebus</code> (Service Bus) and <code>spring-cloud-azure-starter-eventhubs</code> (Event Hubs native SDK, not Kafka protocol). Azure SDK–based: uses Azure managed identity for auth (no credentials in code), supports Azure Active Directory OAuth2 automatically.</div></div>
+        <div class="kp"><div class="ki">🔑</div><div class="kt"><strong class="ck">Managed Identity Authentication</strong> — Production best practice: use Azure Managed Identity instead of connection strings. Spring Boot apps in Azure (App Service, AKS, Container Apps) get a system identity automatically. Configure: <code>credential: managed-identity-enabled: true</code>. No secrets in config, no rotation needed, audited by Azure AD. Works with Event Hubs, Service Bus, Azure Storage, Key Vault.</div></div>
+        <div class="kp"><div class="ki">📊</div><div class="kt"><strong class="cp">Azure Schema Registry</strong> — Managed schema registry in Azure. Store Avro, JSON Schema, or Protobuf schemas. Integrates with Event Hubs and Spring Cloud Azure. Replace Confluent Schema Registry with Azure Schema Registry for fully Azure-native architecture. <code>SchemaRegistryApacheAvroSerializer</code> handles schema registration/lookup automatically.</div></div>
+        <div class="kp"><div class="ki">🔄</div><div class="kt"><strong class="ca">Event Hubs Capture</strong> — Automatically captures event streams to Azure Blob Storage or Azure Data Lake in Avro format. No consumer needed. Configure capture window (time or size). Enables: batch analytics on historical data, backup/replay, regulatory compliance. Long-term cold storage without running a consumer 24/7.</div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="t5x">
+      <div class="stitle">◆ Memorizable Code — Event Hubs + Spring Cloud Azure</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Azure Event Hubs — Kafka Protocol + Spring Cloud Azure Service Bus</div></div>
+<pre><span class="cm">// ══ OPTION A: Event Hubs via Kafka Protocol ═══════</span>
+<span class="cm">// application.yml — ONLY connection details change!</span>
+<span class="cm">// spring:</span>
+<span class="cm">//   kafka:</span>
+<span class="cm">//     bootstrap-servers: MY-NAMESPACE.servicebus.windows.net:9093</span>
+<span class="cm">//     properties:</span>
+<span class="cm">//       security.protocol: SASL_SSL</span>
+<span class="cm">//       sasl.mechanism: PLAIN</span>
+<span class="cm">//       sasl.jaas.config: >-</span>
+<span class="cm">//         org.apache.kafka.common.security.plain.PlainLoginModule required</span>
+<span class="cm">//         username="$ConnectionString"</span>
+<span class="cm">//         password="Endpoint=sb://MY-NAMESPACE.servicebus.windows.net/;</span>
+<span class="cm">//         SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=XXXX";</span>
+<span class="cm">//     producer:</span>
+<span class="cm">//       key-serializer: org.apache.kafka.common.serialization.StringSerializer</span>
+<span class="cm">//       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer</span>
+<span class="cm">// All @KafkaListener and KafkaTemplate code stays IDENTICAL!</span>
+
+<span class="cm">// ══ OPTION B: Spring Cloud Azure Event Hubs SDK ════</span>
+<span class="cm">// dependency: spring-cloud-azure-starter-eventhubs</span>
+<span class="cm">//</span>
+<span class="cm">// application.yml:</span>
+<span class="cm">// spring:</span>
+<span class="cm">//   cloud:</span>
+<span class="cm">//     azure:</span>
+<span class="cm">//       eventhubs:</span>
+<span class="cm">//         namespace: MY-NAMESPACE</span>
+<span class="cm">//         credential:</span>
+<span class="cm">//           managed-identity-enabled: true   # no secrets!</span>
+<span class="cm">//         connection-string: ${AZURE_EVENTHUBS_CONN_STR} # or explicit</span>
+
+<span class="cm">// Producer via EventHubProducerClient</span>
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">AzureOrderProducer</span> {
+    <span class="an">@Autowired</span>
+    <span class="kw">private</span> <span class="tp">EventHubProducerClient</span> producerClient;
+
+    <span class="kw">public void</span> <span class="fn">send</span>(<span class="tp">OrderEvent</span> event) <span class="kw">throws</span> <span class="tp">JsonProcessingException</span> {
+        <span class="tp">EventData</span> data = <span class="kw">new</span> <span class="tp">EventData</span>(objectMapper.<span class="fn">writeValueAsString</span>(event));
+        data.<span class="fn">getProperties</span>().<span class="fn">put</span>(<span class="st2">"eventType"</span>, <span class="st2">"OrderPlaced"</span>);
+        data.<span class="fn">getProperties</span>().<span class="fn">put</span>(<span class="st2">"correlationId"</span>, event.<span class="fn">getOrderId</span>().<span class="fn">toString</span>());
+
+        <span class="tp">CreateBatchOptions</span> batchOptions = <span class="kw">new</span> <span class="tp">CreateBatchOptions</span>()
+            .<span class="fn">setPartitionKey</span>(event.<span class="fn">getOrderId</span>().<span class="fn">toString</span>());  <span class="cm">// ordering</span>
+        <span class="tp">EventDataBatch</span> batch = producerClient.<span class="fn">createBatch</span>(batchOptions);
+        batch.<span class="fn">tryAdd</span>(data);
+        producerClient.<span class="fn">send</span>(batch);
+    }
+}
+
+<span class="cm">// ══ OPTION C: Azure Service Bus (queues/topics) ════</span>
+<span class="cm">// dependency: spring-cloud-azure-starter-servicebus</span>
+<span class="an">@Service</span>
+<span class="kw">public class</span> <span class="cl">OrderNotificationService</span> {
+    <span class="an">@Autowired</span>
+    <span class="kw">private</span> <span class="tp">ServiceBusSenderClient</span> sender;
+
+    <span class="kw">public void</span> <span class="fn">sendToQueue</span>(<span class="tp">OrderEvent</span> event) {
+        <span class="tp">ServiceBusMessage</span> msg = <span class="kw">new</span> <span class="tp">ServiceBusMessage</span>(
+            objectMapper.<span class="fn">writeValueAsBytes</span>(event));
+        msg.<span class="fn">setContentType</span>(<span class="st2">"application/json"</span>);
+        msg.<span class="fn">setSessionId</span>(event.<span class="fn">getOrderId</span>().<span class="fn">toString</span>()); <span class="cm">// ordered session</span>
+        msg.<span class="fn">setMessageId</span>(<span class="tp">UUID</span>.<span class="fn">randomUUID</span>().<span class="fn">toString</span>());   <span class="cm">// dedup</span>
+        sender.<span class="fn">sendMessage</span>(msg);
+    }
+}
+
+<span class="cm">// Consumer with Spring Integration</span>
+<span class="an">@ServiceBusListener</span>(destination = <span class="st2">"order-queue"</span>)
+<span class="kw">public void</span> <span class="fn">processOrder</span>(<span class="tp">ServiceBusReceivedMessage</span> msg) {
+    <span class="tp">String</span> body = msg.<span class="fn">getBody</span>().<span class="fn">toString</span>();
+    <span class="tp">OrderEvent</span> event = objectMapper.<span class="fn">readValue</span>(body, <span class="tp">OrderEvent</span>.<span class="kw">class</span>);
+    orderService.<span class="fn">process</span>(event);
+}
+
+<span class="cm">// ── Managed Identity config (no connection strings!) ─</span>
+<span class="cm">// application.yml:</span>
+<span class="cm">// spring.cloud.azure:</span>
+<span class="cm">//   credential.managed-identity-enabled: true</span>
+<span class="cm">//   profile.tenant-id: ${AZURE_TENANT_ID}</span>
+<span class="cm">//   servicebus.namespace: MY-NAMESPACE</span>
+<span class="cm">// No passwords! Azure AD authenticates the pod's managed identity.</span></pre>
+      </div>
+    </div>
+
+    <div class="panel" id="t5q">
+      <div class="stitle">◆ Interview Questions</div>
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag taz">Azure</span><div class="iqqt">What is Azure Event Hubs and how does it compare to Apache Kafka?</div><div class="iqtgl">▾</div></div><div class="iqb">Azure Event Hubs is a fully managed event streaming service with Kafka-compatible protocol support. Similarities: topics (Event Hubs), partitions, consumer groups, offsets, Kafka producer/consumer API works without code changes.<br><br>Key differences: <strong>Managed</strong>: no ZooKeeper/KRaft management, automatic scaling (Standard), built-in geo-redundancy (Premium). <strong>Limitations</strong>: no Kafka Streams, no full admin API, max 90-day retention (Standard), 1 MB max message (Standard). <strong>Pricing</strong>: pay-per-throughput-unit, not per cluster. <strong>Integration</strong>: native Azure Active Directory, Event Hubs Capture (auto-archive to Blob/ADLS), Managed Identity auth.<div class="trick"><strong>⚡ For existing Spring Kafka apps migrating to Azure: just change bootstrap-servers to Event Hubs endpoint. Zero code changes for basic producer/consumer patterns.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag taz">Azure</span><div class="iqqt">When should you use Azure Event Hubs vs Azure Service Bus vs Azure Event Grid?</div><div class="iqtgl">▾</div></div><div class="iqb"><strong>Event Hubs</strong>: high-throughput event streaming, telemetry ingestion, log aggregation, event sourcing, big data pipelines. Think: millions of events/sec from IoT devices, application logs, click streams. Kafka-compatible. Temporary storage (days).<br><br><strong>Service Bus</strong>: reliable message queuing with guaranteed delivery, sessions (ordered processing), dead-lettering, scheduled delivery, transactions. Think: order processing, workflow orchestration, command/control messages. Smaller scale but stronger guarantees.<br><br><strong>Event Grid</strong>: reactive programming model — react to events from Azure resources (blob created, VM stopped, etc.) or custom topics. Push model (webhooks). Fan-out to multiple subscribers. Think: trigger functions on storage events, system automation.<div class="info"><strong>💡 Rule: IoT/streaming/analytics → Event Hubs. Business logic messaging/queuing → Service Bus. Azure resource events/webhooks → Event Grid.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tm">Must Know</span><div class="iqqt">What is Spring Cloud Azure and how does it simplify Azure integration?</div><div class="iqtgl">▾</div></div><div class="iqb">Spring Cloud Azure is Microsoft's official Spring integration library that provides Spring-idiom access to Azure services. Key features:<br><br><strong>Auto-configuration</strong>: add dependency, configure in application.yml → beans auto-wired.<br><strong>Managed Identity</strong>: set <code>managed-identity-enabled: true</code> → no connection strings, no secrets, no rotation. Azure AD handles auth.<br><strong>Property binding</strong>: <code>spring.cloud.azure.servicebus.namespace=my-ns</code> → Spring Cloud Azure configures SDK clients.<br><strong>Spring Integration</strong>: <code>@ServiceBusListener</code>, <code>@EventHubsListener</code> annotations work like Spring JMS/Kafka annotations.<br><strong>Spring Messaging</strong>: <code>MessageChannel</code> abstraction allows same code to swap between Service Bus and Kafka.<div class="trick"><strong>⚡ For new Azure projects: use Spring Cloud Azure with Managed Identity. For migrating existing Kafka apps: use Event Hubs Kafka protocol endpoint (no code change). Don't mix both — pick one approach per service.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tp2">Senior</span><div class="iqqt">How would you architect a high-throughput event pipeline on Azure?</div><div class="iqtgl">▾</div></div><div class="iqb">Recommended architecture for high-throughput event processing on Azure:<br><br><strong>Ingestion</strong>: Azure Event Hubs (Kafka protocol) or Event Hubs Premium (up to 200 MB/s). Multiple partitions for parallelism.<br><br><strong>Processing</strong>: Spring Boot microservices on Azure Kubernetes Service (AKS), each running as a consumer group. Use HPA (Horizontal Pod Autoscaler) with KEDA (Kubernetes Event-driven Autoscaling) — KEDA auto-scales based on Kafka consumer lag metric. More lag → more pods, up to partition count.<br><br><strong>State</strong>: For stateful processing — either Kafka Streams on HDInsight (managed Kafka with Streams support) or Azure Stream Analytics (managed stream processing, SQL-based).<br><br><strong>Archival</strong>: Event Hubs Capture → Azure Data Lake Storage → Spark/Synapse Analytics for batch processing on historical data.<br><br><strong>Observability</strong>: Azure Monitor + Prometheus on AKS, alert on consumer lag via KEDA metrics. Application Insights for distributed tracing across services.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tt">Tricky</span><div class="iqqt">What is KEDA and how does it enable Kafka-driven autoscaling on Kubernetes?</div><div class="iqtgl">▾</div></div><div class="iqb">KEDA (Kubernetes Event-Driven Autoscaling) is a Kubernetes operator that scales deployments based on external event sources — including Kafka consumer lag. Normal HPA only scales on CPU/memory. KEDA watches the Kafka consumer group lag:<br><br>1. KEDA polls Kafka broker for consumer group lag on configured topic.<br>2. When lag exceeds threshold (e.g., 100 messages per pod), KEDA tells HPA to scale up.<br>3. New pods join the consumer group → Kafka rebalances → more partitions processed → lag reduces.<br>4. When lag drops below threshold, KEDA scales down (including scale-to-zero when no messages).<br><br>Configuration: <code>ScaledObject</code> CRD pointing to the Kafka topic and consumer group, min/max replica bounds. Pairs perfectly with Azure Event Hubs (same Kafka protocol) or self-managed Kafka on AKS.<div class="trick"><strong>⚡ KEDA + Kafka = autoscaling perfectly aligned to processing demand. No wasted pods when Kafka is quiet. Instantly scales when messages arrive.</strong></div></div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="t5m">
+      <div class="mtip mtipa"><div class="mico">💡</div><div><strong>Azure Event Hubs = managed Kafka in the cloud.</strong><br>Change bootstrap-servers URL → your Spring Kafka app works on Azure. Zero code changes for basic patterns.<br><br><strong>Azure service selection guide:</strong><br>• High-throughput streaming → <strong>Event Hubs</strong> (Kafka protocol)<br>• Reliable business messaging → <strong>Service Bus</strong><br>• Azure resource events / webhooks → <strong>Event Grid</strong><br>• Full Kafka + Streams → <strong>HDInsight Kafka</strong> or self-managed on AKS<br><br><strong>Production auth: always use Managed Identity.</strong> No secrets = no rotation = no leaks.<br><br><strong>KEDA + Event Hubs = lag-driven autoscaling on Kubernetes.</strong> Perfect pairing.</div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<div class="footer">PHASE 11 · KAFKA · KAFKA STREAMS · AZURE EVENT HUBS · SPRING CLOUD AZURE · SENIOR ENGINEER INTERVIEW PREP</div>
+
+<script>
+let cur = 0;
+const TOTAL = 6;
+const tabColors = ['kf','kf','kf','st','st','az'];
+
+function go(i, colorIdx) {
+  for(let j = 0; j < TOTAL; j++) {
+    document.getElementById('c'+j).classList.toggle('on', j === i);
+    const b = document.getElementById('nb'+j);
+    const isActive = j === i;
+    const c = tabColors[j];
+    b.className = 'nb' + (isActive ? (' on ' + c) : '');
+    const ps = document.getElementById('ps'+j);
+    if (!ps) return;
+    ps.className = 'ps';
+    const pc = tabColors[j] === 'kf' ? ['dk','ak'] : tabColors[j] === 'st' ? ['ds','as'] : ['da','aa'];
+    if (j < i) ps.classList.add(pc[0]);
+    else if (j === i) ps.classList.add(pc[1]);
+  }
+  cur = i;
+  window.scrollTo({ top: document.querySelector('.nav').offsetTop, behavior: 'smooth' });
+}
+
+function tab(ti, panel) {
+  const color = tabColors[ti] === 'kf' ? 'onk' : tabColors[ti] === 'st' ? 'ons' : 'ona';
+  const tpMap = { 'c': 0, 'x': 1, 'q': 2, 'm': 3 };
+  const tabs = document.querySelectorAll(`#tb${ti} .stab`);
+  tabs.forEach((t, i) => t.classList.toggle(color, i === tpMap[panel]));
+  tabs.forEach((t, i) => {
+    if (i !== tpMap[panel]) { t.classList.remove('onk','ons','ona'); }
+  });
+  const card = document.getElementById('c'+ti);
+  card.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  const tp = document.getElementById('t'+ti+panel);
+  if (tp) tp.classList.add('on');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' && cur < TOTAL - 1) {
+    go(cur + 1, tabColors[cur + 1] === 'kf' ? 0 : tabColors[cur + 1] === 'st' ? 1 : 2);
+  }
+  if (e.key === 'ArrowLeft' && cur > 0) {
+    go(cur - 1, tabColors[cur - 1] === 'kf' ? 0 : tabColors[cur - 1] === 'st' ? 1 : 2);
+  }
+});
+</script>
+</body>
+</html>
