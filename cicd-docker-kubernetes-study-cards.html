@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CI/CD · Docker · Kubernetes — Study Cards</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Epilogue:wght@300;400;500;600;700;800;900&family=Azeret+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:       #f2ede6;
+  --bg2:      #ece6dd;
+  --surf:     #ffffff;
+  --surf2:    #f8f4ef;
+  --surf3:    #eee9e2;
+  --bdr:      #ddd6cc;
+  --bdr2:     #c9c0b4;
+  --bdr3:     #b0a494;
+
+  --ink:      #181410;
+  --ink2:     #2e2820;
+  --muted:    #7a7060;
+  --muted2:   #a89e90;
+
+  /* CI/CD — indigo */
+  --ci:       #2840b0;
+  --ci-l:     #eef0fc;
+  --ci-b:     rgba(40,64,176,0.28);
+  --ci-soft:  #4860d0;
+
+  /* Docker — ocean blue */
+  --dk:       #0066cc;
+  --dk-l:     #e8f4ff;
+  --dk-b:     rgba(0,102,204,0.28);
+  --dk-soft:  #1a80e0;
+
+  /* Kubernetes — navy teal */
+  --k8:       #0f6b6b;
+  --k8-l:     #e6f5f5;
+  --k8-b:     rgba(15,107,107,0.28);
+  --k8-soft:  #1a8888;
+
+  /* accents */
+  --amber:    #8a5e00;
+  --amber-l:  #fef6e0;
+  --amber-b:  rgba(138,94,0,0.28);
+  --rose:     #a01428;
+  --rose-l:   #fdeef1;
+  --rose-b:   rgba(160,20,40,0.28);
+  --sage:     #2a5c30;
+  --sage-l:   #eaf4eb;
+  --sage-b:   rgba(42,92,48,0.28);
+
+  --code:     #111008;
+  --code2:    #1a1610;
+  --kw:#c8a040; --tp:#60c880; --fn:#58b0e0; --str:#e09060;
+  --cm:#504030; --nb:#c08840; --an:#a870d0; --cl:#60c880;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Epilogue', sans-serif;
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* ─── HEADER ────────────────────────────────────── */
+.hdr { background: var(--ink2); position: relative; overflow: hidden; }
+
+.hdr-rule {
+  height: 5px;
+  background: linear-gradient(90deg,
+    var(--ci) 0%, var(--ci-soft) 33%,
+    var(--dk-soft) 33%, var(--dk) 66%,
+    var(--k8-soft) 66%, var(--k8) 100%);
+}
+
+.hdr-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 15% 60%, rgba(40,64,176,0.14) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 30%, rgba(15,107,107,0.12) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.hdr-watermark {
+  position: absolute; right: 48px; bottom: -12px;
+  font-family: 'Libre Baskerville', serif;
+  font-size: 160px; font-weight: 700; font-style: italic;
+  color: rgba(255,255,255,0.03); line-height: 1;
+  pointer-events: none; user-select: none;
+}
+
+.hdr-inner { padding: 46px 60px 42px; position: relative; z-index: 2; }
+
+.phase-row {
+  display: flex; gap: 10px; align-items: center;
+  margin-bottom: 15px; flex-wrap: wrap;
+}
+.p-badge {
+  font-family: 'Azeret Mono', monospace;
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 4px 11px; border-radius: 2px;
+}
+.pb-ci { background: rgba(40,64,176,0.25); color: #8898e8; border: 1px solid rgba(136,152,232,0.3); }
+.pb-dk { background: rgba(0,102,204,0.22); color: #6ab0f8; border: 1px solid rgba(106,176,248,0.3); }
+.pb-k8 { background: rgba(15,107,107,0.22); color: #60c8c8; border: 1px solid rgba(96,200,200,0.3); }
+.p-sep { color: rgba(255,255,255,0.2); font-size: 12px; }
+
+h1 {
+  font-family: 'Libre Baskerville', serif;
+  font-size: clamp(30px, 4.5vw, 54px);
+  font-weight: 700; line-height: 1.06;
+  color: #fff; letter-spacing: -0.5px;
+}
+h1 .ci { color: #8898e8; }
+h1 .dk { color: #6ab0f8; }
+h1 .k8 { color: #60c8c8; }
+
+.hdr-sub {
+  margin-top: 10px;
+  font-family: 'Azeret Mono', monospace;
+  font-size: 11px; color: rgba(255,255,255,0.3);
+}
+.hdr-meta { display: flex; gap: 22px; margin-top: 18px; flex-wrap: wrap; }
+.hm {
+  font-family: 'Azeret Mono', monospace;
+  font-size: 10px; color: rgba(255,255,255,0.35);
+}
+.hm b { color: rgba(255,255,255,0.65); }
+
+/* ─── PROGRESS ──────────────────────────────────── */
+.prog {
+  background: rgba(0,0,0,0.25);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 11px 60px;
+  display: flex; align-items: center; gap: 5px;
+}
+.plbl {
+  font-family: 'Azeret Mono', monospace;
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(255,255,255,0.22); margin-right: 10px; white-space: nowrap;
+}
+.ps { flex: 1; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.08); cursor: pointer; transition: background .25s; }
+.ps.done { background: rgba(136,152,232,0.4); }
+.ps.active { background: #8898e8; }
+.ps.ddk  { background: rgba(106,176,248,0.35); }
+.ps.adk  { background: #6ab0f8; }
+.ps.dk8  { background: rgba(96,200,200,0.35); }
+.ps.ak8  { background: #60c8c8; }
+.psp { width: 8px; flex-shrink: 0; }
+
+/* ─── NAV ───────────────────────────────────────── */
+.nav {
+  background: var(--surf);
+  border-bottom: 2px solid var(--bdr);
+  padding: 0 60px;
+  display: flex; overflow-x: auto; scrollbar-width: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.nav::-webkit-scrollbar { display: none; }
+.nb {
+  flex-shrink: 0; padding: 13px 18px;
+  border: none; border-bottom: 3px solid transparent;
+  background: transparent; color: var(--muted);
+  font-family: 'Epilogue', sans-serif;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all .2s;
+  white-space: nowrap;
+  display: flex; align-items: center; gap: 7px;
+}
+.nb:hover { color: var(--ink2); background: var(--surf2); }
+.nb.on-ci { color: var(--ci); border-bottom-color: var(--ci); }
+.nb.on-dk { color: var(--dk); border-bottom-color: var(--dk); }
+.nb.on-k8 { color: var(--k8); border-bottom-color: var(--k8); }
+.ntag {
+  font-family: 'Azeret Mono', monospace;
+  font-size: 9px; padding: 2px 6px;
+  border-radius: 2px; background: var(--surf2); color: var(--muted2);
+}
+.nb.on-ci .ntag { background: var(--ci-l); color: var(--ci); }
+.nb.on-dk .ntag { background: var(--dk-l); color: var(--dk); }
+.nb.on-k8 .ntag { background: var(--k8-l); color: var(--k8); }
+
+.kbh {
+  text-align: center; padding: 7px;
+  font-family: 'Azeret Mono', monospace;
+  font-size: 10px; color: var(--muted2);
+  background: var(--surf2); border-bottom: 1px solid var(--bdr);
+}
+kbd { background: var(--bdr); padding: 1px 5px; border-radius: 3px; font-size: 10px; }
+
+/* ─── MAIN ──────────────────────────────────────── */
+.main { max-width: 1100px; margin: 0 auto; padding: 32px 60px 72px; }
+.card { display: none; animation: cardIn .3s ease; }
+.card.on { display: block; }
+@keyframes cardIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+/* ─── CARD STRUCTURE ────────────────────────────── */
+.band {
+  background: var(--surf); border: 1px solid var(--bdr);
+  border-bottom: none; border-radius: 12px 12px 0 0;
+  padding: 26px 36px;
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 20px;
+  position: relative; overflow: hidden;
+}
+.band-bar { position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+.bl { display: flex; align-items: flex-start; gap: 16px; }
+.tnum {
+  font-family: 'Libre Baskerville', serif;
+  font-style: italic; font-size: 52px; font-weight: 700;
+  line-height: 1; flex-shrink: 0; width: 64px; text-align: right;
+  color: var(--bdr2);
+}
+.ttag {
+  display: inline-flex;
+  font-family: 'Azeret Mono', monospace;
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 3px 10px; border-radius: 2px; margin-bottom: 8px;
+}
+.btitle {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 22px; font-weight: 700; color: var(--ink); line-height: 1.2;
+}
+.bsub { margin-top: 5px; font-size: 13px; color: var(--muted); line-height: 1.6; font-style: italic; }
+.pbadge {
+  flex-shrink: 0; font-family: 'Azeret Mono', monospace;
+  font-size: 9px; font-weight: 600; letter-spacing: 1px;
+  padding: 5px 12px; border-radius: 20px; margin-top: 4px; text-transform: uppercase;
+}
+
+.content {
+  background: var(--surf); border: 1px solid var(--bdr); border-top: none;
+  border-radius: 0 0 12px 12px; padding: 0 36px 36px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+}
+
+/* tabs */
+.stabs {
+  display: flex; border-bottom: 1px solid var(--bdr);
+  margin: 0 -36px 26px; padding: 0 36px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.stabs::-webkit-scrollbar { display: none; }
+.stab {
+  flex-shrink: 0; padding: 12px 15px;
+  font-size: 10px; font-weight: 700; color: var(--muted);
+  cursor: pointer; border-bottom: 2px solid transparent;
+  transition: all .2s; font-family: 'Azeret Mono', monospace;
+  letter-spacing: .5px; text-transform: uppercase;
+  display: flex; align-items: center; gap: 5px;
+}
+.stab:hover { color: var(--ink2); }
+.stab.on-ci { color: var(--ci); border-bottom-color: var(--ci); }
+.stab.on-dk { color: var(--dk); border-bottom-color: var(--dk); }
+.stab.on-k8 { color: var(--k8); border-bottom-color: var(--k8); }
+.panel { display: none; } .panel.on { display: block; }
+
+/* content elements */
+.stitle {
+  font-family: 'Azeret Mono', monospace;
+  font-size: 9px; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 13px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--bdr);
+}
+
+.sbox {
+  border-radius: 9px; padding: 14px 17px; margin-bottom: 18px;
+  font-size: 13.5px; line-height: 1.75; display: flex; gap: 12px;
+}
+.sbox-ci { background: var(--ci-l); border: 1px solid var(--ci-b); }
+.sbox-dk { background: var(--dk-l); border: 1px solid var(--dk-b); }
+.sbox-k8 { background: var(--k8-l); border: 1px solid var(--k8-b); }
+.sico { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.stxt { flex: 1; color: var(--ink2); }
+.stxt strong { color: var(--ink); }
+
+.kps { display: flex; flex-direction: column; gap: 10px; }
+.kp {
+  display: flex; gap: 12px; padding: 13px 16px;
+  border-radius: 9px; border: 1px solid var(--bdr);
+  background: var(--surf2); font-size: 13.5px; line-height: 1.7;
+  transition: border-color .2s, box-shadow .2s;
+}
+.kp:hover { border-color: var(--bdr2); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+.ki { font-size: 16px; flex-shrink: 0; margin-top: 2px; }
+.kt { flex: 1; color: var(--ink2); }
+.kt strong { color: var(--ink); }
+.kt code {
+  padding: 1px 6px; border-radius: 3px;
+  font-family: 'Azeret Mono', monospace; font-size: 11.5px;
+}
+.c-ci code { background: var(--ci-l); border: 1px solid var(--ci-b); color: var(--ci); }
+.c-dk code { background: var(--dk-l); border: 1px solid var(--dk-b); color: var(--dk); }
+.c-k8 code { background: var(--k8-l); border: 1px solid var(--k8-b); color: var(--k8); }
+.cci { color: var(--ci); font-weight: 700; }
+.cdk { color: var(--dk); font-weight: 700; }
+.ck8 { color: var(--k8); font-weight: 700; }
+.cam { color: var(--amber); font-weight: 700; }
+.cro { color: var(--rose); font-weight: 700; }
+.csg { color: var(--sage); font-weight: 700; }
+
+/* code */
+.cblock { background: var(--code); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); }
+.chdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 16px; background: var(--code2);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.cdots { display: flex; gap: 5px; align-items: center; }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dr { background: #ff5f57; } .dy { background: #febc2e; } .dg { background: #28c840; }
+.clang { font-family: 'Azeret Mono', monospace; font-size: 9px; letter-spacing: 1.5px; color: rgba(255,255,255,0.2); text-transform: uppercase; }
+pre { padding: 22px; overflow-x: auto; font-family: 'Azeret Mono', monospace; font-size: 12px; line-height: 1.82; color: #8a9880; }
+.kw{color:var(--kw);}.tp{color:var(--tp);}.fn{color:var(--fn);}.str{color:var(--str);}
+.cm{color:var(--cm);font-style:italic;}.nb{color:var(--nb);}.an{color:var(--an);}.cl{color:var(--cl);}
+
+/* IQ */
+.iqs { display: flex; flex-direction: column; gap: 10px; }
+.iq { border: 1px solid var(--bdr); border-radius: 9px; overflow: hidden; transition: border-color .2s, box-shadow .2s; }
+.iq:hover { border-color: var(--bdr2); box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+.iqh { padding: 13px 16px; cursor: pointer; display: flex; align-items: flex-start; gap: 10px; background: var(--surf2); user-select: none; }
+.iqtag {
+  font-family: 'Azeret Mono', monospace; font-size: 9px; font-weight: 600;
+  letter-spacing: 1px; padding: 3px 8px; border-radius: 2px;
+  white-space: nowrap; flex-shrink: 0; margin-top: 2px; text-transform: uppercase;
+}
+.tmk { background: var(--rose-l); color: var(--rose); border: 1px solid var(--rose-b); }
+.ttr { background: var(--amber-l); color: var(--amber); border: 1px solid var(--amber-b); }
+.tco { background: var(--ci-l); color: var(--ci); border: 1px solid var(--ci-b); }
+.tsr { background: var(--k8-l); color: var(--k8); border: 1px solid var(--k8-b); }
+.tcmp { background: var(--sage-l); color: var(--sage); border: 1px solid var(--sage-b); }
+.iqqt { font-size: 13px; font-weight: 700; color: var(--ink); flex: 1; line-height: 1.5; }
+.iq-tgl { color: var(--muted); font-size: 14px; flex-shrink: 0; margin-top: 3px; transition: transform .25s; }
+.iq.open .iq-tgl { transform: rotate(180deg); }
+.iqb { display: none; padding: 15px 16px; font-size: 13px; line-height: 1.8; color: var(--ink2); border-top: 1px solid var(--bdr); background: var(--surf); }
+.iq.open .iqb { display: block; }
+.iqb strong { color: var(--ink); }
+.iqb code { padding: 1px 6px; border-radius: 3px; font-family: 'Azeret Mono', monospace; font-size: 11.5px; }
+.tip-a { margin-top: 10px; padding: 10px 13px; background: var(--amber-l); border-left: 3px solid var(--amber); border-radius: 0 6px 6px 0; font-size: 12.5px; color: var(--amber); }
+.tip-r { margin-top: 10px; padding: 10px 13px; background: var(--rose-l); border-left: 3px solid var(--rose); border-radius: 0 6px 6px 0; font-size: 12.5px; color: var(--rose); }
+.tip-g { margin-top: 10px; padding: 10px 13px; background: var(--sage-l); border-left: 3px solid var(--sage); border-radius: 0 6px 6px 0; font-size: 12.5px; color: var(--sage); }
+.tip-b { margin-top: 10px; padding: 10px 13px; background: var(--ci-l); border-left: 3px solid var(--ci); border-radius: 0 6px 6px 0; font-size: 12.5px; color: var(--ci); }
+
+/* table */
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; border-radius: 9px; overflow: hidden; border: 1px solid var(--bdr); }
+.tbl th { padding: 9px 14px; text-align: left; font-family: 'Azeret Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; border-bottom: 1px solid var(--bdr); }
+.th-ci { background: var(--ci); color: rgba(255,255,255,0.92); }
+.th-dk { background: var(--dk); color: rgba(255,255,255,0.92); }
+.th-k8 { background: var(--k8); color: rgba(255,255,255,0.92); }
+.tbl td { padding: 9px 14px; border-bottom: 1px solid rgba(221,214,204,0.6); color: var(--ink2); vertical-align: top; line-height: 1.55; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: var(--surf2); }
+.tbl td code { padding: 1px 5px; border-radius: 3px; font-family: 'Azeret Mono', monospace; font-size: 10.5px; }
+
+/* flow */
+.flow { background: var(--surf2); border: 1px solid var(--bdr); border-radius: 9px; padding: 16px 18px; overflow-x: auto; margin-bottom: 16px; }
+.fr { display: flex; align-items: center; flex-wrap: nowrap; gap: 0; }
+.fn2 { flex-shrink: 0; background: var(--surf); border: 1.5px solid var(--bdr2); border-radius: 6px; padding: 8px 13px; font-family: 'Azeret Mono', monospace; font-size: 10px; font-weight: 600; color: var(--ink2); white-space: nowrap; text-align: center; }
+.fn-ci { background: var(--ci-l); border-color: var(--ci-b); color: var(--ci); }
+.fn-dk { background: var(--dk-l); border-color: var(--dk-b); color: var(--dk); }
+.fn-k8 { background: var(--k8-l); border-color: var(--k8-b); color: var(--k8); }
+.fn-am { background: var(--amber-l); border-color: var(--amber-b); color: var(--amber); }
+.fn-sg { background: var(--sage-l); border-color: var(--sage-b); color: var(--sage); }
+.fa { color: var(--muted2); font-size: 14px; padding: 0 6px; flex-shrink: 0; }
+.fsub { font-family: 'Azeret Mono', monospace; font-size: 9px; color: var(--muted); margin-top: 4px; text-align: center; }
+
+/* memory */
+.mtip { border-radius: 10px; padding: 17px 19px; font-size: 13.5px; line-height: 1.75; display: flex; gap: 13px; }
+.mico { font-size: 22px; flex-shrink: 0; }
+.mti-ci { background: linear-gradient(135deg, var(--ci-l), #fff); border: 1px solid var(--ci-b); }
+.mti-ci strong { color: var(--ci); }
+.mti-dk { background: linear-gradient(135deg, var(--dk-l), #fff); border: 1px solid var(--dk-b); }
+.mti-dk strong { color: var(--dk); }
+.mti-k8 { background: linear-gradient(135deg, var(--k8-l), #fff); border: 1px solid var(--k8-b); }
+.mti-k8 strong { color: var(--k8); }
+
+.gap { margin-bottom: 22px; } .gap-sm { margin-bottom: 14px; }
+@media(max-width:640px){.main,.nav,.prog,.hdr-inner{padding-left:20px;padding-right:20px;}.band,.content{padding-left:20px;padding-right:20px;}.stabs{margin:0 -20px 22px;padding:0 20px;}}
+.footer { text-align: center; padding: 26px 60px; color: rgba(255,255,255,0.2); font-family: 'Azeret Mono', monospace; font-size: 9px; letter-spacing: 1px; background: var(--ink2); margin-top: 52px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-rule"></div>
+  <div class="hdr-bg"></div>
+  <div class="hdr-inner">
+    <div class="hdr-watermark">DevOps</div>
+    <div class="phase-row">
+      <span class="p-badge pb-ci">CI/CD</span>
+      <span class="p-sep">·</span>
+      <span class="p-badge pb-dk">Docker</span>
+      <span class="p-sep">·</span>
+      <span class="p-badge pb-k8">Kubernetes</span>
+    </div>
+    <h1><span class="ci">CI/CD</span> · <span class="dk">Docker</span><br>&amp; <span class="k8">Kubernetes</span></h1>
+    <div class="hdr-sub">// Must-Know · Senior Engineer Level · Pipelines · Containers · Orchestration · Spring Boot Deployment</div>
+    <div class="hdr-meta">
+      <div class="hm">Cards <b>9</b></div>
+      <div class="hm">Priority <b>🔴 HIGH</b></div>
+      <div class="hm">Est. <b>2–3 days</b></div>
+    </div>
+  </div>
+  <div class="prog">
+    <span class="plbl">Progress</span>
+    <div class="ps active" id="sg0" onclick="go(0)"></div>
+    <div class="ps" id="sg1" onclick="go(1)"></div>
+    <div class="ps" id="sg2" onclick="go(2)"></div>
+    <div class="psp"></div>
+    <div class="ps" id="sg3" onclick="go(3)"></div>
+    <div class="ps" id="sg4" onclick="go(4)"></div>
+    <div class="ps" id="sg5" onclick="go(5)"></div>
+    <div class="psp"></div>
+    <div class="ps" id="sg6" onclick="go(6)"></div>
+    <div class="ps" id="sg7" onclick="go(7)"></div>
+    <div class="ps" id="sg8" onclick="go(8)"></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav" id="topnav">
+  <button class="nb on-ci" onclick="go(0)" id="nb0"><span class="ntag">01</span>What is CI/CD</button>
+  <button class="nb" onclick="go(1)" id="nb1"><span class="ntag">02</span>GitHub Actions</button>
+  <button class="nb" onclick="go(2)" id="nb2"><span class="ntag">03</span>Pipeline Patterns</button>
+  <button class="nb" onclick="go(3)" id="nb3"><span class="ntag">04</span>Docker Basics</button>
+  <button class="nb" onclick="go(4)" id="nb4"><span class="ntag">05</span>Dockerfile</button>
+  <button class="nb" onclick="go(5)" id="nb5"><span class="ntag">06</span>Docker Compose</button>
+  <button class="nb" onclick="go(6)" id="nb6"><span class="ntag">07</span>Kubernetes Basics</button>
+  <button class="nb" onclick="go(7)" id="nb7"><span class="ntag">08</span>K8s Workloads</button>
+  <button class="nb" onclick="go(8)" id="nb8"><span class="ntag">09</span>K8s Production</button>
+</div>
+<div class="kbh">Navigate: <kbd>←</kbd> <kbd>→</kbd> arrow keys · Click tabs for sections</div>
+
+<div class="main">
+
+<!-- ════════════════════════════
+     CARD 0 — WHAT IS CI/CD
+════════════════════════════ -->
+<div class="card on" id="c0">
+  <div class="band">
+    <div class="band-bar" style="background:linear-gradient(90deg,var(--ci),var(--ci-soft))"></div>
+    <div class="bl">
+      <div class="tnum">01</div>
+      <div>
+        <div class="ttag" style="background:var(--ci-l);color:var(--ci);border:1px solid var(--ci-b)">CI/CD</div>
+        <div class="btitle">What is CI/CD?</div>
+        <div class="bsub">Continuous Integration, Delivery, and Deployment — automating the path from code to production</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--rose-l);color:var(--rose);border:1px solid var(--rose-b)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb0">
+      <div class="stab on-ci" onclick="tab(0,'c','ci')">📌 Concepts</div>
+      <div class="stab" onclick="tab(0,'x','ci')">💻 Code</div>
+      <div class="stab" onclick="tab(0,'q','ci')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(0,'m','ci')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="p0c">
+      <div class="sbox sbox-ci"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> Before CI/CD, developers would code for weeks, merge everything at the end ("integration hell"), manually test, and manually deploy — a process taking days and packed with surprise failures. CI/CD automates all of this: every code push triggers automated tests, every passing build creates a deployable artifact, and every merge to main can automatically go live in production.</div></div>
+      <div class="stitle">◆ The Three Concepts</div>
+      <div class="kps c-ci">
+        <div class="kp"><div class="ki">🔄</div><div class="kt"><strong class="cci">Continuous Integration (CI)</strong> — Developers push code frequently (multiple times per day). Each push automatically triggers: code checkout, compile/build, run unit tests, run integration tests, static analysis, code coverage. Goal: <strong>detect integration problems immediately</strong>. If it breaks, you know in minutes not weeks. The team keeps a single shared branch that always compiles and all tests pass.</div></div>
+        <div class="kp"><div class="ki">📦</div><div class="kt"><strong class="cci">Continuous Delivery (CD)</strong> — After CI passes, the pipeline automatically packages the app (Docker image, JAR, etc.) and deploys it to a staging/QA environment. The app is always in a <strong>deployable state</strong>. Deployment to production still requires a human approval click — this gives teams confidence that production deployment is just "pressing a button" rather than a risky, manual process.</div></div>
+        <div class="kp"><div class="ki">🚀</div><div class="kt"><strong class="cci">Continuous Deployment</strong> — The ultimate step: every commit that passes all tests is <strong>automatically deployed to production</strong> — no human approval. Only possible with comprehensive automated tests, feature flags, canary deployments, and rollback automation. Companies like Netflix, Amazon, and Etsy deploy hundreds of times per day using this model.</div></div>
+        <div class="kp"><div class="ki">📊</div><div class="kt"><strong class="cam">Key Metrics (DORA)</strong> — DevOps Research and Assessment defines 4 metrics for high-performing teams: <strong>Deployment Frequency</strong> (how often you deploy), <strong>Lead Time for Changes</strong> (code commit → production), <strong>Change Failure Rate</strong> (% of deployments causing incidents), <strong>Time to Restore</strong> (how fast you recover from failures). Elite teams deploy multiple times/day with &lt;1% failure rate.</div></div>
+        <div class="kp"><div class="ki">🔀</div><div class="kt"><strong class="cci">Branch Strategy</strong> — <strong>Trunk-based development</strong>: small, frequent commits directly to main. Feature flags hide incomplete features. Simplest, fastest. Used by Google. <strong>GitFlow</strong>: feature/release/hotfix branches. More structure, slower. <strong>GitHub Flow</strong>: feature branches → PR → main. Middle ground. CI/CD works best with trunk-based or GitHub Flow — long-lived branches create "merge debt."</div></div>
+      </div>
+      <div class="gap-sm"></div>
+      <div class="stitle">◆ CI/CD Pipeline Stages</div>
+      <div class="flow">
+        <div class="fr" style="flex-wrap:wrap;gap:4px">
+          <div><div class="fn-ci">Code Push<br><small>git commit</small></div></div>
+          <div class="fa">→</div>
+          <div><div class="fn2">Build<br><small>mvn package</small></div></div>
+          <div class="fa">→</div>
+          <div><div class="fn2">Unit Tests<br><small>fast, isolated</small></div></div>
+          <div class="fa">→</div>
+          <div><div class="fn2">Integration<br><small>DB, API tests</small></div></div>
+          <div class="fa">→</div>
+          <div><div class="fn-am">Docker Build<br><small>image tag</small></div></div>
+          <div class="fa">→</div>
+          <div><div class="fn-sg">Deploy Staging<br><small>auto</small></div></div>
+          <div class="fa">→</div>
+          <div><div class="fn-ci">Deploy Prod<br><small>approval or auto</small></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel" id="p0x">
+      <div class="stitle">◆ Memorizable Code — Basic CI/CD Concepts in Pipeline YAML</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">CI/CD Pipeline Structure — GitHub Actions Concepts</div></div>
+<pre><span class="cm"># CI/CD pipeline = automated response to code events</span>
+<span class="cm"># Trigger → Jobs → Steps → Deploy</span>
+<span class="cm">#</span>
+<span class="cm"># Every pipeline answers:</span>
+<span class="cm"># WHEN?    — on: push/pr/schedule/manual</span>
+<span class="cm"># WHERE?   — runs-on: ubuntu-latest / self-hosted</span>
+<span class="cm"># WHAT?    — steps: checkout → build → test → deploy</span>
+<span class="cm"># DEPLOY?  — only on main branch, after all tests pass</span>
+<span class="cm">#</span>
+<span class="cm"># CI = runs on EVERY push</span>
+<span class="cm"># CD = runs on MERGE to main only</span>
+<span class="cm">#</span>
+<span class="cm"># The goal:</span>
+<span class="cm"># Developer pushes → pipeline runs (5–10 min) →</span>
+<span class="cm"># if green: deploy happens automatically</span>
+<span class="cm"># if red: dev gets notification immediately</span>
+<span class="cm">#</span>
+<span class="cm"># DORA elite benchmarks:</span>
+<span class="cm"># Deployment frequency:  multiple times/day</span>
+<span class="cm"># Lead time:             &lt; 1 hour</span>
+<span class="cm"># Change failure rate:   &lt; 1%</span>
+<span class="cm"># Mean time to restore:  &lt; 1 hour</span></pre>
+      </div>
+    </div>
+    <div class="panel" id="p0q">
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tmk">Must Know</span><div class="iqqt">What is the difference between Continuous Integration, Continuous Delivery, and Continuous Deployment?</div><div class="iq-tgl">▾</div></div><div class="iqb"><strong>CI (Continuous Integration)</strong>: developers integrate code into a shared repo frequently. Each push triggers automated build + test. Purpose: catch integration bugs early. Every commit should leave the codebase in a working state.<br><br><strong>Continuous Delivery</strong>: extends CI — after tests pass, the pipeline automatically packages and deploys to a staging environment. Production deployment requires a human "approve" button. The promise: deployment to production is always a low-risk, one-button operation because it was already tested in staging.<br><br><strong>Continuous Deployment</strong>: removes the human approval — every successful pipeline run deploys straight to production. Requires very high test coverage, feature flags, monitoring, and instant rollback capability.<div class="tip-a"><strong>⚡ Interview framing:</strong> CI = "tests run on every push." CD = "deployment is automated." The difference between Delivery and Deployment is: Delivery has a human gate before production; Deployment does not.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag ttr">Tricky</span><div class="iqqt">Why is "integration hell" a problem and how does CI specifically solve it?</div><div class="iq-tgl">▾</div></div><div class="iqb">Integration hell happens when developers work in isolation on feature branches for weeks. When they finally merge, the conflicting changes are extensive and painful to resolve — database schema changes conflict, API contracts diverged, tests fail in unexpected ways. Fixing takes longer than the feature took to build.<br><br>CI solves this with two principles: <strong>Integrate frequently</strong> (every day, every few hours) so conflicts are small and easy to fix. <strong>Automate the integration check</strong> — every merge triggers a full build + test suite, so the team gets immediate feedback rather than discovering problems days later.<div class="tip-b"><strong>💡 The fundamental insight: merging 10 small changes is far less painful than merging 1 huge change. CI enforces the habit of small, frequent integration.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tco">Concept</span><div class="iqqt">What are the DORA metrics and why do they matter for CI/CD?</div><div class="iq-tgl">▾</div></div><div class="iqb">DORA (DevOps Research and Assessment) metrics measure software delivery performance with data from thousands of organizations: <strong>Deployment Frequency</strong> (how often code goes to production), <strong>Lead Time for Changes</strong> (commit to deployed in production), <strong>Change Failure Rate</strong> (% of deployments causing production failures), <strong>Mean Time to Restore</strong> (how fast you recover from incidents).<br><br>They matter because they're predictive — elite performers (multiple deploys/day, &lt;1hr lead time, &lt;1% failure rate) also have better business outcomes (revenue growth, market share, customer satisfaction). CI/CD directly improves all four: automation increases deployment frequency, reduces lead time, and faster pipelines mean faster recovery.</div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="p0m">
+      <div class="mtip mti-ci"><div class="mico">💡</div><div><strong>CI/CD = automate the boring, risky, manual parts of software delivery.</strong><br><br><strong>The three levels:</strong><br>• CI = every push triggers automated build + tests<br>• Continuous Delivery = staging deploy is automatic, prod needs approval<br>• Continuous Deployment = prod deploy is automatic (no human gate)<br><br><strong>Pipeline stages order:</strong> push → build → unit test → integration test → package → staging → (approve) → production<br><br><strong>DORA goal:</strong> Deploy often, fail rarely, recover fast. CI/CD is the enabler.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     CARD 1 — GITHUB ACTIONS
+════════════════════════════ -->
+<div class="card" id="c1">
+  <div class="band">
+    <div class="band-bar" style="background:linear-gradient(90deg,var(--ci),var(--ci-soft))"></div>
+    <div class="bl">
+      <div class="tnum">02</div>
+      <div>
+        <div class="ttag" style="background:var(--ci-l);color:var(--ci);border:1px solid var(--ci-b)">CI/CD</div>
+        <div class="btitle">GitHub Actions — Pipeline Configuration</div>
+        <div class="bsub">Events, workflows, jobs, steps, secrets — the anatomy of a real CI/CD pipeline</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--rose-l);color:var(--rose);border:1px solid var(--rose-b)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb1">
+      <div class="stab on-ci" onclick="tab(1,'c','ci')">📌 Concepts</div>
+      <div class="stab" onclick="tab(1,'x','ci')">💻 Code</div>
+      <div class="stab" onclick="tab(1,'q','ci')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(1,'m','ci')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="p1c">
+      <div class="sbox sbox-ci"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> GitHub Actions lets you define automated workflows in YAML files inside your repo. An event (push, pull request, schedule) triggers a workflow. Each workflow has jobs. Each job runs on a runner (VM) and has steps (commands to execute). Jobs can run in parallel or depend on each other. You get 2,000 minutes/month free on public repos.</div></div>
+      <div class="kps c-ci">
+        <div class="kp"><div class="ki">📋</div><div class="kt"><strong class="cci">Workflow Structure</strong> — Lives in <code>.github/workflows/*.yml</code>. Top-level keys: <code>name</code> (workflow name), <code>on</code> (trigger events), <code>env</code> (shared environment variables), <code>jobs</code> (parallel/sequential units of work). Each job has: <code>runs-on</code> (runner OS), <code>needs</code> (job dependencies), <code>steps</code> (sequential commands).</div></div>
+        <div class="kp"><div class="ki">⚡</div><div class="kt"><strong class="cci">Trigger Events</strong> — <code>push</code>: any push to specified branches. <code>pull_request</code>: PR opened/updated/merged. <code>schedule</code>: cron-based (e.g., nightly builds). <code>workflow_dispatch</code>: manual trigger with optional inputs. <code>release</code>: when a GitHub release is created. Multiple events can trigger the same workflow. Use <code>branches</code> filter to only trigger on specific branches.</div></div>
+        <div class="kp"><div class="ki">🔐</div><div class="kt"><strong class="cci">Secrets &amp; Environment Variables</strong> — Never hardcode credentials. Store as GitHub Secrets (Settings → Secrets → Actions). Reference with <code>${{ secrets.MY_SECRET }}</code>. Environments (staging, prod) can have their own secrets and require approvals. Use <code>env</code> for non-sensitive config. GitHub automatically masks secret values in logs.</div></div>
+        <div class="kp"><div class="ki">♻️</div><div class="kt"><strong class="cci">Caching Dependencies</strong> — <code>actions/cache</code> caches Maven/Gradle/npm dependencies between runs. Speeds up builds by 2–10x. Key includes a hash of the lock file (pom.xml, package-lock.json) — cache invalidates automatically when dependencies change. Without caching, each run re-downloads all dependencies from scratch.</div></div>
+        <div class="kp"><div class="ki">🔗</div><div class="kt"><strong class="cam">Job Dependencies</strong> — Jobs run in parallel by default. Use <code>needs: [build]</code> to run a job only after another completes. Use <code>if: ${{ github.ref == 'refs/heads/main' }}</code> to conditionally run jobs. Chain: test → build → deploy-staging → (manual approval) → deploy-prod.</div></div>
+      </div>
+    </div>
+    <div class="panel" id="p1x">
+      <div class="stitle">◆ Memorizable Code — Complete Spring Boot CI/CD Pipeline</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">GitHub Actions — Spring Boot CI/CD Pipeline</div></div>
+<pre><span class="cm"># .github/workflows/ci-cd.yml</span>
+<span class="fn">name</span>: <span class="str">Spring Boot CI/CD</span>
+
+<span class="fn">on</span>:
+  <span class="fn">push</span>:
+    <span class="fn">branches</span>: [ <span class="str">main</span>, <span class="str">develop</span> ]
+  <span class="fn">pull_request</span>:
+    <span class="fn">branches</span>: [ <span class="str">main</span> ]
+
+<span class="fn">env</span>:
+  <span class="fn">JAVA_VERSION</span>: <span class="str">'21'</span>
+  <span class="fn">IMAGE_NAME</span>: <span class="str">my-app</span>
+
+<span class="fn">jobs</span>:
+
+  <span class="cm">## ── Job 1: Build & Test ──────────────────────────</span>
+  <span class="fn">test</span>:
+    <span class="fn">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="fn">steps</span>:
+      - <span class="fn">uses</span>: <span class="str">actions/checkout@v4</span>
+
+      - <span class="fn">name</span>: <span class="str">Set up JDK 21</span>
+        <span class="fn">uses</span>: <span class="str">actions/setup-java@v4</span>
+        <span class="fn">with</span>:
+          <span class="fn">java-version</span>: <span class="str">${{ env.JAVA_VERSION }}</span>
+          <span class="fn">distribution</span>: <span class="str">temurin</span>
+
+      - <span class="fn">name</span>: <span class="str">Cache Maven dependencies</span>
+        <span class="fn">uses</span>: <span class="str">actions/cache@v4</span>
+        <span class="fn">with</span>:
+          <span class="fn">path</span>: <span class="str">~/.m2/repository</span>
+          <span class="fn">key</span>: <span class="str">maven-${{ hashFiles('**/pom.xml') }}</span>
+          <span class="fn">restore-keys</span>: <span class="str">maven-</span>
+
+      - <span class="fn">name</span>: <span class="str">Run tests</span>
+        <span class="fn">run</span>: <span class="str">mvn verify --no-transfer-progress</span>
+
+      - <span class="fn">name</span>: <span class="str">Upload test report</span>
+        <span class="fn">if</span>: <span class="str">always()</span>              <span class="cm"># upload even on failure</span>
+        <span class="fn">uses</span>: <span class="str">actions/upload-artifact@v4</span>
+        <span class="fn">with</span>:
+          <span class="fn">name</span>: <span class="str">test-results</span>
+          <span class="fn">path</span>: <span class="str">target/surefire-reports/</span>
+
+  <span class="cm">## ── Job 2: Build & Push Docker Image ────────────</span>
+  <span class="fn">docker</span>:
+    <span class="fn">needs</span>: <span class="str">test</span>                   <span class="cm"># only after tests pass</span>
+    <span class="fn">if</span>: <span class="str">github.ref == 'refs/heads/main'</span>
+    <span class="fn">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="fn">steps</span>:
+      - <span class="fn">uses</span>: <span class="str">actions/checkout@v4</span>
+
+      - <span class="fn">name</span>: <span class="str">Login to Docker Hub</span>
+        <span class="fn">uses</span>: <span class="str">docker/login-action@v3</span>
+        <span class="fn">with</span>:
+          <span class="fn">username</span>: <span class="str">${{ secrets.DOCKER_USERNAME }}</span>
+          <span class="fn">password</span>: <span class="str">${{ secrets.DOCKER_TOKEN }}</span>
+
+      - <span class="fn">name</span>: <span class="str">Build and push</span>
+        <span class="fn">uses</span>: <span class="str">docker/build-push-action@v5</span>
+        <span class="fn">with</span>:
+          <span class="fn">push</span>: <span class="kw">true</span>
+          <span class="fn">tags</span>: |
+            <span class="str">myorg/${{ env.IMAGE_NAME }}:latest</span>
+            <span class="str">myorg/${{ env.IMAGE_NAME }}:${{ github.sha }}</span>
+
+  <span class="cm">## ── Job 3: Deploy to Staging ─────────────────────</span>
+  <span class="fn">deploy-staging</span>:
+    <span class="fn">needs</span>: <span class="str">docker</span>
+    <span class="fn">environment</span>: <span class="str">staging</span>         <span class="cm"># environment gates/secrets</span>
+    <span class="fn">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="fn">steps</span>:
+      - <span class="fn">name</span>: <span class="str">Deploy to K8s staging</span>
+        <span class="fn">run</span>: |
+          <span class="str">kubectl set image deployment/app \</span>
+            <span class="str">app=myorg/${{ env.IMAGE_NAME }}:${{ github.sha }}</span>
+        <span class="fn">env</span>:
+          <span class="fn">KUBECONFIG_DATA</span>: <span class="str">${{ secrets.KUBECONFIG_STAGING }}</span>
+
+  <span class="cm">## ── Job 4: Deploy to Prod (requires approval) ────</span>
+  <span class="fn">deploy-prod</span>:
+    <span class="fn">needs</span>: <span class="str">deploy-staging</span>
+    <span class="fn">environment</span>: <span class="str">production</span>      <span class="cm"># human approval required!</span>
+    <span class="fn">runs-on</span>: <span class="str">ubuntu-latest</span>
+    <span class="fn">steps</span>:
+      - <span class="fn">name</span>: <span class="str">Deploy to production</span>
+        <span class="fn">run</span>: <span class="str">./scripts/deploy-prod.sh ${{ github.sha }}</span></pre>
+      </div>
+    </div>
+    <div class="panel" id="p1q">
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tmk">Must Know</span><div class="iqqt">What is the difference between a job and a step in GitHub Actions?</div><div class="iq-tgl">▾</div></div><div class="iqb"><strong>Job</strong>: a collection of steps that runs on a single runner (VM). Jobs run in parallel by default. Each job starts with a fresh VM — no files or state from other jobs unless you explicitly pass artifacts. Use <code>needs:</code> to create dependencies. Each job can have different environments, conditionals, and runner types.<br><br><strong>Step</strong>: a single action within a job. Steps run sequentially on the same VM. They share the workspace (files from earlier steps are available). A step is either a shell command (<code>run:</code>) or a reusable action (<code>uses:</code>). Because steps share the workspace, step 2 can use files built by step 1.<div class="tip-a"><strong>⚡ Memory: Jobs = parallel VMs. Steps = sequential commands on one VM.</strong> If you need to share files between units → use steps. If you want parallelism → use jobs with artifacts.</div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag ttr">Tricky</span><div class="iqqt">How do you securely pass secrets to a pipeline without hardcoding them?</div><div class="iq-tgl">▾</div></div><div class="iqb">GitHub Secrets are the answer — encrypted at rest, masked in logs, never exposed in PR builds from forks. Store via GitHub UI (Settings → Secrets → Actions) or GitHub CLI. Reference in YAML: <code>${{ secrets.MY_SECRET }}</code>.<br><br>For more structure: use <strong>Environments</strong> (staging, production) — each environment can have its own secrets and require mandatory reviewer approval before running. Production environment secrets are never exposed to staging jobs.<br><br>What NOT to do: hardcode in YAML (visible in git history forever), use env variables for sensitive values without secrets, print secrets to logs even "temporarily."<div class="tip-r"><strong>⚠️ Secrets from pull requests submitted from forks do NOT have access to repo secrets by default — GitHub protects against supply-chain attacks this way.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag ttr">Tricky</span><div class="iqqt">Why is caching important in CI pipelines and how does it work?</div><div class="iq-tgl">▾</div></div><div class="iqb">Every CI run starts on a fresh VM — no prior state. Without caching, Maven/Gradle downloads all dependencies (100s of MB) on every single run, adding 2–5 minutes per pipeline. Multiply by 50 developers × 10 pushes/day = significant waste.<br><br>The <code>actions/cache</code> action stores a named snapshot between runs. The cache key includes a hash of the dependency file (pom.xml, package-lock.json). If dependencies haven't changed, the cache hits and restores in seconds. When pom.xml changes, the hash changes, the old cache misses, and a fresh cache is built with the updated dependencies.<div class="tip-g"><strong>💡 Good caching practice: always include the lock file hash in the cache key. Use restore-keys for fallback to a partial match when the exact key misses.</strong></div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="p1m">
+      <div class="mtip mti-ci"><div class="mico">💡</div><div><strong>GitHub Actions anatomy: Event → Workflow → Jobs → Steps</strong><br><br><strong>Key YAML fields:</strong><br>• on: push/pr/schedule/dispatch → WHEN to run<br>• runs-on: ubuntu-latest → WHERE to run<br>• needs: [job-name] → run AFTER another job<br>• if: condition → run ONLY WHEN condition is true<br>• uses: action@version → reuse community actions<br>• run: command → execute shell command<br><br><strong>Secrets rule:</strong> never hardcode. Always ${{ secrets.NAME }}.<br><strong>Caching rule:</strong> hash the lock file in the cache key.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     CARD 2 — PIPELINE PATTERNS
+════════════════════════════ -->
+<div class="card" id="c2">
+  <div class="band">
+    <div class="band-bar" style="background:linear-gradient(90deg,var(--ci),var(--ci-soft))"></div>
+    <div class="bl">
+      <div class="tnum">03</div>
+      <div>
+        <div class="ttag" style="background:var(--ci-l);color:var(--ci);border:1px solid var(--ci-b)">CI/CD</div>
+        <div class="btitle">Pipeline Patterns &amp; Best Practices</div>
+        <div class="bsub">Fast feedback, deployment strategies, rollbacks — patterns used by high-performing teams</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--amber-l);color:var(--amber);border:1px solid var(--amber-b)">🟡 Medium</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb2">
+      <div class="stab on-ci" onclick="tab(2,'c','ci')">📌 Concepts</div>
+      <div class="stab" onclick="tab(2,'x','ci')">💻 Code</div>
+      <div class="stab" onclick="tab(2,'q','ci')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(2,'m','ci')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="p2c">
+      <div class="sbox sbox-ci"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> A great CI/CD pipeline isn't just "run tests then deploy." It uses smart patterns: fail fast (run quick tests first), deploy gradually (canary before full rollout), test in production with flags, and automate rollbacks when metrics go wrong. These patterns reduce risk while maintaining deployment speed.</div></div>
+      <div class="kps c-ci">
+        <div class="kp"><div class="ki">⚡</div><div class="kt"><strong class="cci">Fail Fast Principle</strong> — Order pipeline stages from cheapest to most expensive. Compilation (5s) → Unit tests (30s) → Integration tests (2min) → E2E tests (10min) → Deploy. If compilation fails, don't run tests. If unit tests fail, don't run integration tests. This minimises wasted compute and gives developers fast feedback on simple mistakes.</div></div>
+        <div class="kp"><div class="ki">🐦</div><div class="kt"><strong class="cci">Canary Deployment</strong> — Deploy the new version to a small percentage of traffic (5–10%) first. Monitor error rates and latency. If metrics are healthy after 10 minutes, gradually roll out to 25%, 50%, 100%. If metrics degrade, automatically roll back the canary. Kubernetes + Argo Rollouts automates this. You get real production testing without full blast radius.</div></div>
+        <div class="kp"><div class="ki">🔵🟢</div><div class="kt"><strong class="cci">Blue-Green Deployment</strong> — Run two identical production environments (Blue = current, Green = new). Deploy to Green while Blue serves traffic. Switch the load balancer from Blue to Green (instant, no downtime). If Green has problems, switch back to Blue in seconds. Requires double the infrastructure during deployment but gives near-zero-downtime deployments with instant rollback.</div></div>
+        <div class="kp"><div class="ki">🏳️</div><div class="kt"><strong class="cam">Feature Flags</strong> — Deploy code without activating it. Use a feature flag service (LaunchDarkly, Unleash) to enable a feature for 1% of users, specific users, or specific environments. Decouple code deployment from feature release. Roll back by disabling the flag — no redeployment. Dark launching: deploy to all but show to 0% until testing complete.</div></div>
+        <div class="kp"><div class="ki">↩️</div><div class="kt"><strong class="cci">Automated Rollback</strong> — Monitor deployment health metrics (error rate, p99 latency, HTTP 5xx rate). If metrics cross thresholds within N minutes of a deployment, automatically trigger a rollback to the previous known-good version. Kubernetes rolling deployments have built-in rollback: <code>kubectl rollout undo deployment/app</code>. Argo Rollouts automates analysis + rollback with Prometheus metrics.</div></div>
+      </div>
+    </div>
+    <div class="panel" id="p2x">
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Pipeline Patterns — Matrix Tests + Canary + Blue-Green Config</div></div>
+<pre><span class="cm"># ── Matrix testing: test on multiple JDK versions ────</span>
+<span class="fn">jobs</span>:
+  <span class="fn">test</span>:
+    <span class="fn">strategy</span>:
+      <span class="fn">matrix</span>:
+        <span class="fn">java</span>: [<span class="str">17</span>, <span class="str">21</span>]
+        <span class="fn">os</span>: [<span class="str">ubuntu-latest</span>, <span class="str">windows-latest</span>]
+      <span class="fn">fail-fast</span>: <span class="kw">false</span>   <span class="cm"># continue other matrix jobs on failure</span>
+    <span class="fn">runs-on</span>: <span class="str">${{ matrix.os }}</span>
+    <span class="fn">steps</span>:
+      - <span class="fn">uses</span>: <span class="str">actions/setup-java@v4</span>
+        <span class="fn">with</span>:
+          <span class="fn">java-version</span>: <span class="str">${{ matrix.java }}</span>
+      - <span class="fn">run</span>: <span class="str">mvn test</span>
+
+<span class="cm"># ── Semantic versioning from git tags ─────────────────</span>
+<span class="fn">on</span>:
+  <span class="fn">push</span>:
+    <span class="fn">tags</span>: [ <span class="str">'v*.*.*'</span> ]    <span class="cm"># triggers on v1.2.3</span>
+
+<span class="fn">steps</span>:
+  - <span class="fn">name</span>: <span class="str">Extract version</span>
+    <span class="fn">run</span>: <span class="str">echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV</span>
+  - <span class="fn">name</span>: <span class="str">Build with version</span>
+    <span class="fn">run</span>: <span class="str">mvn package -Dapp.version=${{ env.VERSION }}</span>
+
+<span class="cm"># ── Blue-Green: switch K8s service selector ───────────</span>
+<span class="cm"># Blue deployment (current live)</span>
+<span class="cm"># apiVersion: apps/v1</span>
+<span class="cm"># kind: Deployment</span>
+<span class="cm"># metadata:</span>
+<span class="cm">#   name: app-blue</span>
+<span class="cm"># spec:</span>
+<span class="cm">#   selector:</span>
+<span class="cm">#     matchLabels: { app: myapp, version: blue }</span>
+
+<span class="cm"># Green (new version)</span>
+<span class="cm"># metadata:</span>
+<span class="cm">#   name: app-green</span>
+<span class="cm"># spec:</span>
+<span class="cm">#   selector:</span>
+<span class="cm">#     matchLabels: { app: myapp, version: green }</span>
+
+<span class="cm"># Service — switch from blue to green by updating selector:</span>
+<span class="cm"># kubectl patch svc app -p '{"spec":{"selector":{"version":"green"}}}'</span>
+<span class="cm"># Instant traffic switch. Rollback: patch back to "blue"</span>
+
+<span class="cm"># ── Automated rollback trigger in pipeline ────────────</span>
+<span class="fn">steps</span>:
+  - <span class="fn">name</span>: <span class="str">Deploy</span>
+    <span class="fn">run</span>: <span class="str">kubectl rollout status deployment/app --timeout=5m</span>
+  - <span class="fn">name</span>: <span class="str">Smoke test post-deploy</span>
+    <span class="fn">run</span>: <span class="str">./scripts/smoke-test.sh</span>
+  - <span class="fn">name</span>: <span class="str">Rollback on failure</span>
+    <span class="fn">if</span>: <span class="str">failure()</span>
+    <span class="fn">run</span>: |
+      <span class="str">kubectl rollout undo deployment/app</span>
+      <span class="str">echo "Deployment failed! Rolled back."</span></pre>
+      </div>
+    </div>
+    <div class="panel" id="p2q">
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tmk">Must Know</span><div class="iqqt">What is the difference between Blue-Green and Canary deployments?</div><div class="iq-tgl">▾</div></div><div class="iqb"><strong>Blue-Green</strong>: two complete production environments. You deploy to the idle one (Green), test it, then switch ALL traffic at once. Instant switchover, instant rollback. Pro: zero-downtime. Con: requires 2x infrastructure cost during deployment. Best for: planned releases where you want tested, instant switchover.<br><br><strong>Canary</strong>: gradually shift traffic from old to new version — 5% → 25% → 50% → 100%. The new version gets real production traffic at low blast radius. You observe real metrics before full rollout. Pro: catches issues with small user impact. Con: two versions running simultaneously for an extended period (complexity, state management). Best for: frequent releases where gradual exposure reduces risk.<div class="tip-a"><strong>⚡ Blue-Green = all-or-nothing switch. Canary = gradual percentage shift. Canary is safer for risky releases; Blue-Green is faster for high-confidence releases.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tsr">Senior</span><div class="iqqt">How do feature flags change the relationship between deployment and release?</div><div class="iq-tgl">▾</div></div><div class="iqb">Traditionally, deployment = release. The moment code goes to production, users see it. Feature flags break this coupling: code can be deployed to production but hidden behind a flag that returns false for all users.<br><br>This enables: <strong>Continuous deployment without continuous release</strong> — you can merge and deploy every day even if features aren't ready for users. <strong>Controlled rollout</strong> — enable for 1% of users, monitor, gradually increase. <strong>Instant rollback</strong> — disable the flag without redeployment. <strong>A/B testing</strong> — show feature A to 50%, feature B to 50%, compare metrics. <strong>Kill switch</strong> — if a feature causes issues, disable it in seconds without a pipeline run.<div class="tip-b"><strong>💡 Feature flags are how large companies (Facebook, GitHub) deploy multiple times per day to hundreds of millions of users without risk. They're a key enabler of continuous deployment.</strong></div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="p2m">
+      <div class="mtip mti-ci"><div class="mico">💡</div><div><strong>Pipeline best practices:</strong><br>• Fail fast: cheap tests first, expensive tests last<br>• Matrix: test across multiple Java/OS versions in parallel<br>• Canary: 5% → 25% → 100% with metric gates<br>• Blue-Green: instant traffic switch, instant rollback<br>• Feature flags: deploy code without releasing to users<br>• Automated rollback: if smoke tests fail → undo immediately<br><br><strong>The goal: deploy often with confidence. Confidence comes from tests + gradual rollout + observability + fast rollback.</strong></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     CARD 3 — DOCKER BASICS
+════════════════════════════ -->
+<div class="card" id="c3">
+  <div class="band">
+    <div class="band-bar" style="background:linear-gradient(90deg,var(--dk),var(--dk-soft))"></div>
+    <div class="bl">
+      <div class="tnum">04</div>
+      <div>
+        <div class="ttag" style="background:var(--dk-l);color:var(--dk);border:1px solid var(--dk-b)">Docker</div>
+        <div class="btitle">Docker Fundamentals</div>
+        <div class="bsub">Images, containers, registries, and the key commands every developer needs daily</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--rose-l);color:var(--rose);border:1px solid var(--rose-b)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb3">
+      <div class="stab on-dk" onclick="tab(3,'c','dk')">📌 Concepts</div>
+      <div class="stab" onclick="tab(3,'x','dk')">💻 Code</div>
+      <div class="stab" onclick="tab(3,'q','dk')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(3,'m','dk')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="p3c">
+      <div class="sbox sbox-dk"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> Docker solves "it works on my machine." A container bundles your application AND all its dependencies (JDK, libraries, configs) into one portable unit. Run the same container image on your laptop, CI server, and production Kubernetes — identical behavior, no more environment drift. Unlike VMs, containers share the host OS kernel — they start in milliseconds and use megabytes of memory instead of gigabytes.</div></div>
+      <div class="kps c-dk">
+        <div class="kp"><div class="ki">📸</div><div class="kt"><strong class="cdk">Image</strong> — An immutable, read-only snapshot of your application and its environment. Built from a Dockerfile. Composed of layers — each instruction in a Dockerfile adds a layer. Images are stored in registries (Docker Hub, ECR, GCR). An image is the blueprint. You can't change an image — you rebuild it. Tag versions: <code>myapp:1.0.0</code>, <code>myapp:latest</code>.</div></div>
+        <div class="kp"><div class="ki">📦</div><div class="kt"><strong class="cdk">Container</strong> — A running instance of an image. Lightweight, isolated process. Has its own filesystem (from the image), network, and process space. Ephemeral by default — containers are designed to be disposable. Write a file in a container? It's lost when the container stops unless you use a volume. Multiple containers can run from the same image simultaneously.</div></div>
+        <div class="kp"><div class="ki">📚</div><div class="kt"><strong class="cdk">Layers &amp; Caching</strong> — Each Dockerfile instruction creates a read-only layer. Docker caches layers — if a layer hasn't changed, Docker reuses it. Order matters: put infrequently-changing instructions first (base image, system deps), frequently-changing instructions last (application code). Copy dependencies BEFORE source code so the dependency layer is cached even when code changes.</div></div>
+        <div class="kp"><div class="ki">🗂️</div><div class="kt"><strong class="cdk">Registry</strong> — A storage and distribution service for Docker images. <strong>Docker Hub</strong>: default public registry, free tier available. <strong>AWS ECR</strong>: Amazon's private registry, integrates with ECS/EKS. <strong>GitHub Container Registry (ghcr.io)</strong>: integrated with GitHub repos. <strong>Google Artifact Registry</strong>: GCP. Push an image: <code>docker push myorg/myapp:1.0</code>. Pull: <code>docker pull myorg/myapp:1.0</code>.</div></div>
+        <div class="kp"><div class="ki">💾</div><div class="kt"><strong class="cam">Volumes</strong> — Persist data beyond container lifecycle. Managed by Docker, stored on the host. Mount a volume: <code>-v myvolume:/data</code>. Bind mount: <code>-v /host/path:/container/path</code>. Use volumes for: database data, config files, uploaded files. Never store stateful data in a container's filesystem — it disappears with the container.</div></div>
+        <div class="kp"><div class="ki">🌐</div><div class="kt"><strong class="cdk">Networking</strong> — Containers on the same Docker network can communicate by container name (DNS). Default bridge network: containers use IP addresses. User-defined networks: containers use names. <code>docker network create mynet</code>, then <code>docker run --network mynet</code>. Port mapping: <code>-p 8080:8080</code> (host:container).</div></div>
+      </div>
+    </div>
+    <div class="panel" id="p3x">
+      <div class="stitle">◆ Memorizable Code — Essential Docker Commands</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Docker Commands — Build, Run, Inspect, Clean</div></div>
+<pre><span class="cm"># ── Build image ───────────────────────────────────────</span>
+<span class="fn">docker build</span> -t myapp:1.0 .           <span class="cm"># build from ./Dockerfile</span>
+<span class="fn">docker build</span> -t myapp:1.0 -f Dockerfile.prod .  <span class="cm"># custom Dockerfile</span>
+<span class="fn">docker build</span> --no-cache -t myapp:1.0 . <span class="cm"># force rebuild all layers</span>
+
+<span class="cm"># ── Run container ─────────────────────────────────────</span>
+<span class="fn">docker run</span> -p 8080:8080 myapp:1.0             <span class="cm"># foreground</span>
+<span class="fn">docker run</span> -d -p 8080:8080 myapp:1.0          <span class="cm"># detached (background)</span>
+<span class="fn">docker run</span> -d --name myapp -p 8080:8080 \
+  -e SPRING_PROFILES_ACTIVE=prod \             <span class="cm"># env variable</span>
+  -e DB_PASSWORD=secret \
+  -v /data:/app/uploads \                      <span class="cm"># mount volume</span>
+  --network mynet \                            <span class="cm"># custom network</span>
+  --restart unless-stopped \                  <span class="cm"># auto-restart policy</span>
+  myapp:1.0
+
+<span class="cm"># ── Container lifecycle ────────────────────────────────</span>
+<span class="fn">docker ps</span>                     <span class="cm"># running containers</span>
+<span class="fn">docker ps -a</span>                  <span class="cm"># all containers (incl. stopped)</span>
+<span class="fn">docker stop</span> myapp             <span class="cm"># graceful stop (SIGTERM → 10s → SIGKILL)</span>
+<span class="fn">docker start</span> myapp            <span class="cm"># start stopped container</span>
+<span class="fn">docker rm</span> myapp               <span class="cm"># remove stopped container</span>
+<span class="fn">docker rm -f</span> myapp            <span class="cm"># force remove (even if running)</span>
+
+<span class="cm"># ── Inspect and debug ─────────────────────────────────</span>
+<span class="fn">docker logs</span> myapp             <span class="cm"># view stdout/stderr</span>
+<span class="fn">docker logs -f</span> myapp          <span class="cm"># follow logs (tail -f)</span>
+<span class="fn">docker exec -it</span> myapp bash    <span class="cm"># open shell inside running container</span>
+<span class="fn">docker inspect</span> myapp          <span class="cm"># full container metadata (JSON)</span>
+<span class="fn">docker stats</span>                  <span class="cm"># live CPU/memory usage</span>
+<span class="fn">docker top</span> myapp              <span class="cm"># processes running inside</span>
+
+<span class="cm"># ── Images ────────────────────────────────────────────</span>
+<span class="fn">docker images</span>                 <span class="cm"># list local images</span>
+<span class="fn">docker rmi</span> myapp:1.0          <span class="cm"># remove image</span>
+<span class="fn">docker pull</span> postgres:15       <span class="cm"># download from registry</span>
+<span class="fn">docker push</span> myorg/myapp:1.0   <span class="cm"># upload to registry</span>
+<span class="fn">docker tag</span> myapp:1.0 myorg/myapp:1.0  <span class="cm"># add registry tag</span>
+
+<span class="cm"># ── Networking ────────────────────────────────────────</span>
+<span class="fn">docker network create</span> mynet
+<span class="fn">docker network ls</span>
+<span class="fn">docker network inspect</span> mynet
+
+<span class="cm"># ── Cleanup ────────────────────────────────────────────</span>
+<span class="fn">docker system prune</span> -a        <span class="cm"># remove all unused (images, containers, etc.)</span>
+<span class="fn">docker volume prune</span>           <span class="cm"># remove unused volumes</span></pre>
+      </div>
+    </div>
+    <div class="panel" id="p3q">
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tmk">Must Know</span><div class="iqqt">What is the difference between a Docker image and a container?</div><div class="iq-tgl">▾</div></div><div class="iqb">An <strong>image</strong> is a static, immutable snapshot — a read-only template containing the application and all its dependencies. Think of it as a class definition. You can't change an image; you rebuild it. Images are stored in registries and versioned with tags.<br><br>A <strong>container</strong> is a running instance of an image — it's the image brought to life as an isolated process. Think of it as an instance of a class. Multiple containers can run from the same image. Containers have writable layers on top of the image's read-only layers — any writes go there. When the container stops, its writable layer is lost (unless using volumes).<div class="tip-a"><strong>⚡ Analogy: Image = class definition (static blueprint). Container = object instance (running, has state). You can create many containers from one image.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag ttr">Tricky</span><div class="iqqt">How does Docker layer caching work and why does layer order matter?</div><div class="iq-tgl">▾</div></div><div class="iqb">Docker builds images layer by layer. Each Dockerfile instruction creates a new layer. Docker caches layers — if a layer is unchanged, Docker reuses the cached version. If a layer changes, all layers AFTER it must be rebuilt too (cache invalidated).<br><br>Order matters because of this chain invalidation. Wrong order: COPY . . (source code) then RUN mvn install (download deps) — every source change forces re-downloading all dependencies. Correct order: COPY pom.xml ., then RUN mvn dependency:resolve (downloads deps — cached until pom.xml changes), THEN COPY src ./src, then RUN mvn package. Now dependencies download once and are cached for subsequent code-only changes.<div class="tip-r"><strong>⚠️ The golden rule: put things that change INFREQUENTLY at the top. Things that change FREQUENTLY at the bottom. Dependencies before source code — always.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tco">Concept</span><div class="iqqt">What is the difference between Docker volumes and bind mounts?</div><div class="iq-tgl">▾</div></div><div class="iqb"><strong>Docker Volumes</strong>: managed by Docker, stored in a special Docker area on the host (<code>/var/lib/docker/volumes/</code>). Lifecycle independent of containers. Easy to backup, migrate. Access via <code>-v volumename:/path</code>. Best for: production database data, stateful app data. Don't depend on specific host path.<br><br><strong>Bind Mounts</strong>: map a specific host directory into the container. <code>-v /host/absolute/path:/container/path</code>. Container sees host files directly. Best for: local development (mount source code for hot-reload), configuration files. Depends on specific host path — less portable across environments.<div class="tip-g"><strong>💡 Production rule: use named volumes for data that needs to persist. Use bind mounts only for local development hot-reload or config injection.</strong></div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="p3m">
+      <div class="mtip mti-dk"><div class="mico">💡</div><div><strong>Docker solves "works on my machine" by bundling everything into one portable image.</strong><br><br><strong>Core concepts:</strong><br>• Image = immutable blueprint (class)<br>• Container = running instance (object)<br>• Registry = image storage (Docker Hub, ECR, GCR)<br>• Volume = persistent data storage<br>• Layer = each Dockerfile instruction, cached<br><br><strong>Daily commands:</strong> build → run → logs → exec → stop → rm<br><br><strong>Layer caching rule:</strong> infrequent changes first (deps), frequent changes last (code).</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     CARD 4 — DOCKERFILE
+════════════════════════════ -->
+<div class="card" id="c4">
+  <div class="band">
+    <div class="band-bar" style="background:linear-gradient(90deg,var(--dk),var(--dk-soft))"></div>
+    <div class="bl">
+      <div class="tnum">05</div>
+      <div>
+        <div class="ttag" style="background:var(--dk-l);color:var(--dk);border:1px solid var(--dk-b)">Docker</div>
+        <div class="btitle">Dockerfile — Writing Production-Grade Images</div>
+        <div class="bsub">Multi-stage builds, layer optimisation, security hardening, and Spring Boot best practices</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--rose-l);color:var(--rose);border:1px solid var(--rose-b)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb4">
+      <div class="stab on-dk" onclick="tab(4,'c','dk')">📌 Concepts</div>
+      <div class="stab" onclick="tab(4,'x','dk')">💻 Code</div>
+      <div class="stab" onclick="tab(4,'q','dk')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(4,'m','dk')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="p4c">
+      <div class="sbox sbox-dk"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> A Dockerfile is a recipe for building a Docker image. Each instruction (FROM, RUN, COPY, etc.) adds a layer. The key technique is multi-stage builds: use a big "builder" image (JDK 21 + Maven) to compile your code, then copy only the compiled JAR into a small "runtime" image (JRE only). Your final image goes from 500MB to 80MB, has no build tools, and a smaller attack surface.</div></div>
+      <div class="kps c-dk">
+        <div class="kp"><div class="ki">🏗️</div><div class="kt"><strong class="cdk">Multi-Stage Builds</strong> — Use multiple <code>FROM</code> instructions. Each creates a new stage. You can selectively <code>COPY --from=stage-name</code> artefacts between stages. The final image only contains the last stage. Benefits: small production image (no JDK, Maven, build tools), faster pulls, smaller attack surface. The builder stage is discarded — it never appears in your registry or production environment.</div></div>
+        <div class="kp"><div class="ki">📏</div><div class="kt"><strong class="cdk">Key Dockerfile Instructions</strong> — <code>FROM</code>: base image. <code>WORKDIR</code>: set working directory (create if not exists). <code>COPY</code>: copy files from host. <code>RUN</code>: execute command, creates a layer. <code>ENV</code>: set environment variable. <code>EXPOSE</code>: document the port (doesn't publish it — just documentation). <code>ENTRYPOINT</code>: main command. <code>CMD</code>: default arguments. <code>USER</code>: switch to non-root user.</div></div>
+        <div class="kp"><div class="ki">🔐</div><div class="kt"><strong class="cdk">Security Best Practices</strong> — Run as non-root user (<code>USER nonroot</code>). Use minimal base images (distroless, alpine). Don't store secrets in the image (use env vars or mounted secrets). Scan images for vulnerabilities (<code>docker scout</code>, Trivy, Snyk). Pin base image versions — <code>FROM eclipse-temurin:21-jre-alpine</code> not <code>FROM openjdk:latest</code>. Running as root inside a container is a common security misconfiguration.</div></div>
+        <div class="kp"><div class="ki">🍃</div><div class="kt"><strong class="cdk">Spring Boot Layered JARs</strong> — Spring Boot 2.3+ supports layered JARs. Extract with <code>java -Djarmode=layertools -jar app.jar extract</code>. Creates separate directories for: dependencies (rarely change), spring-boot-loader, snapshot-dependencies, application code (changes most). Each directory becomes a Docker layer — Docker caches the unchanged dependency layers. Rebuilding after a code-only change only rebuilds the tiny application layer (seconds vs minutes).</div></div>
+        <div class="kp"><div class="ki">📝</div><div class="kt"><strong class="cam">.dockerignore</strong> — Like .gitignore but for Docker build context. Exclude: <code>target/</code>, <code>.git/</code>, <code>*.md</code>, <code>node_modules/</code>, <code>.env</code>. Smaller build context = faster builds. Also prevents accidentally copying local environment files (credentials) into the image. Always create a .dockerignore alongside your Dockerfile.</div></div>
+      </div>
+    </div>
+    <div class="panel" id="p4x">
+      <div class="stitle">◆ Memorizable Code — Production Spring Boot Dockerfile</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Production Dockerfile — Multi-Stage + Layered JAR + Non-Root User</div></div>
+<pre><span class="cm"># ── Stage 1: Build ────────────────────────────────────</span>
+<span class="kw">FROM</span> eclipse-temurin:21-jdk-alpine <span class="kw">AS</span> builder
+<span class="kw">WORKDIR</span> /build
+
+<span class="cm"># Copy dependency descriptor first (cached unless pom.xml changes)</span>
+<span class="kw">COPY</span> pom.xml .
+<span class="kw">COPY</span> .mvn .mvn
+<span class="kw">COPY</span> mvnw .
+
+<span class="cm"># Download dependencies (this layer is cached between code changes)</span>
+<span class="kw">RUN</span> ./mvnw dependency:resolve -q
+
+<span class="cm"># Now copy source (invalidates cache only when code changes)</span>
+<span class="kw">COPY</span> src ./src
+<span class="kw">RUN</span> ./mvnw package -DskipTests -q
+
+<span class="cm"># Extract layered JAR (Spring Boot 2.3+)</span>
+<span class="kw">RUN</span> java -Djarmode=layertools -jar target/*.jar extract --destination /layers
+
+<span class="cm"># ── Stage 2: Runtime (small, secure) ─────────────────</span>
+<span class="kw">FROM</span> eclipse-temurin:21-jre-alpine <span class="cm"># JRE only, not full JDK</span>
+<span class="kw">WORKDIR</span> /app
+
+<span class="cm"># Create non-root user (security!)</span>
+<span class="kw">RUN</span> addgroup -S spring && adduser -S spring -G spring
+
+<span class="cm"># Copy layers from builder stage (most stable first → best caching)</span>
+<span class="kw">COPY</span> --from=builder /layers/dependencies          ./
+<span class="kw">COPY</span> --from=builder /layers/spring-boot-loader    ./
+<span class="kw">COPY</span> --from=builder /layers/snapshot-dependencies ./
+<span class="kw">COPY</span> --from=builder /layers/application           ./
+
+<span class="cm"># Run as non-root</span>
+<span class="kw">USER</span> spring:spring
+
+<span class="cm"># Health check (used by Docker and K8s)</span>
+<span class="kw">HEALTHCHECK</span> --interval=30s --timeout=10s --retries=3 \
+  CMD wget -qO- http://localhost:8080/actuator/health || exit 1
+
+<span class="kw">EXPOSE</span> 8080
+
+<span class="cm"># JVM tuning for containers</span>
+<span class="kw">ENV</span> JAVA_OPTS="-XX:+UseContainerSupport \
+  -XX:MaxRAMPercentage=75.0 \
+  -XX:+UseG1GC \
+  -Djava.security.egd=file:/dev/./urandom"
+
+<span class="kw">ENTRYPOINT</span> ["sh", "-c", "java $JAVA_OPTS org.springframework.boot.loader.launch.JarLauncher"]
+
+<span class="cm">---</span>
+<span class="cm"># .dockerignore</span>
+<span class="str">target/</span>
+<span class="str">.git/</span>
+<span class="str">.github/</span>
+<span class="str">*.md</span>
+<span class="str">.env</span>
+<span class="str">*.log</span></pre>
+      </div>
+    </div>
+    <div class="panel" id="p4q">
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tmk">Must Know</span><div class="iqqt">What is a multi-stage Docker build and why is it important for Java apps?</div><div class="iq-tgl">▾</div></div><div class="iqb">A multi-stage build uses multiple FROM instructions. Each stage can use a different base image. You copy artefacts between stages with COPY --from=stage-name.<br><br>For Java: Stage 1 (builder): full JDK 21 + Maven (~500MB) to compile the code. Stage 2 (runtime): just JRE (~80MB) to run the compiled JAR. The final image only contains Stage 2 — Stage 1 is discarded.<br><br>Why critical: a naive image with the full JDK is 500MB+. Multi-stage gives you ~80MB images. No build tools = smaller attack surface. No source code in production image. Faster pulls, faster startup. The build environment is completely separate from the runtime environment.<div class="tip-a"><strong>⚡ Without multi-stage: 500MB image with JDK, Maven, source code. With multi-stage: 80MB image with JRE + JAR only. Always use multi-stage for production Java images.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag ttr">Tricky</span><div class="iqqt">Why run containers as a non-root user and how do you do it in Dockerfile?</div><div class="iq-tgl">▾</div></div><div class="iqb">By default, Docker containers run as root. If an attacker exploits a vulnerability in your app, they get root access inside the container — and potentially the host if other vulnerabilities are combined (container escape).<br><br>Running as a non-root user is defense-in-depth: even if the app is exploited, the attacker has limited permissions. It's also a requirement for many Kubernetes environments (Pod Security Standards, most production clusters run with <code>runAsNonRoot: true</code>).<br><br>In Dockerfile: <code>RUN addgroup -S appgroup && adduser -S appuser -G appgroup</code>, then <code>USER appuser:appgroup</code> before ENTRYPOINT. The colon notation specifies both user and group.<div class="tip-r"><strong>⚠️ Many CI/CD security scanners (Trivy, Snyk) will fail images that run as root. Non-root is required for production Kubernetes deployments under Pod Security Standards.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tsr">Senior</span><div class="iqqt">How does Spring Boot's layered JAR improve Docker build performance?</div><div class="iq-tgl">▾</div></div><div class="iqb">A plain Spring Boot fat JAR puts everything in one layer — changing one line of code invalidates the entire layer (100MB+ re-pushed to registry on every change). Spring Boot layered JARs split the fat JAR into ordered layers: dependencies (changes rarely — quarterly), spring-boot-loader (changes with Spring Boot upgrade), snapshot-dependencies (changes weekly), application code (changes multiple times per day).<br><br>In the Dockerfile, each layer is a separate COPY instruction — Docker caches each independently. A code-only change: only the application layer rebuilds (tiny, &lt;1MB). Dependencies, loader, and snapshots are all served from cache. Result: rebuilds go from 2–5 minutes to seconds. Registry pushes go from 100MB to 1MB per deploy.</div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="p4m">
+      <div class="mtip mti-dk"><div class="mico">💡</div><div><strong>Production Dockerfile checklist:</strong><br>✓ Multi-stage: JDK to build → JRE to run<br>✓ Dependency layer before source code (cache!)<br>✓ Layered JAR for Spring Boot (COPY deps → loader → app)<br>✓ Non-root USER before ENTRYPOINT<br>✓ Pin base image version (not :latest)<br>✓ HEALTHCHECK for container orchestration<br>✓ .dockerignore (exclude target/, .git/, .env)<br>✓ JVM flags: -XX:+UseContainerSupport -XX:MaxRAMPercentage=75<br><br><strong>Image size goal: &lt;100MB for Java apps with JRE alpine base.</strong></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     CARD 5 — DOCKER COMPOSE
+════════════════════════════ -->
+<div class="card" id="c5">
+  <div class="band">
+    <div class="band-bar" style="background:linear-gradient(90deg,var(--dk),#1a90e8)"></div>
+    <div class="bl">
+      <div class="tnum">06</div>
+      <div>
+        <div class="ttag" style="background:var(--dk-l);color:var(--dk);border:1px solid var(--dk-b)">Docker</div>
+        <div class="btitle">Docker Compose — Local Multi-Container Development</div>
+        <div class="bsub">Define and run multi-container apps locally — your app, database, Redis, and all dependencies in one command</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--rose-l);color:var(--rose);border:1px solid var(--rose-b)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb5">
+      <div class="stab on-dk" onclick="tab(5,'c','dk')">📌 Concepts</div>
+      <div class="stab" onclick="tab(5,'x','dk')">💻 Code</div>
+      <div class="stab" onclick="tab(5,'q','dk')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(5,'m','dk')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="p5c">
+      <div class="sbox sbox-dk"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> Your Spring Boot app needs a PostgreSQL database, a Redis cache, and maybe a Kafka broker. Without Docker Compose you'd install and configure each manually, and your teammates each have slightly different versions. With Docker Compose: one <code>docker-compose.yml</code> file, one <code>docker compose up</code> command — everyone gets the same stack running in seconds.</div></div>
+      <div class="kps c-dk">
+        <div class="kp"><div class="ki">📋</div><div class="kt"><strong class="cdk">Compose File Structure</strong> — <code>version</code> (compose spec version), <code>services</code> (each service = one container), <code>volumes</code> (named volumes), <code>networks</code> (custom networks). Each service specifies: <code>image</code> or <code>build</code>, <code>ports</code>, <code>environment</code>, <code>depends_on</code>, <code>volumes</code>, <code>healthcheck</code>. Services on the same compose project share a network and can reach each other by service name.</div></div>
+        <div class="kp"><div class="ki">⏳</div><div class="kt"><strong class="cdk">depends_on &amp; healthcheck</strong> — <code>depends_on: db</code> starts db before the app, but doesn't wait for db to be <em>ready</em> (accepting connections). Add a <code>healthcheck</code> to the db service + <code>depends_on: {db: {condition: service_healthy}}</code> to wait until the database is actually accepting connections. Without healthcheck: your app starts and fails with "connection refused" for 5–10 seconds while the DB initialises.</div></div>
+        <div class="kp"><div class="ki">🔀</div><div class="kt"><strong class="cdk">Override Files</strong> — <code>docker-compose.override.yml</code> automatically merges with <code>docker-compose.yml</code>. Use for local dev extras (bind mounts for hot-reload, extra debug ports, different env vars). Keep base file production-like. Override adds dev convenience. <code>docker compose -f docker-compose.yml -f docker-compose.ci.yml up</code> for explicit merging in CI.</div></div>
+        <div class="kp"><div class="ki">💡</div><div class="kt"><strong class="cam">Key Commands</strong> — <code>docker compose up -d</code>: start all services detached. <code>docker compose down</code>: stop and remove containers (keeps volumes). <code>docker compose down -v</code>: also remove volumes. <code>docker compose logs -f app</code>: follow specific service logs. <code>docker compose exec app bash</code>: shell into running container. <code>docker compose ps</code>: status of all services.</div></div>
+      </div>
+    </div>
+    <div class="panel" id="p5x">
+      <div class="stitle">◆ Memorizable Code — Spring Boot + PostgreSQL + Redis + Kafka</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">Docker Compose — Full Spring Boot Dev Stack</div></div>
+<pre><span class="cm"># docker-compose.yml</span>
+<span class="fn">version</span>: <span class="str">'3.9'</span>
+
+<span class="fn">services</span>:
+
+  <span class="cm">## ── Spring Boot App ───────────────────────────────</span>
+  <span class="fn">app</span>:
+    <span class="fn">build</span>: .                      <span class="cm"># build from local Dockerfile</span>
+    <span class="fn">ports</span>:
+      - <span class="str">"8080:8080"</span>
+    <span class="fn">environment</span>:
+      <span class="fn">SPRING_DATASOURCE_URL</span>: <span class="str">jdbc:postgresql://db:5432/mydb</span>
+      <span class="fn">SPRING_DATASOURCE_USERNAME</span>: <span class="str">user</span>
+      <span class="fn">SPRING_DATASOURCE_PASSWORD</span>: <span class="str">password</span>
+      <span class="fn">SPRING_REDIS_HOST</span>: <span class="str">redis</span>
+      <span class="fn">SPRING_KAFKA_BOOTSTRAP_SERVERS</span>: <span class="str">kafka:9092</span>
+    <span class="fn">depends_on</span>:
+      <span class="fn">db</span>:
+        <span class="fn">condition</span>: <span class="str">service_healthy</span>   <span class="cm"># wait for DB to be ready</span>
+      <span class="fn">redis</span>:
+        <span class="fn">condition</span>: <span class="str">service_started</span>
+    <span class="fn">healthcheck</span>:
+      <span class="fn">test</span>: [<span class="str">"CMD"</span>, <span class="str">"wget"</span>, <span class="str">"-qO-"</span>, <span class="str">"http://localhost:8080/actuator/health"</span>]
+      <span class="fn">interval</span>: <span class="str">30s</span>
+      <span class="fn">timeout</span>: <span class="str">10s</span>
+      <span class="fn">retries</span>: <span class="nb">3</span>
+      <span class="fn">start_period</span>: <span class="str">40s</span>   <span class="cm"># give app time to start</span>
+
+  <span class="cm">## ── PostgreSQL ────────────────────────────────────</span>
+  <span class="fn">db</span>:
+    <span class="fn">image</span>: <span class="str">postgres:16-alpine</span>
+    <span class="fn">environment</span>:
+      <span class="fn">POSTGRES_DB</span>: <span class="str">mydb</span>
+      <span class="fn">POSTGRES_USER</span>: <span class="str">user</span>
+      <span class="fn">POSTGRES_PASSWORD</span>: <span class="str">password</span>
+    <span class="fn">volumes</span>:
+      - <span class="str">pgdata:/var/lib/postgresql/data</span>   <span class="cm"># persist data</span>
+      - <span class="str">./init.sql:/docker-entrypoint-initdb.d/init.sql</span>  <span class="cm"># init script</span>
+    <span class="fn">ports</span>:
+      - <span class="str">"5432:5432"</span>     <span class="cm"># expose for local tools (pgAdmin, IntelliJ)</span>
+    <span class="fn">healthcheck</span>:
+      <span class="fn">test</span>: [<span class="str">"CMD"</span>, <span class="str">"pg_isready"</span>, <span class="str">"-U"</span>, <span class="str">"user"</span>, <span class="str">"-d"</span>, <span class="str">"mydb"</span>]
+      <span class="fn">interval</span>: <span class="str">10s</span>
+      <span class="fn">retries</span>: <span class="nb">5</span>
+
+  <span class="cm">## ── Redis ─────────────────────────────────────────</span>
+  <span class="fn">redis</span>:
+    <span class="fn">image</span>: <span class="str">redis:7-alpine</span>
+    <span class="fn">ports</span>:
+      - <span class="str">"6379:6379"</span>
+    <span class="fn">command</span>: <span class="str">redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru</span>
+
+  <span class="cm">## ── Kafka + Zookeeper ────────────────────────────</span>
+  <span class="fn">kafka</span>:
+    <span class="fn">image</span>: <span class="str">confluentinc/cp-kafka:7.4.0</span>
+    <span class="fn">ports</span>:
+      - <span class="str">"9092:9092"</span>
+    <span class="fn">environment</span>:
+      <span class="fn">KAFKA_BROKER_ID</span>: <span class="nb">1</span>
+      <span class="fn">KAFKA_ZOOKEEPER_CONNECT</span>: <span class="str">zookeeper:2181</span>
+      <span class="fn">KAFKA_ADVERTISED_LISTENERS</span>: <span class="str">PLAINTEXT://kafka:9092</span>
+    <span class="fn">depends_on</span>:
+      - <span class="str">zookeeper</span>
+
+  <span class="fn">zookeeper</span>:
+    <span class="fn">image</span>: <span class="str">confluentinc/cp-zookeeper:7.4.0</span>
+    <span class="fn">environment</span>:
+      <span class="fn">ZOOKEEPER_CLIENT_PORT</span>: <span class="nb">2181</span>
+
+<span class="fn">volumes</span>:
+  <span class="fn">pgdata</span>:     <span class="cm"># named volume — data survives compose down</span></pre>
+      </div>
+    </div>
+    <div class="panel" id="p5q">
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tmk">Must Know</span><div class="iqqt">Why does depends_on not ensure a service is ready, and how do you fix it?</div><div class="iq-tgl">▾</div></div><div class="iqb"><code>depends_on: db</code> ensures Docker starts the db container <em>before</em> the app container. However, "started" just means the container process began — not that PostgreSQL inside has finished initialising and is accepting connections. PostgreSQL takes 2–5 seconds to start up after the container launches.<br><br>Without fix: your app starts, tries to connect to PostgreSQL, gets "connection refused", crashes, and Docker may or may not restart it depending on restart policy. Fix: add a healthcheck to the db service that uses <code>pg_isready</code>, then in app's depends_on use <code>condition: service_healthy</code>. Compose now waits until pg_isready returns success before starting the app.<div class="tip-a"><strong>⚡ Always add healthchecks to database services and use condition: service_healthy in depends_on. This is one of the most common Docker Compose mistakes.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tco">Concept</span><div class="iqqt">When should you use Docker Compose vs Kubernetes?</div><div class="iq-tgl">▾</div></div><div class="iqb"><strong>Docker Compose</strong>: single machine, simple services, local development, CI environment spin-up, small deployments. No auto-scaling, no self-healing across nodes, no load balancing across hosts. Great for: local dev stack, integration testing in CI, small internal tools.<br><br><strong>Kubernetes</strong>: multi-node clusters, production workloads, auto-scaling, self-healing, rolling deployments, service discovery across nodes, resource management. Much more complex setup. Use when: high availability required, multiple replicas, horizontal scaling, zero-downtime deployments, managing dozens of microservices.<div class="tip-g"><strong>💡 Rule: development → Docker Compose. Testing → Docker Compose. Staging and production → Kubernetes (or managed equivalents like AWS ECS, Azure Container Apps).</strong></div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="p5m">
+      <div class="mtip mti-dk"><div class="mico">💡</div><div><strong>Docker Compose = one command to start your entire local stack.</strong><br><br><strong>Key commands:</strong><br>• docker compose up -d → start all services detached<br>• docker compose down → stop and remove (keeps volumes)<br>• docker compose down -v → also remove volumes<br>• docker compose logs -f app → tail specific service<br>• docker compose exec app bash → shell into service<br><br><strong>Critical pattern: add healthcheck to DB + condition: service_healthy in app's depends_on.</strong><br><br><strong>Service name = hostname.</strong> App reaches DB at: <code>jdbc:postgresql://db:5432/mydb</code></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     CARD 6 — KUBERNETES BASICS
+════════════════════════════ -->
+<div class="card" id="c6">
+  <div class="band">
+    <div class="band-bar" style="background:linear-gradient(90deg,var(--k8),var(--k8-soft))"></div>
+    <div class="bl">
+      <div class="tnum">07</div>
+      <div>
+        <div class="ttag" style="background:var(--k8-l);color:var(--k8);border:1px solid var(--k8-b)">Kubernetes</div>
+        <div class="btitle">Kubernetes Fundamentals</div>
+        <div class="bsub">Pods, Nodes, Control Plane — understanding the architecture that runs the world's production workloads</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--rose-l);color:var(--rose);border:1px solid var(--rose-b)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb6">
+      <div class="stab on-k8" onclick="tab(6,'c','k8')">📌 Concepts</div>
+      <div class="stab" onclick="tab(6,'x','k8')">💻 Code</div>
+      <div class="stab" onclick="tab(6,'q','k8')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(6,'m','k8')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="p6c">
+      <div class="sbox sbox-k8"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> Kubernetes (K8s) is like a super-intelligent container manager. You tell it "I need 5 copies of my app running, each with 512MB RAM, and replace any that crash." Kubernetes figures out which machines to run them on, monitors health, restarts failed containers, handles traffic routing, and manages deployments — automatically, across hundreds of machines.</div></div>
+      <div class="stitle">◆ Architecture</div>
+      <div class="flow">
+        <div class="fr" style="flex-wrap:wrap;gap:4px">
+          <div><div class="fn-k8">Control Plane<br><small>API Server, etcd, Scheduler</small></div><div class="fsub">cluster brain</div></div>
+          <div class="fa">manages →</div>
+          <div><div class="fn2">Worker Node 1<br><small>kubelet, kube-proxy</small></div></div>
+          <div class="fa">+</div>
+          <div><div class="fn2">Worker Node 2</div></div>
+          <div class="fa">+</div>
+          <div><div class="fn2">Worker Node N</div></div>
+        </div>
+        <div style="margin-top:8px;font-family:'Azeret Mono',monospace;font-size:9px;color:var(--muted)">Each node runs Pods → Pods contain Containers</div>
+      </div>
+      <div class="kps c-k8">
+        <div class="kp"><div class="ki">🫘</div><div class="kt"><strong class="ck8">Pod</strong> — The smallest deployable unit in K8s. A pod wraps one or more containers that share the same network namespace (localhost) and storage. Usually one container per pod (your app), sometimes a sidecar. Pods are ephemeral — K8s can kill and recreate them at any time. Never use the pod IP directly — use Services. Pods have a unique IP within the cluster.</div></div>
+        <div class="kp"><div class="ki">🖥️</div><div class="kt"><strong class="ck8">Node</strong> — A physical or virtual machine running K8s. Each node has: <code>kubelet</code> (agent communicating with control plane), <code>kube-proxy</code> (network rules for service routing), container runtime (containerd/CRI-O). The control plane schedules pods onto nodes based on resource availability, affinity rules, and taints/tolerations.</div></div>
+        <div class="kp"><div class="ki">🧠</div><div class="kt"><strong class="ck8">Control Plane Components</strong> — <code>kube-apiserver</code>: all cluster communication goes through this REST API. <code>etcd</code>: distributed key-value store — the cluster's source of truth (all state). <code>kube-scheduler</code>: watches for unscheduled pods, picks the best node. <code>kube-controller-manager</code>: watches state and reconciles (if 3 replicas desired but only 2 running, creates a third).</div></div>
+        <div class="kp"><div class="ki">🏷️</div><div class="kt"><strong class="ck8">Labels &amp; Selectors</strong> — Labels are key-value metadata on any K8s object. Selectors filter objects by labels. Critical: Services find which Pods to send traffic to via label selectors. Deployments manage Pods by label selectors. <code>app: myapp, version: v2, env: production</code>. kubectl supports: <code>kubectl get pods -l app=myapp</code>.</div></div>
+        <div class="kp"><div class="ki">🔑</div><div class="kt"><strong class="cam">Namespaces</strong> — Virtual clusters within a cluster. Provide logical isolation: <code>dev</code>, <code>staging</code>, <code>production</code> namespaces in the same physical cluster. Resource quotas per namespace. RBAC permissions per namespace. Services in different namespaces can still communicate: <code>servicename.namespace.svc.cluster.local</code>.</div></div>
+      </div>
+    </div>
+    <div class="panel" id="p6x">
+      <div class="stitle">◆ Memorizable Code — Essential kubectl Commands</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">kubectl — Essential Commands for Daily Use</div></div>
+<pre><span class="cm"># ── Context & Namespace ───────────────────────────────</span>
+<span class="fn">kubectl config get-contexts</span>              <span class="cm"># list clusters</span>
+<span class="fn">kubectl config use-context</span> my-cluster    <span class="cm"># switch cluster</span>
+<span class="fn">kubectl config set-context</span> --current --namespace=myapp  <span class="cm"># set default ns</span>
+
+<span class="cm"># ── View resources ────────────────────────────────────</span>
+<span class="fn">kubectl get pods</span>                          <span class="cm"># all pods in namespace</span>
+<span class="fn">kubectl get pods -o wide</span>                  <span class="cm"># + node info</span>
+<span class="fn">kubectl get pods -l app=myapp</span>             <span class="cm"># by label selector</span>
+<span class="fn">kubectl get all</span>                           <span class="cm"># pods, svcs, deployments</span>
+<span class="fn">kubectl get nodes</span>                         <span class="cm"># cluster nodes</span>
+<span class="fn">kubectl describe pod</span> my-pod-xyz           <span class="cm"># detailed info + events</span>
+<span class="fn">kubectl describe deployment</span> myapp         <span class="cm"># deployment details</span>
+
+<span class="cm"># ── Logs & Debug ─────────────────────────────────────</span>
+<span class="fn">kubectl logs</span> my-pod-xyz                   <span class="cm"># stdout</span>
+<span class="fn">kubectl logs -f</span> my-pod-xyz               <span class="cm"># follow (tail -f)</span>
+<span class="fn">kubectl logs</span> my-pod-xyz -c sidecar       <span class="cm"># specific container</span>
+<span class="fn">kubectl logs</span> --previous my-pod-xyz       <span class="cm"># previous (crashed) pod</span>
+<span class="fn">kubectl exec -it</span> my-pod-xyz -- bash       <span class="cm"># shell into pod</span>
+<span class="fn">kubectl port-forward</span> pod/my-pod-xyz 8080:8080  <span class="cm"># local access</span>
+<span class="fn">kubectl port-forward</span> svc/myapp 8080:80   <span class="cm"># via service</span>
+
+<span class="cm"># ── Apply/Delete resources ────────────────────────────</span>
+<span class="fn">kubectl apply -f</span> deployment.yml           <span class="cm"># create or update</span>
+<span class="fn">kubectl apply -f</span> ./k8s/                   <span class="cm"># all YAML in directory</span>
+<span class="fn">kubectl delete -f</span> deployment.yml          <span class="cm"># delete defined resources</span>
+<span class="fn">kubectl delete pod</span> my-pod-xyz             <span class="cm"># delete a pod (recreated by deployment)</span>
+
+<span class="cm"># ── Deployments ──────────────────────────────────────</span>
+<span class="fn">kubectl rollout status deployment/myapp</span>   <span class="cm"># watch rollout progress</span>
+<span class="fn">kubectl rollout history deployment/myapp</span>  <span class="cm"># revision history</span>
+<span class="fn">kubectl rollout undo deployment/myapp</span>     <span class="cm"># rollback to previous</span>
+<span class="fn">kubectl rollout undo deployment/myapp</span> --to-revision=3
+<span class="fn">kubectl set image deployment/myapp</span> app=myapp:1.2.0  <span class="cm"># update image</span>
+<span class="fn">kubectl scale deployment/myapp</span> --replicas=5
+
+<span class="cm"># ── Resource usage ───────────────────────────────────</span>
+<span class="fn">kubectl top nodes</span>                         <span class="cm"># node CPU/memory</span>
+<span class="fn">kubectl top pods</span>                          <span class="cm"># pod CPU/memory</span></pre>
+      </div>
+    </div>
+    <div class="panel" id="p6q">
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tmk">Must Know</span><div class="iqqt">What is a Pod and why is it the fundamental unit in Kubernetes rather than a container?</div><div class="iq-tgl">▾</div></div><div class="iqb">A Pod abstracts a group of co-located containers that logically belong together. All containers in a pod share: the same network namespace (they communicate via localhost), the same storage volumes, and the same lifecycle. This enables the sidecar pattern: a main app container + helper containers (log forwarder, proxy, secret injector) that need to be tightly coupled.<br><br>K8s uses pods rather than containers as the unit because: (1) some workloads naturally need tightly-coupled helpers, (2) the pod provides a stable abstraction — the scheduler works with pods as atomic units, and (3) network and storage can be bound at the pod level (a single IP, shared volumes) rather than per-container, making the networking model simpler.<div class="tip-a"><strong>⚡ In practice: 99% of pods have exactly one app container. Use multiple containers per pod only for sidecars that must share localhost network or volumes (Envoy proxy, log agents).</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag ttr">Tricky</span><div class="iqqt">What happens when a Pod is deleted in Kubernetes?</div><div class="iq-tgl">▾</div></div><div class="iqb">If the pod was created directly (bad practice): it's deleted permanently. Nothing recreates it.<br><br>If managed by a Deployment or ReplicaSet (normal practice): the controller immediately notices the pod count dropped below the desired replicas and creates a new pod. The new pod gets a new name and potentially runs on a different node — it's a fresh container. Any data in the old pod's local filesystem is gone.<br><br>This is why pods are called "ephemeral" and why stateful data must go in Volumes or external storage. The Deployment ensures the desired number of pods always run — you can delete pods freely during debugging and the system heals itself.<div class="tip-r"><strong>⚠️ Never create Pods directly in production — always use Deployments (or StatefulSets for stateful workloads). A lone Pod has no self-healing.</strong></div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="p6m">
+      <div class="mtip mti-k8"><div class="mico">💡</div><div><strong>Kubernetes architecture in one sentence:</strong> Control Plane (brain) schedules and manages Pods on Worker Nodes (muscle).<br><br><strong>Key objects hierarchy:</strong> Cluster → Namespace → Node → Pod → Container<br><br><strong>Pod = smallest deployable unit.</strong> Ephemeral. Gets new IP on restart. Never address by IP — use Service.<br><br><strong>Essential kubectl workflow:</strong><br>apply → get pods → describe pod (if issues) → logs → exec (if debugging needed) → rollout undo (if bad deploy)<br><br><strong>Labels + Selectors = how K8s objects find each other.</strong></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     CARD 7 — K8S WORKLOADS
+════════════════════════════ -->
+<div class="card" id="c7">
+  <div class="band">
+    <div class="band-bar" style="background:linear-gradient(90deg,var(--k8),var(--k8-soft))"></div>
+    <div class="bl">
+      <div class="tnum">08</div>
+      <div>
+        <div class="ttag" style="background:var(--k8-l);color:var(--k8);border:1px solid var(--k8-b)">Kubernetes</div>
+        <div class="btitle">K8s Workloads — Deployment, Service, ConfigMap</div>
+        <div class="bsub">The core objects you write every day — Deployment for running apps, Service for networking, ConfigMap/Secret for config</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--rose-l);color:var(--rose);border:1px solid var(--rose-b)">🔴 Must Know</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb7">
+      <div class="stab on-k8" onclick="tab(7,'c','k8')">📌 Concepts</div>
+      <div class="stab" onclick="tab(7,'x','k8')">💻 Code</div>
+      <div class="stab" onclick="tab(7,'q','k8')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(7,'m','k8')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="p7c">
+      <div class="sbox sbox-k8"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> Kubernetes has named building blocks. Deployment manages your app replicas and handles rolling updates. Service gives your pods a stable address and load balances traffic between them. ConfigMap stores non-sensitive config. Secret stores sensitive config (DB passwords, API keys). Together, these four objects cover 90% of what you deploy in K8s.</div></div>
+      <div class="kps c-k8">
+        <div class="kp"><div class="ki">📦</div><div class="kt"><strong class="ck8">Deployment</strong> — Manages a ReplicaSet which manages Pods. You declare: "I want 3 replicas of my-app:v2". K8s makes it happen and keeps it that way. Handles: rolling updates (gradually replace old pods), rollbacks (kubectl rollout undo), scaling (kubectl scale). Deployment → ReplicaSet → Pods. Use Deployment for stateless apps.</div></div>
+        <div class="kp"><div class="ki">🌐</div><div class="kt"><strong class="ck8">Service</strong> — A stable network endpoint for a group of Pods. Pods die and get new IPs — Services provide a consistent address. Types: <code>ClusterIP</code> (internal only — default), <code>NodePort</code> (expose on each node's port, dev use), <code>LoadBalancer</code> (creates cloud load balancer, production), <code>ExternalName</code> (DNS alias to external service). Selects pods by label selector.</div></div>
+        <div class="kp"><div class="ki">⚙️</div><div class="kt"><strong class="ck8">ConfigMap</strong> — Stores non-sensitive configuration as key-value pairs. Inject into pods as: environment variables, command-line arguments, or files mounted via volume. Separate config from image — same image runs in dev/staging/prod with different ConfigMaps. Update ConfigMap → pods pick up new config on restart (or rolling restart: <code>kubectl rollout restart</code>).</div></div>
+        <div class="kp"><div class="ki">🔐</div><div class="kt"><strong class="ck8">Secret</strong> — Like ConfigMap but for sensitive data (passwords, tokens, certificates). Base64 encoded (NOT encrypted by default — enable etcd encryption at rest for real security). Best practice: don't store credentials in Secrets; use external secret managers (AWS Secrets Manager, HashiCorp Vault, Azure Key Vault) synced to K8s Secrets via operators (External Secrets Operator).</div></div>
+        <div class="kp"><div class="ki">🚪</div><div class="kt"><strong class="cam">Ingress</strong> — HTTP/HTTPS routing for external traffic. One Ingress controller (NGINX, Traefik) handles all incoming HTTP traffic and routes based on host/path rules. <code>api.example.com/orders</code> → orders Service. <code>api.example.com/users</code> → users Service. Handles TLS termination. Replaces needing a LoadBalancer Service per microservice.</div></div>
+        <div class="kp"><div class="ki">📊</div><div class="kt"><strong class="ck8">Resource Requests &amp; Limits</strong> — <code>requests</code>: minimum resources guaranteed (used by scheduler). <code>limits</code>: maximum allowed (container killed if exceeded). CPU: measured in millicores (250m = 0.25 cores). Memory: in bytes (256Mi = 256 megabytes). Always set both — without limits, one pod can starve others. Without requests, scheduler can't make good placement decisions.</div></div>
+      </div>
+    </div>
+    <div class="panel" id="p7x">
+      <div class="stitle">◆ Memorizable Code — Complete Spring Boot K8s Deployment</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">K8s Manifests — Deployment + Service + ConfigMap + Secret + Ingress</div></div>
+<pre><span class="cm"># ── ConfigMap ──────────────────────────────────────────</span>
+<span class="fn">apiVersion</span>: v1
+<span class="fn">kind</span>: ConfigMap
+<span class="fn">metadata</span>:
+  <span class="fn">name</span>: myapp-config
+  <span class="fn">namespace</span>: production
+<span class="fn">data</span>:
+  <span class="fn">SPRING_PROFILES_ACTIVE</span>: <span class="str">production</span>
+  <span class="fn">LOG_LEVEL</span>: <span class="str">INFO</span>
+  <span class="fn">REDIS_HOST</span>: <span class="str">redis-service</span>
+---
+<span class="cm"># ── Secret ──────────────────────────────────────────────</span>
+<span class="fn">apiVersion</span>: v1
+<span class="fn">kind</span>: Secret
+<span class="fn">metadata</span>:
+  <span class="fn">name</span>: myapp-secrets
+<span class="fn">type</span>: Opaque
+<span class="fn">stringData</span>:                        <span class="cm"># auto base64-encodes</span>
+  <span class="fn">DB_PASSWORD</span>: <span class="str">my-secure-password</span>
+  <span class="fn">JWT_SECRET</span>: <span class="str">my-jwt-secret-key</span>
+---
+<span class="cm"># ── Deployment ──────────────────────────────────────────</span>
+<span class="fn">apiVersion</span>: apps/v1
+<span class="fn">kind</span>: Deployment
+<span class="fn">metadata</span>:
+  <span class="fn">name</span>: myapp
+  <span class="fn">namespace</span>: production
+<span class="fn">spec</span>:
+  <span class="fn">replicas</span>: <span class="nb">3</span>
+  <span class="fn">selector</span>:
+    <span class="fn">matchLabels</span>:
+      <span class="fn">app</span>: myapp
+  <span class="fn">strategy</span>:
+    <span class="fn">type</span>: RollingUpdate
+    <span class="fn">rollingUpdate</span>:
+      <span class="fn">maxSurge</span>: <span class="nb">1</span>       <span class="cm"># create 1 extra pod during update</span>
+      <span class="fn">maxUnavailable</span>: <span class="nb">0</span>  <span class="cm"># never reduce running pods below desired</span>
+  <span class="fn">template</span>:
+    <span class="fn">metadata</span>:
+      <span class="fn">labels</span>:
+        <span class="fn">app</span>: myapp
+        <span class="fn">version</span>: v1.2.0
+    <span class="fn">spec</span>:
+      <span class="fn">containers</span>:
+        - <span class="fn">name</span>: app
+          <span class="fn">image</span>: myorg/myapp:1.2.0
+          <span class="fn">ports</span>:
+            - <span class="fn">containerPort</span>: <span class="nb">8080</span>
+          <span class="fn">envFrom</span>:
+            - <span class="fn">configMapRef</span>:
+                <span class="fn">name</span>: myapp-config
+          <span class="fn">env</span>:
+            - <span class="fn">name</span>: DB_PASSWORD
+              <span class="fn">valueFrom</span>:
+                <span class="fn">secretKeyRef</span>:
+                  <span class="fn">name</span>: myapp-secrets
+                  <span class="fn">key</span>: DB_PASSWORD
+          <span class="fn">resources</span>:
+            <span class="fn">requests</span>:
+              <span class="fn">cpu</span>: <span class="str">250m</span>        <span class="cm"># guaranteed minimum</span>
+              <span class="fn">memory</span>: <span class="str">256Mi</span>
+            <span class="fn">limits</span>:
+              <span class="fn">cpu</span>: <span class="str">500m</span>        <span class="cm"># hard cap</span>
+              <span class="fn">memory</span>: <span class="str">512Mi</span>
+          <span class="fn">livenessProbe</span>:
+            <span class="fn">httpGet</span>:
+              <span class="fn">path</span>: /actuator/health/liveness
+              <span class="fn">port</span>: <span class="nb">8080</span>
+            <span class="fn">initialDelaySeconds</span>: <span class="nb">30</span>
+            <span class="fn">periodSeconds</span>: <span class="nb">15</span>
+          <span class="fn">readinessProbe</span>:
+            <span class="fn">httpGet</span>:
+              <span class="fn">path</span>: /actuator/health/readiness
+              <span class="fn">port</span>: <span class="nb">8080</span>
+            <span class="fn">initialDelaySeconds</span>: <span class="nb">20</span>
+            <span class="fn">periodSeconds</span>: <span class="nb">10</span>
+---
+<span class="cm"># ── Service ──────────────────────────────────────────────</span>
+<span class="fn">apiVersion</span>: v1
+<span class="fn">kind</span>: Service
+<span class="fn">metadata</span>:
+  <span class="fn">name</span>: myapp-service
+<span class="fn">spec</span>:
+  <span class="fn">selector</span>:
+    <span class="fn">app</span>: myapp                    <span class="cm"># routes to pods with this label</span>
+  <span class="fn">ports</span>:
+    - <span class="fn">port</span>: <span class="nb">80</span>                    <span class="cm"># service port</span>
+      <span class="fn">targetPort</span>: <span class="nb">8080</span>           <span class="cm"># container port</span>
+  <span class="fn">type</span>: ClusterIP                 <span class="cm"># internal only</span>
+---
+<span class="cm"># ── Ingress ───────────────────────────────────────────────</span>
+<span class="fn">apiVersion</span>: networking.k8s.io/v1
+<span class="fn">kind</span>: Ingress
+<span class="fn">metadata</span>:
+  <span class="fn">name</span>: myapp-ingress
+  <span class="fn">annotations</span>:
+    <span class="fn">cert-manager.io/cluster-issuer</span>: <span class="str">letsencrypt-prod</span>
+<span class="fn">spec</span>:
+  <span class="fn">tls</span>:
+    - <span class="fn">hosts</span>: [<span class="str">api.example.com</span>]
+      <span class="fn">secretName</span>: myapp-tls
+  <span class="fn">rules</span>:
+    - <span class="fn">host</span>: api.example.com
+      <span class="fn">http</span>:
+        <span class="fn">paths</span>:
+          - <span class="fn">path</span>: /
+            <span class="fn">pathType</span>: Prefix
+            <span class="fn">backend</span>:
+              <span class="fn">service</span>:
+                <span class="fn">name</span>: myapp-service
+                <span class="fn">port</span>:
+                  <span class="fn">number</span>: <span class="nb">80</span></pre>
+      </div>
+    </div>
+    <div class="panel" id="p7q">
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tmk">Must Know</span><div class="iqqt">What is the difference between liveness and readiness probes?</div><div class="iq-tgl">▾</div></div><div class="iqb"><strong>Liveness probe</strong>: answers "Is this container alive?" If it fails, Kubernetes kills the container and restarts it. Use for: detecting dead locks, infinite loops, unrecoverable application states. Map to Spring Boot Actuator's <code>/actuator/health/liveness</code>. Fail carefully — false positives cause restart loops. Only fail for genuinely unrecoverable states.<br><br><strong>Readiness probe</strong>: answers "Is this container ready to receive traffic?" If it fails, Kubernetes removes the pod from the Service's endpoints (stops sending traffic). Container is NOT restarted. Use for: startup not complete yet, DB connection temporarily lost, temporarily overloaded. Map to <code>/actuator/health/readiness</code>.<div class="tip-a"><strong>⚡ Liveness = restart. Readiness = remove from rotation. Never fail liveness for temporary issues (DB restart) — that kills your pod unnecessarily. Fail readiness instead.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag ttr">Tricky</span><div class="iqqt">What is the difference between requests and limits for CPU and memory?</div><div class="iq-tgl">▾</div></div><div class="iqb"><strong>Requests</strong>: the minimum resources guaranteed to a pod. The scheduler uses this to place pods on nodes that have at least this much available. If requests = 250m CPU, the pod gets at least 250m CPU when available.<br><br><strong>Limits</strong>: the hard maximum. CPU limit: if exceeded, CPU is throttled (not killed). Memory limit: if exceeded, the container is OOMKilled (killed and restarted). Always set both.<br><br>Practical advice: set memory requests = memory limits (avoid unexpected OOM). Set CPU requests = expected average usage, CPU limits = 2x requests (allows bursting). Without limits, one pod can consume entire node resources, starving others. Without requests, scheduler makes poor placement decisions.<div class="tip-r"><strong>⚠️ OOMKilled is one of the most common issues in K8s. Always set memory limits. Check with kubectl describe pod — if Reason: OOMKilled, increase memory limit.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag ttr">Tricky</span><div class="iqqt">What is the difference between a ClusterIP, NodePort, and LoadBalancer Service?</div><div class="iq-tgl">▾</div></div><div class="iqb"><strong>ClusterIP</strong>: creates a stable virtual IP only reachable within the cluster. Default type. Use for: service-to-service communication within the cluster. Other pods reach it by service name DNS. Not accessible from outside.<br><br><strong>NodePort</strong>: exposes the service on a specific port (30000–32767) on EVERY node. External traffic hits any_node_ip:node_port → routed to the service. Useful for quick testing. Not for production (you need to know node IPs, ports are in ugly range).<br><br><strong>LoadBalancer</strong>: provisions a cloud load balancer (AWS ALB, Azure LB, GCP LB) pointing to your service. Gets an external IP. Best for production external access. Expensive: each LoadBalancer costs money. Better: use one Ingress controller with one LoadBalancer in front of all services.</div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="p7m">
+      <div class="mtip mti-k8"><div class="mico">💡</div><div><strong>Core K8s objects for every app:</strong><br>• Deployment → manages replicas + rolling updates<br>• Service (ClusterIP) → stable DNS name for pods<br>• ConfigMap → non-sensitive config as env vars or files<br>• Secret → sensitive config (encrypted at rest ideally)<br>• Ingress → HTTP routing from outside world<br><br><strong>Probe rule:</strong> Liveness = restart on unrecoverable. Readiness = remove from traffic on temporary issue. Both use /actuator/health/* in Spring Boot.<br><br><strong>Always set requests AND limits.</strong> Memory: requests=limits. CPU: limits=2×requests.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     CARD 8 — K8S PRODUCTION
+════════════════════════════ -->
+<div class="card" id="c8">
+  <div class="band">
+    <div class="band-bar" style="background:linear-gradient(90deg,var(--k8),#28a8a8)"></div>
+    <div class="bl">
+      <div class="tnum">09</div>
+      <div>
+        <div class="ttag" style="background:var(--k8-l);color:var(--k8);border:1px solid var(--k8-b)">Kubernetes</div>
+        <div class="btitle">K8s Production Patterns</div>
+        <div class="bsub">HPA, StatefulSets, PodDisruptionBudgets, resource quotas, and the patterns that make K8s production-ready</div>
+      </div>
+    </div>
+    <div class="pbadge" style="background:var(--amber-l);color:var(--amber);border:1px solid var(--amber-b)">🟡 Medium</div>
+  </div>
+  <div class="content">
+    <div class="stabs" id="tb8">
+      <div class="stab on-k8" onclick="tab(8,'c','k8')">📌 Concepts</div>
+      <div class="stab" onclick="tab(8,'x','k8')">💻 Code</div>
+      <div class="stab" onclick="tab(8,'q','k8')">❓ Interview Q&amp;A</div>
+      <div class="stab" onclick="tab(8,'m','k8')">🧠 Memory</div>
+    </div>
+    <div class="panel on" id="p8c">
+      <div class="sbox sbox-k8"><div class="sico">🧠</div><div class="stxt"><strong>In plain English:</strong> Basic K8s knowledge gets your app running. Production-grade K8s means: automatically scaling up when traffic spikes, not putting all pods on one node (so a node failure doesn't take you down), never going below 2 healthy pods during maintenance, and managing stateful databases with the right controller. These patterns separate "it works" from "it works under production load."</div></div>
+      <div class="kps c-k8">
+        <div class="kp"><div class="ki">📈</div><div class="kt"><strong class="ck8">Horizontal Pod Autoscaler (HPA)</strong> — Automatically scales replica count based on metrics. CPU: scale up when average CPU across pods exceeds 70%. Custom metrics: scale based on Kafka lag, HTTP request queue depth, or any Prometheus metric. Define min and max replicas. KEDA extends HPA for event-driven scaling (scale to zero, scale on message queue depth). Essential for handling traffic spikes without over-provisioning 24/7.</div></div>
+        <div class="kp"><div class="ki">🗃️</div><div class="kt"><strong class="ck8">StatefulSet vs Deployment</strong> — Use StatefulSet for stateful apps (databases, Kafka, ZooKeeper). StatefulSet provides: stable, unique pod names (pod-0, pod-1), stable persistent volume per pod, ordered startup/shutdown (pod-0 starts before pod-1). Deployment pods are interchangeable and stateless. Use StatefulSet when each instance needs its own identity (Kafka partition leader, DB replica role).</div></div>
+        <div class="kp"><div class="ki">🛡️</div><div class="kt"><strong class="ck8">PodDisruptionBudget (PDB)</strong> — Limits the number of pods that can be down simultaneously during voluntary disruptions (node drain, rolling updates, cluster upgrades). <code>minAvailable: 2</code>: at least 2 pods must always be running. K8s won't drain a node if it would violate the PDB. Critical for high availability — prevents maintenance from taking down your entire service.</div></div>
+        <div class="kp"><div class="ki">🏗️</div><div class="kt"><strong class="ck8">Pod Affinity &amp; Anti-Affinity</strong> — Control pod placement. Anti-affinity: spread pods across different nodes so a single node failure doesn't take out all replicas. <code>podAntiAffinity: preferredDuringScheduling</code>: soft preference. <code>requiredDuringScheduling</code>: hard rule (pod won't schedule if violated). Production rule: use anti-affinity for all multi-replica deployments to ensure nodes and availability zones are balanced.</div></div>
+        <div class="kp"><div class="ki">💾</div><div class="kt"><strong class="cam">PersistentVolume &amp; PersistentVolumeClaim</strong> — For stateful workloads needing persistent storage. PV: a piece of storage provisioned by cluster admin (or dynamic provisioner). PVC: a request for storage by a pod. StorageClass: defines provisioner and parameters (fast SSD, slow HDD, replicated). Pods request storage via PVC — abstract, doesn't need to know underlying storage. Dynamic provisioning: cloud creates the volume automatically when a PVC is created.</div></div>
+      </div>
+    </div>
+    <div class="panel" id="p8x">
+      <div class="stitle">◆ Memorizable Code — HPA + PDB + Anti-Affinity + StatefulSet</div>
+      <div class="cblock"><div class="chdr"><div class="cdots"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div></div><div class="clang">K8s Production — HPA + PodDisruptionBudget + Anti-Affinity</div></div>
+<pre><span class="cm"># ── HPA: auto-scale on CPU ────────────────────────────</span>
+<span class="fn">apiVersion</span>: autoscaling/v2
+<span class="fn">kind</span>: HorizontalPodAutoscaler
+<span class="fn">metadata</span>:
+  <span class="fn">name</span>: myapp-hpa
+<span class="fn">spec</span>:
+  <span class="fn">scaleTargetRef</span>:
+    <span class="fn">apiVersion</span>: apps/v1
+    <span class="fn">kind</span>: Deployment
+    <span class="fn">name</span>: myapp
+  <span class="fn">minReplicas</span>: <span class="nb">2</span>
+  <span class="fn">maxReplicas</span>: <span class="nb">20</span>
+  <span class="fn">metrics</span>:
+    - <span class="fn">type</span>: Resource
+      <span class="fn">resource</span>:
+        <span class="fn">name</span>: cpu
+        <span class="fn">target</span>:
+          <span class="fn">type</span>: Utilization
+          <span class="fn">averageUtilization</span>: <span class="nb">70</span>    <span class="cm"># scale up when >70% avg CPU</span>
+    - <span class="fn">type</span>: Resource
+      <span class="fn">resource</span>:
+        <span class="fn">name</span>: memory
+        <span class="fn">target</span>:
+          <span class="fn">type</span>: Utilization
+          <span class="fn">averageUtilization</span>: <span class="nb">80</span>
+  <span class="fn">behavior</span>:
+    <span class="fn">scaleDown</span>:
+      <span class="fn">stabilizationWindowSeconds</span>: <span class="nb">300</span>  <span class="cm"># wait 5min before scale down</span>
+---
+<span class="cm"># ── PodDisruptionBudget: HA during maintenance ────────</span>
+<span class="fn">apiVersion</span>: policy/v1
+<span class="fn">kind</span>: PodDisruptionBudget
+<span class="fn">metadata</span>:
+  <span class="fn">name</span>: myapp-pdb
+<span class="fn">spec</span>:
+  <span class="fn">selector</span>:
+    <span class="fn">matchLabels</span>:
+      <span class="fn">app</span>: myapp
+  <span class="fn">minAvailable</span>: <span class="nb">2</span>    <span class="cm"># at least 2 pods always running</span>
+  <span class="cm"># OR: maxUnavailable: 1</span>
+---
+<span class="cm"># ── Anti-Affinity: spread pods across nodes ───────────</span>
+<span class="cm"># In Deployment spec.template.spec:</span>
+<span class="fn">affinity</span>:
+  <span class="fn">podAntiAffinity</span>:
+    <span class="fn">preferredDuringSchedulingIgnoredDuringExecution</span>:  <span class="cm"># soft rule</span>
+      - <span class="fn">weight</span>: <span class="nb">100</span>
+        <span class="fn">podAffinityTerm</span>:
+          <span class="fn">labelSelector</span>:
+            <span class="fn">matchLabels</span>:
+              <span class="fn">app</span>: myapp
+          <span class="fn">topologyKey</span>: kubernetes.io/hostname  <span class="cm"># spread across nodes</span>
+  <span class="cm"># For zone spread (production HA):</span>
+  <span class="cm"># topologyKey: topology.kubernetes.io/zone</span>
+---
+<span class="cm"># ── Namespace ResourceQuota ────────────────────────────</span>
+<span class="fn">apiVersion</span>: v1
+<span class="fn">kind</span>: ResourceQuota
+<span class="fn">metadata</span>:
+  <span class="fn">name</span>: team-quota
+  <span class="fn">namespace</span>: myteam
+<span class="fn">spec</span>:
+  <span class="fn">hard</span>:
+    <span class="fn">requests.cpu</span>: <span class="str">"4"</span>
+    <span class="fn">requests.memory</span>: <span class="str">8Gi</span>
+    <span class="fn">limits.cpu</span>: <span class="str">"8"</span>
+    <span class="fn">limits.memory</span>: <span class="str">16Gi</span>
+    <span class="fn">pods</span>: <span class="str">"20"</span>
+---
+<span class="cm"># ── kubectl: common production troubleshooting ────────</span>
+<span class="cm"># Pod not starting?</span>
+<span class="cm"># kubectl describe pod pod-name → look at Events section</span>
+<span class="cm"># Common events: ImagePullBackOff, CrashLoopBackOff, OOMKilled</span>
+<span class="cm">#</span>
+<span class="cm"># ImagePullBackOff → image name wrong, or registry auth missing</span>
+<span class="cm"># CrashLoopBackOff → app crashing on start, check: kubectl logs pod-name --previous</span>
+<span class="cm"># OOMKilled         → memory limit too low, increase memory limit</span>
+<span class="cm"># Pending           → not enough resources on nodes, check: kubectl describe pod → Events</span></pre>
+      </div>
+    </div>
+    <div class="panel" id="p8q">
+      <div class="iqs">
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tmk">Must Know</span><div class="iqqt">What is a PodDisruptionBudget and why is it critical for production?</div><div class="iq-tgl">▾</div></div><div class="iqb">A PodDisruptionBudget (PDB) defines the minimum number of pods that must remain available during <em>voluntary</em> disruptions — node drains, cluster upgrades, rolling deploys, or manual node maintenance.<br><br>Without PDB: when an admin drains a node (moving all pods to other nodes), Kubernetes could move all your pods simultaneously, causing a brief outage. Or during a rolling cluster upgrade, nodes could be drained faster than your pods can reschedule.<br><br>With PDB (<code>minAvailable: 2</code>): Kubernetes checks before draining a node — if draining would leave fewer than 2 pods available, it waits. This guarantees your service maintains minimum capacity even during maintenance operations.<div class="tip-a"><strong>⚡ Always set a PDB for any production service with multiple replicas. Without it, cluster maintenance can unexpectedly take down your service entirely.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag ttr">Tricky</span><div class="iqqt">What is CrashLoopBackOff and how do you diagnose it?</div><div class="iq-tgl">▾</div></div><div class="iqb">CrashLoopBackOff means your container starts, crashes immediately, Kubernetes tries to restart it, it crashes again, and K8s begins adding exponential backoff delays between restarts (10s → 20s → 40s → up to 5 minutes).<br><br>Diagnosis steps: <br>1. <code>kubectl describe pod pod-name</code> → look at Events and Last State (exit code, reason)<br>2. <code>kubectl logs pod-name --previous</code> → logs from the CRASHED container (not current)<br>3. Common causes: app throws exception on startup (check logs), misconfigured env var (DB URL wrong, missing secret), OOMKilled immediately (memory limit too low), liveness probe too aggressive (failing before app starts — increase initialDelaySeconds)<div class="tip-r"><strong>⚠️ Always use --previous flag with kubectl logs when troubleshooting CrashLoopBackOff — the current pod may be restarting and have no logs yet. You need the previous crashed pod's logs.</strong></div></div></div>
+
+        <div class="iq"><div class="iqh" onclick="this.parentElement.classList.toggle('open')"><span class="iqtag tsr">Senior</span><div class="iqqt">How does HPA decide when to scale and what are its limitations?</div><div class="iq-tgl">▾</div></div><div class="iqb">HPA runs a control loop every 15 seconds. It calculates desired replicas: <code>desiredReplicas = ceil(currentReplicas × (currentMetricValue / targetMetricValue))</code>. If 3 pods averaging 90% CPU with target 70%: ceil(3 × 90/70) = ceil(3.86) = 4 replicas.<br><br>Scale-up is fast (within 3 minutes). Scale-down is intentionally slow (stabilization window, default 5 minutes) to prevent thrashing from brief traffic spikes.<br><br>Limitations: HPA can't scale beyond maxReplicas — if traffic exceeds what maxReplicas can handle, requests queue or fail. CPU metrics are delayed (~1 min) — by the time HPA scales up, a traffic spike may have already caused degradation. Custom metrics (Kafka lag, queue depth) from KEDA react faster to specific workload patterns. HPA doesn't help with stateful workloads (use StatefulSet with manual scaling).</div></div></div>
+      </div>
+    </div>
+    <div class="panel" id="p8m">
+      <div class="mtip mti-k8"><div class="mico">💡</div><div><strong>Production K8s checklist:</strong><br>✓ HPA: minReplicas=2, maxReplicas=N, scale on CPU 70%<br>✓ PDB: minAvailable=2 (never go below 2 during maintenance)<br>✓ Anti-affinity: spread pods across nodes (topologyKey: hostname)<br>✓ Zone spread: for multi-AZ HA (topologyKey: zone)<br>✓ Resource limits: memory requests=limits, CPU limits=2×requests<br>✓ Liveness: restart on unrecoverable states only<br>✓ Readiness: remove from rotation on temporary issues<br><br><strong>Troubleshooting order: describe pod → Events → logs --previous → exec bash</strong></div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<div class="footer">CI/CD · Docker · Kubernetes · DevOps Fundamentals · Senior Engineer Interview Prep</div>
+
+<script>
+let cur = 0;
+const TOTAL = 9;
+const colors = ['ci','ci','ci','dk','dk','dk','k8','k8','k8'];
+
+function go(i) {
+  for (let j = 0; j < TOTAL; j++) {
+    document.getElementById('c' + j).classList.toggle('on', j === i);
+    const nb = document.getElementById('nb' + j);
+    nb.className = 'nb' + (j === i ? ' on-' + colors[j] : '');
+    const sg = document.getElementById('sg' + j);
+    sg.className = 'ps';
+    const c = colors[j];
+    if (j === i) sg.classList.add(c === 'ci' ? 'active' : c === 'dk' ? 'adk' : 'ak8');
+    else if (j < i) sg.classList.add(c === 'ci' ? 'done' : c === 'dk' ? 'ddk' : 'dk8');
+  }
+  cur = i;
+  window.scrollTo({ top: document.getElementById('topnav').offsetTop, behavior: 'smooth' });
+}
+
+function tab(cardIdx, panel, colorKey) {
+  const tpMap = { 'c': 0, 'x': 1, 'q': 2, 'm': 3 };
+  const cls = 'on-' + colorKey;
+  document.querySelectorAll('#tb' + cardIdx + ' .stab')
+    .forEach((t, i) => {
+      t.classList.remove('on-ci', 'on-dk', 'on-k8');
+      if (i === tpMap[panel]) t.classList.add(cls);
+    });
+  const card = document.getElementById('c' + cardIdx);
+  card.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  const tp = document.getElementById('p' + cardIdx + panel);
+  if (tp) tp.classList.add('on');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' && cur < TOTAL - 1) go(cur + 1);
+  if (e.key === 'ArrowLeft'  && cur > 0)          go(cur - 1);
+});
+</script>
+</body>
+</html>
